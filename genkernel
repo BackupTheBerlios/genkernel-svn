@@ -73,10 +73,8 @@ fi
 
 clear_log
 
+#Display the main genkernel header
 print_header
-NORMAL=${GOOD} print_info 1 "Gentoo Linux Genkernel; Version ${GK_V}${NORMAL}"
-print_info 1 "Running with options: ${Options}"
-echo
 
 genkernel_determine_arch
 CACHE_DIR="$(arch_replace ${CACHE_DIR})"

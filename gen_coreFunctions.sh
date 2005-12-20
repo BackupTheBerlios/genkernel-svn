@@ -57,6 +57,7 @@ cleanup(){
         clear_tmpdir
     fi
 }
+
 print_header() {
 	NORMAL=${GOOD} print_info 1 "Gentoo Linux Genkernel; Version ${GK_V}${NORMAL}"
 	print_info 1 "Running with options: ${Options}"
