@@ -41,7 +41,7 @@ cleanup(){
     rm -rf "$TEMP"
     fi
 
-    if isTrue ${POSTCLEAR}
+    if logicTrue ${POSTCLEAR}
     then
         echo
         print_info 1 'RUNNING FINAL CACHE/TMP CLEANUP'

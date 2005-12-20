@@ -78,6 +78,9 @@ then
 	mkdir -p "${TEMP}" || die "Failed to create temporary directory!"
 fi
 
+#Create the cache dir if it doesnt exist
+setup_cache_dir
+
 genkernel::()
 {
 	print_info 1 '>> Dependencies processed successfully!'
