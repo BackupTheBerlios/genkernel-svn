@@ -16,10 +16,10 @@ genkernel_lookup_packages() {
 }
 
 genkernel_generate_package() {
-	tar cjf "${CACHE_DIR}/pkg_$1.tar.bz2" "$2" || gen_die "Could not create binary cache for $1!"
+	tar cjf "${CACHE_DIR}/pkg_$1.tar.bz2" "$2" || die "Could not create binary cache for $1!"
 }
 
 genkernel_extract_package() {
-	[ -e "${CACHE_DIR}/pkg_$1.tar.bz2" ] || gen_die "Binary cache not present for $1!"
-	tar jxf "${CACHE_DIR}/pkg_$1.tar.bz2" || gen_die "Could not extract binary cache for $1!"
+	[ -e "${CACHE_DIR}/pkg_$1.tar.bz2" ] || die "Binary cache not present for $1!"
+	tar jxf "${CACHE_DIR}/pkg_$1.tar.bz2" || die "Could not extract binary cache for $1!"
 }

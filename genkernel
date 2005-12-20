@@ -5,45 +5,38 @@ PATH='/bin:/usr/bin:/sbin:/usr/sbin'
 GK_V='4.0.0_alpha1'
 
 # Needs to be here in case sourcing a file fails. 
-gen_die() {
+die() {
   echo "${BAD}Error${NORMAL}: $1"
   exit 1
 }
 
 # FIXME: || die
-source genkernel.conf || gen_die "Failed to source genkernel.conf"
-source gen_coreFunctions.sh || gen_die "Failed to source gen_coreFunctions.sh"
-source gen_dependencyEngine.sh || gen_die "Failed to source gen_dependencyEngine.sh"
-source gen_processPackages.sh || gen_die "Failed to source gen_processPackages.sha"
-source gen_processKernelTree.sh || gen_die "Failed to source gen_processKernelTree.sh"
-source gen_cmdline.sh || gen_die "Failed to source gen_cmdline.sh"
-source gen_initialize.sh || gen_die "Failed to source gen_initialize.sh"
+source genkernel.conf || die "Failed to source genkernel.conf"
+source gen_coreFunctions.sh || die "Failed to source gen_coreFunctions.sh"
+source gen_dependencyEngine.sh || die "Failed to source gen_dependencyEngine.sh"
+source gen_processPackages.sh || die "Failed to source gen_processPackages.sha"
+source gen_processKernelTree.sh || die "Failed to source gen_processKernelTree.sh"
+source gen_cmdline.sh || die "Failed to source gen_cmdline.sh"
+source gen_initialize.sh || die "Failed to source gen_initialize.sh"
 
 trap trap_cleanup SIGHUP SIGQUIT SIGINT SIGTERM SIGKILL
 
 # Parse the cmdline and die if it fails
 init_parse_cmdline $*
 
-#Failed to parse the cmdline properly lets die so we can investigate...
-if logicTrue $__INTERNAL__CONFIG_PARSING_FAILED
-then
-	gen_die 'Fatal error processing arguments; exiting...'
-fi
+# Failed to parse the cmdline properly, die so we can investigate...
+logicTrue ${__INTERNAL__CONFIG_PARSING_FAILED} && die 'Fatal error processing arguments; exiting...'
 
-# Color output
 set_color
-
-# Display the help message
 logicTrue $(config_get_key help) && show_help # --help
 
-# Set bash env var DEBUGFILE if log-override is defined
+# Set DEBUGFILE if log-override is defined
 [ -n "$(config_get_key log-override)" ] && DEBUGFILE="$(config_get_key log-override)"
 
-# Set bash env var TEMP if tempdir is defined
+# Set TEMP if tempdir is defined
 [ -n "$(config_get_key tempdir)" ] && TEMP="$(config_get_key tempdir)"
 
-
-#PLASMAROO TO REMOVE LATER
+### << plasmaroo's junk
 echo "Debugging junk:"
 __debug__iterate_over_config() {
 	for (( n = 0 ; n < ${#__INTERNAL__OPTIONS__KEY[@]}; ++n )) ; do
@@ -52,9 +45,9 @@ __debug__iterate_over_config() {
 	echo "deptree: ${__INTERNAL__CONFIG_PARSING_DEPTREE}"
 }
 __debug__iterate_over_config
-#END PLASMAROO TO REMOVE LATER
+### >> plasmaroo's junk
 
-# Check if any genkernel modules were found
+# Check if any modules to execute were specified
 if [ "${__INTERNAL__CONFIG_PARSING_DEPTREE}" = '' ]
 then
 	echo 'Fatal error: no modules to execute specified...'
@@ -62,12 +55,9 @@ then
 	exit 1
 fi
 
-
 clear_log
 
-#Display the main genkernel header
-print_header
-
+genkernel_print_header
 genkernel_determine_arch
 CACHE_DIR="$(arch_replace ${CACHE_DIR})"
 
@@ -78,10 +68,10 @@ genkernel_lookup_kernel
 print_info 1 '>> Processing dependency tree...'
 require "${__INTERNAL__CONFIG_PARSING_DEPTREE}"
 
-# Generate tmp tree
+# Generate TEMP dir
 if [ ! -d "${TEMP}" ]
 then
-	mkdir -p "${TEMP}" || gen_die "Failed to create temporary directory!"
+	mkdir -p "${TEMP}" || die "Failed to create temporary directory!"
 fi
 
 for i in $(buildDepTreeSolution)
@@ -94,8 +84,8 @@ done
 exit 255
 
 # Read arch-specific config
-source ${ARCH_CONFIG} || gen_die "Could not read ${ARCH_CONFIG}"
-source ${GK_SHARE}/${ARCH}/modules_load || gen_die "Could not read ${GK_SHARE}/${ARCH}/modules_load"
+source ${ARCH_CONFIG} || die "Could not read ${ARCH_CONFIG}"
+source ${GK_SHARE}/${ARCH}/modules_load || die "Could not read ${GK_SHARE}/${ARCH}/modules_load"
 
 # Merge modules_load from config
 for group_modules in ${!AMODULES_*}; do
@@ -122,7 +112,7 @@ then
 		then
 			print_error 1 'The build-host kernel does not appear to have loop device support.'
 			print_error 1 'Please load loop support before running genkernel!'
-			gen_die 'Load loop support!'
+			die 'Load loop support!'
 		else
 			print_info 1 'loop: "loop" module loaded successfully...'
 		fi
@@ -278,7 +268,7 @@ then
 		CMD_STATUS="${PIPESTATUS[0]}"
 		echo
 		print_info 1 "<<< Callback exit status: ${CMD_STATUS}"
-		[ "${CMD_STATUS}" -ne 0 ] && gen_die '--callback failed!'
+		[ "${CMD_STATUS}" -ne 0 ] && die '--callback failed!'
 	else
 		echo
 		print_info 1 ">>> Callback cancelled..."

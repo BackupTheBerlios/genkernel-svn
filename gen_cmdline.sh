@@ -207,14 +207,6 @@ show_usage() {
   echo '	genkernel --help'
 }
 
-# Wrap string $2 to width $1. The function returns the /trail/ so you
-# need to do something with the non-trailing characters.
-wrap_line() {
-	local myChar myLine myTrail
-	myChar=${2[$1]}
-
-}
-
 #  GROUP -> OPTION -> DATA (Boolean):[DEFAULT] -> Allow no'X' (Boolean) -> DESCRIPTION
 ## Debug
 __register_config_option 'Debug' 'debuglevel' 'true' 'false' 'Debug verbosity level'

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-gen_die() {
+die() {
 	echo "${BAD}Error${NORMAL}: $1"
 	exit 1
 }
@@ -58,11 +58,6 @@ cleanup(){
     fi
 }
 
-print_header() {
-	NORMAL=${GOOD} print_info 1 "Gentoo Linux Genkernel; Version ${GK_V}${NORMAL}"
-	print_info 1 "Running with options: ${Options}"
-	echo
-}
 # print_info(debuglevel, print [, newline [, prefixline [, forcefile ] ] ])
 print_info() {
 	local NEWLINE=1
@@ -213,11 +208,11 @@ cache_replace() {
 clear_log() {
     if [ -f "${DEBUGFILE}" ]
     then
-	(echo > "${DEBUGFILE}") 2>/dev/null || gen_die "Could not write to ${DEBUGFILE}."
+	(echo > "${DEBUGFILE}") 2>/dev/null || die "Could not write to ${DEBUGFILE}."
     fi   
 }
 
-gen_die_debugged() {
+die_debugged() {
 	dump_debugcache
 
 	if [ "$#" -gt '0' ]
@@ -308,26 +303,6 @@ clear_tmpdir()
 	fi
 }
 
-genkernel_determine_arch() {
-	local myArch=$(config_get_key arch-override)
-	if [ "${myArch}" != '' ]
-	then
-		ARCH=${myArch}
-	else
-		ARCH=$(uname -m)
-		case "${ARCH}" in
-			i?86)
-				ARCH='x86'
-			;;
-			*)
-			;;
-		esac
-	fi
-
-	ARCH_CONFIG="${GK_SHARE}/${ARCH}/config.sh"
-	[ -f "${ARCH_CONFIG}" ] || gen_die "${ARCH} not yet supported by genkernel. Please add the arch-specific config file, ${ARCH_CONFIG}"
-}
-
 # has test list
 # Return true if list contains test
 has() {
@@ -352,7 +327,7 @@ compile_generic() {
 	local RET myAction
 
 	[ "$#" -lt '2' ] &&
-		gen_die 'compile_generic(): improper usage!'
+		die 'compile_generic(): improper usage!'
 
 	myAction="$1"
 	shift
@@ -388,5 +363,33 @@ compile_generic() {
 		make $(config_get_key makeopts) "$@" >> ${DEBUGFILE} 2>&1
 		RET=$?
 	fi
-	[ "${RET}" -ne '0' ] && gen_die "Failed to compile the \"${1}\" target..."
+	[ "${RET}" -ne '0' ] && die "Failed to compile the \"${1}\" target..."
+}
+
+## Genkernel functions
+
+genkernel_print_header() {
+	NORMAL=${GOOD} print_info 1 "Gentoo Linux Genkernel; Version ${GK_V}${NORMAL}"
+	print_info 1 "Running with options: ${Options}"
+	echo
+}
+
+genkernel_determine_arch() {
+	local myArch=$(config_get_key arch-override)
+	if [ "${myArch}" != '' ]
+	then
+		ARCH=${myArch}
+	else
+		ARCH=$(uname -m)
+		case "${ARCH}" in
+			i?86)
+				ARCH='x86'
+			;;
+			*)
+			;;
+		esac
+	fi
+
+	ARCH_CONFIG="${GK_SHARE}/${ARCH}/config.sh"
+	[ -f "${ARCH_CONFIG}" ] || die "${ARCH} not yet supported by genkernel. Please add the arch-specific config file, ${ARCH_CONFIG}"
 }

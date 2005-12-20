@@ -14,15 +14,15 @@ get_KV() {
 				LOV=`grep ^CONFIG_LOCALVERSION\= ${TEMP}/kerncache.config | sed -e "s/CONFIG_LOCALVERSION=\"\(.*\)\"/\1/"`
 				KV=${VER}.${PAT}.${SUB}${EXV}${LOV}
 			else
-				gen_die 'Kernel unsupported (2.6 or newer needed); exiting.'
+				die 'Kernel unsupported (2.6 or newer needed); exiting.'
 			fi
 
 		else
-			gen_die "Could not find kerncache.config in the kernel cache! Exiting."
+			die "Could not find kerncache.config in the kernel cache! Exiting."
 		fi
 	elif [ "$(config_get_key no-kernel-sources)" = 'true' ]
 	then
-		gen_die '--no-kernel-sources requires a valid --kerncache!'
+		die '--no-kernel-sources requires a valid --kerncache!'
 	else
 		# Configure the kernel
 		# If BUILD_KERNEL=0 then assume --no-clean, menuconfig is cleared
@@ -43,7 +43,7 @@ get_KV() {
 				KV=${VER}.${PAT}.${SUB}${EXV}${LCV}
 			fi
 		else
-			gen_die 'Kernel unsupported (2.6 or newer needed); exiting.'
+			die 'Kernel unsupported (2.6 or newer needed); exiting.'
 		fi
 	fi
 }
@@ -52,7 +52,7 @@ genkernel_lookup_kernel() {
 	local myTree
 	myTree=$(config_get_key kernel-tree)
 
-	[ ! -e ${myTree}/Makefile ] && gen_die 'Kernel source tree invalid, no Makefile found!'
+	[ ! -e ${myTree}/Makefile ] && die 'Kernel source tree invalid, no Makefile found!'
 	get_KV "${myTree}" # Validate ${myTree} into ${KERNEL_DIR}
 
 	# Decide whether to keep config or update it
