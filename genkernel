@@ -21,19 +21,11 @@ source gen_initialize.sh || gen_die "Failed to source gen_initialize.sh"
 
 trap trap_cleanup SIGHUP SIGQUIT SIGINT SIGTERM SIGKILL
 
-# Parse all command line options...
-Options=$* # Save for later
+# Parse the cmdline and die if it fails
+init_parse_cmdline $*
 
-__INTERNAL__CONFIG_PARSING_FAILED=false
-
-while [ $# -gt 0 ]
-do
-	Option=$1; shift
-	parse_cmdline $Option
-done
-
-# Failed to parse the cmdline properly lets die so we can investigate...
-if logicTrue __INTERNAL__CONFIG_PARSING_FAILED
+#Failed to parse the cmdline properly lets die so we can investigate...
+if logicTrue $__INTERNAL__CONFIG_PARSING_FAILED
 then
 	gen_die 'Fatal error processing arguments; exiting...'
 fi

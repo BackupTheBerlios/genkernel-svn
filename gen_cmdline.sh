@@ -310,6 +310,8 @@ parse_cmdline() {
 				myMatched=true
 			else
 				# Data but we don't take data!
+				show_usage
+				echo
 				echo "Configuration parsing error: '${myRequest}' given but --${myName} does not take arguments!"
 				__INTERNAL__CONFIG_PARSING_FAILED=true
 				return 1
@@ -330,6 +332,8 @@ parse_cmdline() {
 						config_set_key "${myName}" "${myDataDefault}"
 						myMatched=true
 					else
+						show_usage
+						echo
 						echo "Configuration parsing error: --${myName} requires an argument!"
 						__INTERNAL__CONFIG_PARSING_FAILED=true
 						return 1
@@ -354,9 +358,24 @@ parse_cmdline() {
 
 	if [ "${myMatched}" = 'false' ]
 	then
+		show_usage
+		echo
 		echo "Configuration parsing error: Invalid request '${myRequest}'."
 		__INTERNAL__CONFIG_PARSING_FAILED=true
 		return 1
 	fi
 }
 
+init_parse_cmdline() {
+	# Parse all command line options...
+	Options=$* 
+	
+	#Internal flag to check if config parsing succeeded
+	__INTERNAL__CONFIG_PARSING_FAILED=false
+
+	while [ $# -gt 0 ]
+	do
+		Option=$1; shift
+		parse_cmdline $Option
+	done
+}

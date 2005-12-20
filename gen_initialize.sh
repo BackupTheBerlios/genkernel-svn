@@ -10,6 +10,9 @@ do
     TEMP="${TMPDIR}/$RANDOM.$RANDOM.$RANDOM.$$.$$"
 done
 
+#Internal flag to check if config parsing succeeded
+__INTERNAL__CONFIG_PARSING_FAILED=false
+
 #Set some defaults
 config_set_key usecolor true
 config_set_key kernel-tree '/usr/src/linux'
