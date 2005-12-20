@@ -12,12 +12,12 @@ die() {
 
 # FIXME: || die
 source genkernel.conf || die "Failed to source genkernel.conf"
-source gen_coreFunctions.sh || die "Failed to source gen_coreFunctions.sh"
-source gen_dependencyEngine.sh || die "Failed to source gen_dependencyEngine.sh"
-source gen_processPackages.sh || die "Failed to source gen_processPackages.sha"
-source gen_processKernelTree.sh || die "Failed to source gen_processKernelTree.sh"
-source gen_cmdline.sh || die "Failed to source gen_cmdline.sh"
-source gen_initialize.sh || die "Failed to source gen_initialize.sh"
+source ${CORE_DIR}/gen_coreFunctions.sh || die "Failed to source gen_coreFunctions.sh"
+source ${CORE_DIR}/gen_dependencyEngine.sh || die "Failed to source gen_dependencyEngine.sh"
+source ${CORE_DIR}/gen_processPackages.sh || die "Failed to source gen_processPackages.sha"
+source ${CORE_DIR}/gen_processKernelTree.sh || die "Failed to source gen_processKernelTree.sh"
+source ${CORE_DIR}/gen_cmdline.sh || die "Failed to source gen_cmdline.sh"
+source ${CORE_DIR}/gen_initialize.sh || die "Failed to source gen_initialize.sh"
 
 trap trap_cleanup SIGHUP SIGQUIT SIGINT SIGTERM SIGKILL
 
@@ -59,7 +59,11 @@ clear_log
 
 genkernel_print_header
 genkernel_determine_arch
+
 CACHE_DIR="$(arch_replace ${CACHE_DIR})"
+CONFIG_DIR="$(arch_replace ${CONFIG_DIR})"
+[ -e "${CACHE_DIR}" ] || mkdir -p "${CACHE_DIR}"
+[ -e "${CONFIG_DIR}" ] || mkdir -p "${CONFIG_DIR}"
 
 genkernel_lookup_packages
 genkernel_lookup_kernel
@@ -73,6 +77,11 @@ if [ ! -d "${TEMP}" ]
 then
 	mkdir -p "${TEMP}" || die "Failed to create temporary directory!"
 fi
+
+genkernel::()
+{
+	print_info 1 '>> Dependencies processed successfully!'
+}
 
 for i in $(buildDepTreeSolution)
 do

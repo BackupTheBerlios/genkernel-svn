@@ -196,8 +196,6 @@ show_help() {
 			fi
 		done
 	done
-	echo
-	exit 0
 }
 
 show_usage() {

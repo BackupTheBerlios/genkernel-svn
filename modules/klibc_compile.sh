@@ -18,7 +18,7 @@ klibc_compile::() {
 	cd "${TEMP}"
 	rm -rf "${KLIBC_DIR}" klibc-build-${KLIBC_VER}
 	[ ! -f "${KLIBC_SRCTAR}" ] && gen_die "Could not find klibc tarball: ${KLIBC_SRCTAR}"
-	/bin/tar zxpf "${KLIBC_SRCTAR}" || gen_die 'Could not extract klibc tarball'
+	unpack "${KLIBC_SRCTAR}" || gen_die 'Could not extract klibc tarball'
 	[ ! -d "${KLIBC_DIR}" ] && gen_die "klibc tarball ${KLIBC_SRCTAR} is invalid"
 	cd "${KLIBC_DIR}"
 

@@ -6,7 +6,7 @@ udev_compile::() {
 	cd "${TEMP}"
 	rm -rf "${UDEV_DIR}" udev
 	[ ! -f "${UDEV_SRCTAR}" ] && gen_die "Could not find udev tarball: ${UDEV_SRCTAR}"
-	/bin/tar -jxpf "${UDEV_SRCTAR}" || gen_die 'Could not extract udev tarball'
+	unpack "${UDEV_SRCTAR}" || gen_die 'Could not extract udev tarball'
 	[ ! -d "${UDEV_DIR}" ] && gen_die "udev tarball ${UDEV_SRCTAR} is invalid"
 
 	cd "${UDEV_DIR}"
