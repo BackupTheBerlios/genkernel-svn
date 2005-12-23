@@ -20,9 +20,10 @@ busybox_compile::()
 	print_info 1 'busybox: >> Compiling...'
 	compile_generic utils all
 
-	[ -f "${TEMP}/${BUSYBOX_DIR}/busybox" ] || die 'Busybox executable does not exist!'
-	strip "${TEMP}/${BUSYBOX_DIR}/busybox" || die 'Could not strip busybox binary!'
-	genkernel_generate_package "busybox-${BUSYBOX_VER}" "${TEMP}/${BUSYBOX_DIR}/busybox"
+	[ -f "busybox" ] || die 'Busybox executable does not exist!'
+	strip "busybox" || die 'Could not strip busybox binary!'
+	mv busybox "busybox-${BUSYBOX_VER}"
+	genkernel_generate_package "busybox-${BUSYBOX_VER}" "./busybox-${BUSYBOX_VER}"
 
 	cd "${TEMP}"
 	rm -rf "${BUSYBOX_DIR}" > /dev/null
