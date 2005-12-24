@@ -248,18 +248,6 @@ die_debugged() {
   	exit 1
 }
 
-has_loop() {
-	dmesg | egrep -q '^loop:'
-	if [ -e '/dev/loop0' -o -e '/dev/loop/0' -a ${PIPESTATUS[1]} ]
-	then
-		# We found devfs or standard dev loop device, assume
-		# loop is compiled into the kernel or the module is loaded
-		return 0
-	else
-		return 1
-	fi
-}
-
 isBootRO()
 {
 	for mo in `grep ' /boot ' /proc/mounts | cut -d ' ' -f 4 | sed -e 's/,/ /'`
