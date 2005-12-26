@@ -21,8 +21,17 @@ source ${CORE_DIR}/gen_initialize.sh || die "Failed to source gen_initialize.sh"
 
 trap trap_cleanup SIGHUP SIGQUIT SIGINT SIGTERM SIGKILL
 
-# Parse the cmdline and die if it fails
-init_parse_cmdline $*
+# Parse all command line options...
+Options=$@
+	
+# Internal flag to check if config parsing succeeded
+__INTERNAL__CONFIG_PARSING_FAILED=false
+
+while [ $# -gt 0 ]
+do
+	Option=$1; shift
+	parse_cmdline $Option
+done
 
 # Failed to parse the cmdline properly, die so we can investigate...
 logicTrue ${__INTERNAL__CONFIG_PARSING_FAILED} && die 'Fatal error processing arguments; exiting...'
@@ -37,14 +46,14 @@ logicTrue $(config_get_key help) && show_help # --help
 [ -n "$(config_get_key tempdir)" ] && TEMP="$(config_get_key tempdir)"
 
 ### << plasmaroo's junk
-echo "Debugging junk:"
-__debug__iterate_over_config() {
-	for (( n = 0 ; n < ${#__INTERNAL__OPTIONS__KEY[@]}; ++n )) ; do
-		echo "${__INTERNAL__OPTIONS__KEY[${n}]} --> ${__INTERNAL__OPTIONS__VALUE[${n}]}"
-        done
-	echo "deptree: ${__INTERNAL__CONFIG_PARSING_DEPTREE}"
-}
-__debug__iterate_over_config
+#echo "Debugging junk:"
+#__debug__iterate_over_config() {
+#	for (( n = 0 ; n < ${#__INTERNAL__OPTIONS__KEY[@]}; ++n )) ; do
+#		echo "${__INTERNAL__OPTIONS__KEY[${n}]} --> ${__INTERNAL__OPTIONS__VALUE[${n}]}"
+#       done
+#	echo "deptree: ${__INTERNAL__CONFIG_PARSING_DEPTREE}"
+#}
+#__debug__iterate_over_config
 ### >> plasmaroo's junk
 
 # Check if any modules to execute were specified
@@ -86,11 +95,13 @@ genkernel::()
 	print_info 1 '>> Dependencies processed successfully!'
 }
 
-# FIXME: inject ::callback into deptree if needed
+# If we have a callback set require the callback module
+[ -n "$(config_get_key callback)" ] && require callback
+
 for i in $(buildDepTreeSolution)
 do
 	print_info 1 ">> Executing module $i..."
-	$i::
+	$i:: || die "$i module call failed!"
 done
 
 # End of execution for now
@@ -215,44 +226,17 @@ fi
 
 if [ "${BUILD_INITRD}" -eq '1' ]
 then
-	# Only compile insmod if we're installing modules onto the initrd
-	if [ "${NOINITRDMODULES}" = '' ]
-	then
-		if [ "${KERN_24}" != '1' ]
-		then
-			# Compile module-init-tools
-			compile_module_init_tools
-		else
-			compile_modutils
-		fi
-	fi
-	
 	[ "${DISKLABEL}" -eq '1' ] && compile_e2fsprogs
+	compile_udev 
 
-	if [ "${KERN_24}" != '1' -a "${UDEV}" -eq '1' ] 
+	if [ "${BUSYBOX}" -eq '1' ]
 	then
-		compile_udev 
-	else
-		DEVFS=1
-		UDEV=0
-		compile_devfsd
-	fi
-
-	if [ "${KERN_24}" != '1' -a  "${CMD_BOOTSPLASH}" != '1' ]
-	then
-	    if [ "${BUSYBOX}" -eq '1' ]
-	    then
 		# Compile Busybox
 		compile_busybox
-	    fi
-	    
-	    # Compile initramfs
-	    create_initramfs
-	else
-	    # Create initrd
-	    compile_busybox
-	    create_initrd
 	fi
+	    
+	# Compile initramfs
+	create_initramfs
 else
 	print_info 1 'initrd: Not building since only the kernel was requested...'
 fi
@@ -313,27 +297,10 @@ then
 	fi
 fi
 
-if [ "${BUILD_INITRD}" -eq '1' ]
-then
-	echo
-	print_info 1 'WARNING... WARNING... WARNING...'
-	print_info 1 'Additional kernel cmdline arguments that *may* be required to boot properly...'
-	[ "${GENSPLASH}" -eq '1' ] && print_info 1 "add \"vga=791 splash=silent,theme:${GENSPLASH_THEME} CONSOLE=/dev/tty1 quiet\" if you use a gensplash framebuffer ]"
-	[ "${BOOTSPLASH}" -eq '1' ] && print_info 1 'add "vga=791 splash=silent" if you use a bootsplash framebuffer'
-	[ "${LVM2}" -eq '1' ] && print_info 1 'add "dolvm2" for lvm2 support'
-	[ "${EVMS2}" -eq '1' ] && print_info 1 'add "doevms2" for evms support'
-	[ "${DMRAID}" -eq '1' ] && print_info 1 'add "dodmraid" for dmraid support'
-	[ "${DMRAID}" -eq '1' ] && print_info 1 '	or "dodmraid=<additional options>"'
-	[ "${UNIONFS}" -eq '1' ] && print_info 1 'add "unionfs" for unionfs support'
-	[ "${UNIONFS}" -eq '1' ] && print_info 1 '	or "unionfs=<block_device>"'
-fi
-
 if [ "${CMD_NOINSTALL}" != '1' -a "${SYMLINK}" = '1' ]
 then 
     echo
-    print_info 1 'Creating symlinks'
-    
-    
+    print_info 1 'Creating symlinks'   
     print_info 1 '	    creating kernel name symlink!'
     if [ -e /boot/kernel-${KNAME}-${ARCH}-${KV} ]
     then
@@ -342,7 +309,7 @@ then
         ret=$?
         [ ${ret} = '1' ] && print_error 1 'kernel link failed'
     fi
-    
+
     if [ "${KERN_24}" != '1' -a  "${CMD_BOOTSPLASH}" != '1' ]
     then
 	print_info 1 '	    creating initramfs name symlink!'
@@ -368,11 +335,12 @@ fi
 
 [ "${BOOTRW}" != '' ] && mount -o remount,ro /boot
 
-echo
+## >> FIXME: this needs to be displayed only if the kernel compile fails
 print_info 1 'Do NOT report kernel bugs as genkernel bugs unless your bug'
 print_info 1 'is about the default genkernel configuration...'
 print_info 1 ''
 print_info 1 'Make sure you have the latest genkernel before reporting bugs.'
+## <<
 
-#Final Cleanup
+# Final Cleanup
 cleanup

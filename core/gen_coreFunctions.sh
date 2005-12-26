@@ -314,9 +314,8 @@ logicTrue() {
 compile_generic() {
 	local RET myAction
 
-	[ "$#" -lt '2' ] &&
-		die 'compile_generic(): improper usage!'
-
+	# $2 may be empty if we don't want to pass any extras to the make.
+	[ "$#" -lt '1' ] && die 'compile_generic(): improper usage!'
 	myAction="$1"
 	shift
 

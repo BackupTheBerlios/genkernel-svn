@@ -357,17 +357,3 @@ parse_cmdline() {
 		return 1
 	fi
 }
-
-init_parse_cmdline() {
-	# Parse all command line options...
-	Options=$* 
-	
-	#Internal flag to check if config parsing succeeded
-	__INTERNAL__CONFIG_PARSING_FAILED=false
-
-	while [ $# -gt 0 ]
-	do
-		Option=$1; shift
-		parse_cmdline $Option
-	done
-}

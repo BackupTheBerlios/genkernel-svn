@@ -1,3 +1,6 @@
+# Output: binpackage { / -> "busybox" }
+# Placement: TBD
+
 busybox_compile::()
 {
 	local	BUSYBOX_SRCTAR="${SRCPKG_DIR}/busybox-${BUSYBOX_VER}.tar.bz2" BUSYBOX_DIR="busybox-${BUSYBOX_VER}" \
@@ -22,8 +25,7 @@ busybox_compile::()
 
 	[ -f "busybox" ] || die 'Busybox executable does not exist!'
 	strip "busybox" || die 'Could not strip busybox binary!'
-	mv busybox "busybox-${BUSYBOX_VER}"
-	genkernel_generate_package "busybox-${BUSYBOX_VER}" "./busybox-${BUSYBOX_VER}"
+	genkernel_generate_package "busybox-${BUSYBOX_VER}" "./busybox"
 
 	cd "${TEMP}"
 	rm -rf "${BUSYBOX_DIR}" > /dev/null

@@ -1,13 +1,15 @@
-require klibc
+# Output: { / -> [[ udev install tree ]] } as designated for the initramfs
+# Placement: Included in output.
 
+require klibc
 udev_compile::() {
 	local UDEV_DIR="udev-${UDEV_VER}" UDEV_SRCTAR="${SRCPKG_DIR}/udev-${UDEV_VER}.tar.bz2"
 
 	cd "${TEMP}"
 	rm -rf "${UDEV_DIR}" udev
-	[ ! -f "${UDEV_SRCTAR}" ] && gen_die "Could not find udev tarball: ${UDEV_SRCTAR}"
-	unpack "${UDEV_SRCTAR}" || gen_die 'Could not extract udev tarball'
-	[ ! -d "${UDEV_DIR}" ] && gen_die "udev tarball ${UDEV_SRCTAR} is invalid"
+	[ ! -f "${UDEV_SRCTAR}" ] && die "Could not find udev tarball: ${UDEV_SRCTAR}"
+	unpack "${UDEV_SRCTAR}" || die 'Could not extract udev tarball'
+	[ ! -d "${UDEV_DIR}" ] && die "udev tarball ${UDEV_SRCTAR} is invalid"
 
 	cd "${UDEV_DIR}"
 	local extras="extras/scsi_id extras/volume_id extras/ata_id extras/run_directory extras/usb_id extras/floppy extras/cdrom_id extras/firmware"
@@ -37,10 +39,10 @@ udev_compile::() {
 
 	print_info 1 '      >> Installing...'
 	install -d "${TEMP}/udev/etc/udev" "${TEMP}/udev/sbin" "${TEMP}/udev/etc/udev/scripts" "${TEMP}/udev/etc/udev/rules.d" "${TEMP}/udev/etc/udev/permissions.d" "${TEMP}/udev/etc/udev/extras" "${TEMP}/udev/etc" "${TEMP}/udev/sbin" "${TEMP}/udev/usr/" "${TEMP}/udev/usr/bin" "${TEMP}/udev/usr/sbin"||
-		gen_die 'Could not create directory hierarchy'
+		die 'Could not create directory hierarchy'
 
 	install -c etc/udev/gentoo/udev.rules "${TEMP}/udev/etc/udev/rules.d/50-udev.rules" ||
-	    gen_die 'Could not copy gentoo udev.rules to 50-udev.rules'
+	    die 'Could not copy gentoo udev.rules to 50-udev.rules'
 
 	compile_generic runtask "EXTRAS=\"${extras}\" DESTDIR=${TEMP}/udev install-config"
 	compile_generic runtask "EXTRAS=\"${extras}\" DESTDIR=${TEMP}/udev install-bin"

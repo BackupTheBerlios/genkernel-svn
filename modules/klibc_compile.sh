@@ -1,5 +1,10 @@
-require @kernel_src_tree:null:fail
+# Output: binpackage { /klibc-build-tree -> [[Build tree]] }
+# Placement: Not relevant as not included in initramfs product.
 
+# Used by the klibc module which defines KLCC to point to the klcc binary
+# for usage by other modules.
+
+require @kernel_src_tree:null:fail
 klibc_compile::() {
 	local KLIBC_DIR="klibc-${KLIBC_VER}" KLIBC_SRCTAR="${SRCPKG_DIR}/klibc-1.1.1.tar.gz"
 
@@ -17,23 +22,21 @@ klibc_compile::() {
 
 	cd "${TEMP}"
 	rm -rf "${KLIBC_DIR}" klibc-build-${KLIBC_VER}
-	[ ! -f "${KLIBC_SRCTAR}" ] && gen_die "Could not find klibc tarball: ${KLIBC_SRCTAR}"
-	unpack "${KLIBC_SRCTAR}" || gen_die 'Could not extract klibc tarball'
-	[ ! -d "${KLIBC_DIR}" ] && gen_die "klibc tarball ${KLIBC_SRCTAR} is invalid"
+	[ ! -f "${KLIBC_SRCTAR}" ] && die "Could not find klibc tarball: ${KLIBC_SRCTAR}"
+	unpack "${KLIBC_SRCTAR}" || die 'Could not extract klibc tarball'
+	[ ! -d "${KLIBC_DIR}" ] && die "klibc tarball ${KLIBC_SRCTAR} is invalid"
 	cd "${KLIBC_DIR}"
 
 	# Don't install to "//lib" fix
 	sed -e 's:$(INSTALLROOT)/$(SHLIBDIR):$(INSTALLROOT)$(INSTALLDIR)/$(CROSS)lib:' -i klibc/Makefile
 	if [ -f ${GK_SHARE}/pkg/byteswap.h ]
 	then
-		echo "Inserting byteswap.h into klibc"
+		# echo "Inserting byteswap.h into klibc"
 		cp "${GK_SHARE}/pkg/byteswap.h" "include/"
-	else
-		echo "${GK_SHARE}/pkg/byteswap.h not found"
 	fi
 
 	print_info 1 'klibc: >> Compiling...'
-	ln -snf "${KERNEL_DIR}" linux || gen_die "Could not link to ${KERNEL_DIR}"
+	ln -snf "${KERNEL_DIR}" linux || die "Could not link to ${KERNEL_DIR}"
 	sed -i MCONFIG -e "s|prefix      =.*|prefix      = ${TEMP}/klibc-build-${KLIBC_VER}|g"
 
 	# PPC fixup for 2.6.14
