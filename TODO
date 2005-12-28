@@ -1,0 +1,19 @@
+Things to fix:
+
+* Cross-compiling... check CROSS=, CROSS_COMPILE and other friends
+  get set in the right places.
+* Debuglevel
+
+Modules to merge in:
+
+* kernel
+  * prepare
+  * config
+  * image
+  * modules
+* grub [gen_bootloader.sh]
+* unionfs
+* lvm2
+* dmraid
+* e2fsprogs needs cpio code
+* packaging output for catalyst

@@ -5,8 +5,9 @@ busybox_compile::()
 {
 	local	BUSYBOX_SRCTAR="${SRCPKG_DIR}/busybox-${BUSYBOX_VER}.tar.bz2" BUSYBOX_DIR="busybox-${BUSYBOX_VER}" \
 		BUSYBOX_CONFIG="${CONFIG_DIR}/busybox.config"
-
 	[ -f "${BUSYBOX_SRCTAR}" ] || die "Could not find busybox source tarball: ${BUSYBOX_SRCTAR}!"
+
+	[ -f "${BUSYBOX_CONFIG}" ] || BUSYBOX_CONFIG="${CONFIG_GENERIC_DIR}/busybox.config"
 	[ -f "${BUSYBOX_CONFIG}" ] || die "Cound not find busybox config file: ${BUSYBOX_CONFIG}!"
 
 	cd "${TEMP}"

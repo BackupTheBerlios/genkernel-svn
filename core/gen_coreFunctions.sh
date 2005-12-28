@@ -372,6 +372,9 @@ genkernel_determine_arch() {
 			i?86)
 				ARCH='x86'
 			;;
+			mips64)
+				ARCH='mips'
+			;;
 			*)
 			;;
 		esac
