@@ -2,6 +2,13 @@
 # Load module and add module to dependency order generation table
 # This is multi-load safe but is coded to die if a circular dependency is found... since those are well, bad.
 
+# Clear up if we need a new deptree
+unset __INTERNAL__DEPS__REQ_N __INTERNAL__DEPS__REQ_D __INTERNAL__DEPS__PRV_S __INTERNAL__DEPS__PRV_P \
+      __MODULE__DEPS__VARS_N __MODULE__DEPS__VARS_D
+
+__INTERNAL__MODULES_LOADING=''
+__INTERNAL__MODULES_LOADED=''
+
 declare -a __INTERNAL__DEPS__REQ_N # Name
 declare -a __INTERNAL__DEPS__REQ_D # Data
 declare -a __INTERNAL__DEPS__PRV_S # Source
@@ -286,4 +293,3 @@ buildDepTreeSolution()
 #	echo "Corrected Route:${myOut}"
 	echo ${myOut} # return
 }
-# buildDepTreeSolution

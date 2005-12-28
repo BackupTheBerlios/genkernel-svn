@@ -10,7 +10,6 @@ die() {
   exit 1
 }
 
-# FIXME: || die
 source genkernel.conf || die "Failed to source genkernel.conf"
 source ${CORE_DIR}/gen_coreFunctions.sh || die "Failed to source gen_coreFunctions.sh"
 source ${CORE_DIR}/gen_dependencyEngine.sh || die "Failed to source gen_dependencyEngine.sh"
@@ -18,6 +17,7 @@ source ${CORE_DIR}/gen_processPackages.sh || die "Failed to source gen_processPa
 source ${CORE_DIR}/gen_processKernelTree.sh || die "Failed to source gen_processKernelTree.sh"
 source ${CORE_DIR}/gen_cmdline.sh || die "Failed to source gen_cmdline.sh"
 source ${CORE_DIR}/gen_initialize.sh || die "Failed to source gen_initialize.sh"
+source ${CORE_DIR}/gen_initramfs.sh || die "Failed to source gen_initramfs.sh"
 
 trap trap_cleanup SIGHUP SIGQUIT SIGINT SIGTERM SIGKILL
 
@@ -79,6 +79,15 @@ genkernel_lookup_kernel
 
 # Process depends
 print_info 1 '>> Processing dependency tree...'
+require "${__INTERNAL__CONFIG_PARSING_DEPTREE}"
+
+# Repeat the process since we now (might) have package-based callbacks
+# Sourcing the dependency engine an additional engine makes the scrubber code erase
+# previously calculated deptrees, which is what we want here.
+source ${CORE_DIR}/gen_dependencyEngine.sh || die "Failed to resource gen_dependencyEngine.sh"
+
+# Reprocess
+genkernel_lookup_packages
 require "${__INTERNAL__CONFIG_PARSING_DEPTREE}"
 
 # Generate TEMP dir
