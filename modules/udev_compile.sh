@@ -29,12 +29,12 @@ udev_compile::() {
 
 	if [ "${ARCH}" = 'um' ]
 	then
-		compile_generic utils "EXTRAS=\"${extras}\" ARCH=um USE_KLIBC=true KLCC=${KLCC} USE_LOG=false DEBUG=false udevdir=/dev all"
+		compile_generic utils EXTRAS="${extras}" ARCH=um USE_KLIBC=true KLCC=${KLCC} USE_LOG=false DEBUG=false udevdir=/dev all
 	elif [ "${ARCH}" = 'sparc64' ]
 	then
-		compile_generic utils "EXTRAS=\"${extras}\" ARCH=sparc64 CROSS=sparc64-unknown-linux-gnu- USE_KLIBC=true KLCC=${KLCC} USE_LOG=false DEBUG=false udevdir=/dev all"
+		compile_generic utils EXTRAS="${extras}" ARCH=sparc64 CROSS=sparc64-unknown-linux-gnu- USE_KLIBC=true KLCC=${KLCC} USE_LOG=false DEBUG=false udevdir=/dev all
 	else
-		compile_generic utils "EXTRAS=\"${extras}\" USE_KLIBC=true KLCC=${KLCC} USE_LOG=false DEBUG=false udevdir=/dev all"
+		compile_generic utils EXTRAS="${extras}" USE_KLIBC=true KLCC=${KLCC} USE_LOG=false DEBUG=false udevdir=/dev all
 	fi
 
 	print_info 1 '      >> Installing...'
@@ -44,8 +44,8 @@ udev_compile::() {
 	install -c etc/udev/gentoo/udev.rules "${TEMP}/udev/etc/udev/rules.d/50-udev.rules" ||
 	    die 'Could not copy gentoo udev.rules to 50-udev.rules'
 
-	compile_generic runtask "EXTRAS=\"${extras}\" DESTDIR=${TEMP}/udev install-config"
-	compile_generic runtask "EXTRAS=\"${extras}\" DESTDIR=${TEMP}/udev install-bin"
+	compile_generic runtask EXTRAS="${extras}" DESTDIR=${TEMP}/udev install-config
+	compile_generic runtask EXTRAS="${extras}" DESTDIR=${TEMP}/udev install-bin
 	install -c extras/ide-devfs.sh "${TEMP}/udev/etc/udev/scripts" 
 	install -c extras/scsi-devfs.sh "${TEMP}/udev/etc/udev/scripts" 
 	install -c extras/raid-devfs.sh "${TEMP}/udev/etc/udev/scripts" 

@@ -38,8 +38,7 @@ provide () {
 
 		if [ -n "${myCheck}" -a "${myCheck}" != "${myCaller}" ]
 		then
-			echo "Conflicting provide ($i in ${myCaller} against $i in ${myCheck})..."
-			exit 1 # XXX XXX XXX
+			die "Conflicting provide ($i in ${myCaller} against $i in ${myCheck})..."
 		else
 			__INTERNAL__DEPS__PRV_S[${#__INTERNAL__DEPS__PRV_S[@]}]="${myCaller}"
 			__INTERNAL__DEPS__PRV_P[${#__INTERNAL__DEPS__PRV_P[@]}]="$i"

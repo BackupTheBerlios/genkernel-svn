@@ -42,7 +42,8 @@ get_KV() {
 				LCV=`grep ^CONFIG_LOCALVERSION= ${KERNEL_DIR}/.config | sed -r -e "s/.*=\"(.*)\"/\1/"`
 				KV=${VER}.${PAT}.${SUB}${EXV}${LCV}
 			fi
-		else
+		elif [ "${PAT}" -lt '6' -a "${VER}" -eq '2' ]
+		then
 			die 'Kernel unsupported (2.6 or newer needed); exiting.'
 		fi
 	fi

@@ -380,3 +380,12 @@ genkernel_determine_arch() {
 	ARCH_CONFIG="${GK_SHARE}/${ARCH}/config.sh"
 	[ -f "${ARCH_CONFIG}" ] || die "${ARCH} not yet supported by genkernel. Please add the arch-specific config file, ${ARCH_CONFIG}"
 }
+
+print_list()
+{
+	local x
+	for x in ${*}
+	do
+		echo ${x}
+	done
+}

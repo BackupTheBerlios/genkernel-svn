@@ -16,6 +16,21 @@ genkernel_lookup_packages()
 	done
 }
 
+genkernel_generate_cpio() {
+	cpio --quiet -o -H newc | gzip -9 > "${TEMP}/$1.cpio.gz"
+}
+
+genkernel_generate_cpio_path() {
+	find $2 -print | genkernel_generate_cpio "$1"
+}
+
+genkernel_generate_cpio_files() {
+	local name=$1
+	shift
+
+	print_list $* | genkernel_generate_cpio "${name}"
+}
+
 genkernel_generate_package() {
 	tar cjf "${CACHE_DIR}/pkg_$1.tar.bz2" "$2" || die "Could not create binary cache for $1!"
 }
