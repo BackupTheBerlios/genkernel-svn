@@ -3,6 +3,7 @@ require @pkg_klibc-${KLIBC_VER}:null:klibc_compile
 klibc::()
 {
 	cd ${TEMP}
+	rm -rf "klibc-build-${KLIBC_VER}"
 	genkernel_extract_package "klibc-${KLIBC_VER}"
 
 	# Export KLCC location for udev and others

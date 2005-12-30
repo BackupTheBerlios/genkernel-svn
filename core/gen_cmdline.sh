@@ -196,6 +196,7 @@ show_help() {
 			fi
 		done
 	done
+	exit 0
 }
 
 show_usage() {

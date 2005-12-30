@@ -14,6 +14,5 @@ Modules to merge in:
 * grub [gen_bootloader.sh]
 * unionfs
 * lvm2
-* dmraid
 * e2fsprogs needs cpio code
 * packaging output for catalyst
