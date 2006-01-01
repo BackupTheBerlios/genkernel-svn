@@ -13,6 +13,7 @@ Modules to merge in:
   * modules
 * grub [gen_bootloader.sh]
 * unionfs
-* lvm2
+* evms2
 * e2fsprogs needs cpio code
 * packaging output for catalyst
+* profiles

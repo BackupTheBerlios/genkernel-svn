@@ -83,6 +83,22 @@ genkernel_extract_package() {
 	tar jxf "${CACHE_DIR}/pkg_$1.tar.bz2" || die "Could not extract binary cache for $1!"
 }
 
+genkernel_convert_tar_to_cpio() {
+	cd "${TEMP}"
+
+	# Set up links, generate CPIO
+	rm -rf "${TEMP}/$1-cpiogen"
+	mkdir -p "${TEMP}/$1-cpiogen"
+	cd "${TEMP}/$1-cpiogen"
+
+	genkernel_extract_package "$1-$2"
+	genkernel_generate_cpio_path "$1-$2" .
+	initramfs_register_cpio "$1-$2"
+
+	cd ${TEMP}
+	rm -rf "${TEMP}/$1-cpiogen"
+}
+
 unpack()
 {
 	local tarFlags
