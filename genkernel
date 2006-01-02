@@ -45,16 +45,15 @@ logicTrue $(config_get_key help) && show_help # --help
 # Set TEMP if tempdir is defined
 [ -n "$(config_get_key tempdir)" ] && TEMP="$(config_get_key tempdir)"
 
-### << plasmaroo's junk
-#echo "Debugging junk:"
-#__debug__iterate_over_config() {
-#	for (( n = 0 ; n < ${#__INTERNAL__OPTIONS__KEY[@]}; ++n )) ; do
-#		echo "${__INTERNAL__OPTIONS__KEY[${n}]} --> ${__INTERNAL__OPTIONS__VALUE[${n}]}"
-#       done
-#	echo "deptree: ${__INTERNAL__CONFIG_PARSING_DEPTREE}"
-#}
-#__debug__iterate_over_config
-### >> plasmaroo's junk
+if [ -n "$(config_get_key profile)" ]
+then
+	for i in "$(config_get_key profile)"
+	do
+		config_profile_read $i
+	done
+fi	
+
+[ -n "$(config_get_key profile-dump)" ] && config_profile_dump
 
 # Check if any modules to execute were specified
 if [ "${__INTERNAL__CONFIG_PARSING_DEPTREE}" = '' ]

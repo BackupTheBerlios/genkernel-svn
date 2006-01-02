@@ -266,6 +266,8 @@ __register_config_option 'Internals' 'callback'	'true' 'false' 'Run the specifie
 __register_config_option 'Internals' 'cachedir' 'true' 'false' 'Override the default cache location.'
 __register_config_option 'Internals' 'tempdir' 'true' 'false' "Location of Genkernel's temporary directory."
 __register_config_option 'Internals' 'postclear' 'false' 'false' 'Clear all temporary files and caches afterwards.'
+__register_config_option 'Internals' 'profile' 'true!m' 'false' 'Use specified profile.'
+__register_config_option 'Internals' 'profile-dump' 'false' 'false' 'Use specified profile.'
 __register_config_option 'Internals' 'mountboot' 'false' 'true' 'Mount /boot automatically.'
 __register_config_option 'Internals' 'usecolor' 'false' 'true' 'Color output.'
 
@@ -300,6 +302,10 @@ parse_cmdline() {
 			if logicTrue ${myTakesData}
 			then
 				config_set_key "${myName}" "${myRequest##*\=}"
+				myMatched=true
+			elif [ "${myTakesData}" = 'true!m' ]
+			then
+				config_set_key "${myName}" "$(config_get_key ${myName}) ${myRequest##*\=}"
 				myMatched=true
 			else
 				# Data but we don't take data!
@@ -357,4 +363,50 @@ parse_cmdline() {
 		__INTERNAL__CONFIG_PARSING_FAILED=true
 		return 1
 	fi
+}
+
+# <file>
+config_profile_read() {
+	[ -f "$1" ] || die "parse_profile: No such file $1!"
+
+	local identifier data set_config
+	while read i
+	do
+		# { identifier }{" := "}{quote}{data}{quote} or
+
+		# Strip out inline comments
+		i="${i/[ 	]\#*/}"
+
+		if [[ "${i}" =~ '^\w+ := \".*\"$' ]]
+		then
+			identifier="${i% :=*}"
+			data="${i#*:= \"}" # Remove up to first quote inclusive
+			data="${data%\"}" # Remove end quote
+
+			set_config="${set_config} ${identifier}"
+			config_set_key "${identifier}" "${data}"
+		# FIXME: profile deps
+		elif [[ "${i}" =~ '^#' ]]
+		then
+			:
+		else
+			echo "# Invalid input: $i"
+		fi
+	done < "$1"
+
+	[ -n "${set_config}" ] && echo "# Profile $1 set config vars:${set_config}"
+}
+
+config_profile_dump() {
+	for (( n = 0 ; n < ${#__INTERNAL__OPTIONS__KEY[@]}; ++n )) ; do
+		case "${__INTERNAL__OPTIONS__KEY[${n}]}" in
+			profile|profile-dump)
+				:
+			;;
+			*)
+				echo "${__INTERNAL__OPTIONS__KEY[${n}]} := \"${__INTERNAL__OPTIONS__VALUE[${n}]}\""
+			;;
+		esac
+	done
+	exit 0
 }
