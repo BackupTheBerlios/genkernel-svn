@@ -20,9 +20,9 @@ busybox_compile::()
 	sed -i -e 's/#\? \?CONFIG_FEATURE_INSTALLER[ =].*/CONFIG_FEATURE_INSTALLER=y/g' .config
 
 	print_info 1 'busybox: >> Configuring...'
-	yes '' 2>/dev/null | compile_generic utils oldconfig
+	yes '' 2>/dev/null | compile_generic oldconfig
 	print_info 1 'busybox: >> Compiling...'
-	compile_generic utils all
+	compile_generic all
 
 	[ -f "busybox" ] || die 'Busybox executable does not exist!'
 	strip "busybox" || die 'Could not strip busybox binary!'
