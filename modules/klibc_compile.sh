@@ -4,21 +4,23 @@
 # Used by the klibc module which defines KLCC to point to the klcc binary
 # for usage by other modules.
 
-require @kernel_src_tree:null:fail
+#require @kernel_src_tree:null:fail
 klibc_compile::() {
 	local KLIBC_DIR="klibc-${KLIBC_VER}" KLIBC_SRCTAR="${SRCPKG_DIR}/klibc-1.1.1.tar.gz"
 
-	# PPC fixup for 2.6.14
-	# Headers are moving around .. need to make them available
-	if [ "${VER}" -eq '2' -a "${PAT}" -eq '6' -a "${SUB}" -ge '14' ]
-	then
-	    if [ "${ARCH}" = 'ppc' -o "${ARCH}" = 'ppc64' ]
-	    then
-    		cd ${KERNEL_DIR}
-		echo 'Applying hack to workaround 2.6.14+ PPC header breakages...'
-    		compile_generic kernel 'include/asm'
-	    fi
-	fi
+	#### This should be done in the kernel config code area
+
+	## PPC fixup for 2.6.14
+	## Headers are moving around .. need to make them available
+	#if [ "${VER}" -eq '2' -a "${PAT}" -eq '6' -a "${SUB}" -ge '14' ]
+	#then
+	#    if [ "${ARCH}" = 'ppc' -o "${ARCH}" = 'ppc64' ]
+	#    then
+    #		cd ${KERNEL_DIR}
+	#	echo 'Applying hack to workaround 2.6.14+ PPC header breakages...'
+    #		compile_generic kernel 'include/asm'
+	#    fi
+	#fi
 
 	cd "${TEMP}"
 	rm -rf "${KLIBC_DIR}" klibc-build-${KLIBC_VER}
@@ -36,43 +38,52 @@ klibc_compile::() {
 	fi
 
 	print_info 1 'klibc: >> Compiling...'
-	ln -snf "${KERNEL_DIR}" linux || die "Could not link to ${KERNEL_DIR}"
+	
+	ln -snf "$(config_get_key kernel-tree)" linux || die "Could not link to $(config_get_key kernel-tree)"
 	sed -i MCONFIG -e "s|prefix      =.*|prefix      = ${TEMP}/klibc-build-${KLIBC_VER}|g"
+    # set the build directory
 
-	# PPC fixup for 2.6.14
+	if [ ! "$(config_get_key kbuild-output)" == "$(config_get_key kernel-tree)" ]
+	then
+		echo "KRNLOBJ = $(config_get_key kbuild-output)" >> MCONFIG
+	fi
+	
+	# PPC fixup for 2.6.14+
 	if [ "${VER}" -eq '2' -a "${PAT}" -eq '6' -a "${SUB}" -ge '14' ]
 	then
 		if [ "${ARCH}" = 'ppc' -o "${ARCH}" = 'ppc64' ]
-        	then
+      	then
 			echo 'INCLUDE += -I$(KRNLSRC)/arch/$(ARCH)/include' >> MCONFIG
 		fi
 	fi
 
 	if [ "${ARCH}" = 'um' ]
 	then
-		compile_generic utils "ARCH=um"
+		compile_generic "ARCH=um"
 	elif [ "${ARCH}" = 'sparc64' ]
 	then
-		compile_generic utils "ARCH=sparc64 CROSS=sparc64-unknown-linux-gnu-"
+		compile_generic "ARCH=sparc64 CROSS=sparc64-unknown-linux-gnu-"
 	elif [ "${ARCH}" = 'x86' ]
 	then
-		compile_generic utils "ARCH=i386"
+		compile_generic "ARCH=i386"
 	## FIXME: Cross-compile
 	else
-		compile_generic utils
+		compile_generic 
 	fi
 
-	compile_generic runtask 'install'
+	compile_generic 'install'
 
-	# PPC fixup for 2.6.14
-	if [ "${VER}" -eq '2' -a "${PAT}" -eq '6' -a "${SUB}" -ge '14' ]
-	then
-	    if [ "${ARCH}" = 'ppc' -o "${ARCH}" = 'ppc64' ]
-	    then
-		cd ${KERNEL_DIR}
-		compile_generic kernel 'archclean'
-	    fi
-	fi
+#### This should be done in the kernel config code area
+
+#	# PPC fixup for 2.6.14
+#	if [ "${VER}" -eq '2' -a "${PAT}" -eq '6' -a "${SUB}" -ge '14' ]
+#	then
+#	    if [ "${ARCH}" = 'ppc' -o "${ARCH}" = 'ppc64' ]
+#	    then
+#		cd ${KERNEL_DIR}
+#		compile_generic 'archclean'
+#	    fi
+#	fi
 
 	cd ${TEMP}
 	genkernel_generate_package "klibc-${KLIBC_VER}" klibc-build-${KLIBC_VER}

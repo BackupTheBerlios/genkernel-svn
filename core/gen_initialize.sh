@@ -17,3 +17,17 @@ __INTERNAL__CONFIG_PARSING_FAILED=false
 config_set_key usecolor true
 config_set_key kernel-tree '/usr/src/linux'
 config_set_key debuglevel '1'
+
+
+
+# For debugging purposes only ... remove at later date
+config_set_key kbuild-output '/tmp/genkernel/2.6.14'
+# config_set_key arch 'i386'
+config_set_key install-path '/tmp/genkernel/2.6.14/output'
+config_set_key install-mod-path '/tmp/genkernel/2.6.14/output'
+# config_set_key clean true
+config_set_key oldconfig true
+# config_set_key menuconfig true
+# config_set_key gconfig true
+# config_set_key xconfig true
+

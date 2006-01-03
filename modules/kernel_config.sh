@@ -44,7 +44,7 @@ kernel_config::()
 
 	# CLEAN
 	# Source dir needs to be clean or kbuild complains
-	if [ ! "$(config_get_key kbuild_output)" == "$(config_get_key kernel-tree)" ]
+	if [ ! "$(config_get_key kbuild-output)" == "$(config_get_key kernel-tree)" ]
 	then
 		compile_generic distclean
 		logicTrue $(config_get_key clean) && compile_generic ${ARGS} clean
@@ -53,6 +53,9 @@ kernel_config::()
 		logicTrue $(config_get_key clean) && compile_generic ${ARGS} clean
 	fi
 
+	# prepare?
+	compile_generic ${ARGS} prepare
+	
 	# Configure
 	if logicTrue $(config_get_key oldconfig)
 	then
@@ -80,15 +83,25 @@ kernel_config::()
 
 	# Override the config???
 
-	# make the kernel
-	compile_generic ${ARGS}
-	
+	# apply the ppc fix?
+	if [ "$(config_get_key arch)" = 'ppc' -o "$(config_get_key arch)" = 'ppc64' ]
+	then
+		echo 'Applying hack to workaround 2.6.14+ PPC header breakages...'
+		compile_generic ${ARGS} 'include/asm'
+	fi
+
 	# make the modules	
 	compile_generic ${ARGS} modules
 	
-	# install the kernel
-	compile_generic ${ARGS} install
-	
 	# install the modules	
 	compile_generic ${ARGS} modules_install
+	
+	# Create the initramfs 
+	# Optionally pack the initramfs into the kernel sources 
+	
+	# make the kernel
+	compile_generic ${ARGS}
+	
+	# install the kernel
+	compile_generic ${ARGS} install
 }
