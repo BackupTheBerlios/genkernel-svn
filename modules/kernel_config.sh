@@ -55,6 +55,15 @@ kernel_config::()
 	then
 		compile_generic distclean
 		logicTrue $(config_get_key clean) && compile_generic ${ARGS} clean
+		# Setup fake i386 kbuild_output for arch=um or xen0 or xenU 
+		# Some proggies need a i386 configured kernel tree
+		if [ 	"$(config_get_key arch-override)" == "um" -o "$(config_get_key arch-override)" == "xen0" \
+			 -o "$(config_get_key arch-override)" == "xenU" ]
+		then
+			mkdir -p "/tmp/genkernel/$(config_get_key arch-override)-i386"
+			yes '' 2>/dev/null | compile_generic ARCH=i386 "KBUILD_OUTPUT=/tmp/genkernel/$(config_get_key arch-override)-i386" oldconfig
+			compile_generic ARCH=i386 "KBUILD_OUTPUT=/tmp/genkernel/$(config_get_key arch-override)-i386" prepare
+		fi
 	else
 		# Cleanup the tree ... everything ...
 		logicTrue $(config_get_key mrproper) && compile_generic ${ARGS} mrproper
@@ -63,16 +72,6 @@ kernel_config::()
 		logicTrue $(config_get_key clean) && compile_generic ${ARGS} clean
 	fi
 
-	if [ 	"$(config_get_key arch-override)" == "um" -o "$(config_get_key arch-override)" == "xen0" \
-		 -o "$(config_get_key arch-override)" == "xenU" ]
-	then
-		# We must use kbuild here 
-		compile_generic distclean
-		mkdir -p "/tmp/genkernel/$(config_get_key arch-override)-i386"
-		yes '' 2>/dev/null | compile_generic ARCH=i386 "KBUILD_OUTPUT=/tmp/genkernel/$(config_get_key arch-override)-i386" oldconfig
-		compile_generic ARCH=i386 "KBUILD_OUTPUT=/tmp/genkernel/$(config_get_key arch-override)-i386" prepare
-	fi
-		
 	# prepare?
 	#compile_generic ${ARGS} prepare
 	
@@ -113,6 +112,8 @@ kernel_config::()
 		compile_generic ${ARGS} 'include/asm'
 	fi
 
+
+##### These things should be their own modules now
 	# make the modules	
 	print_info 1 '>> Compiling kernel modules (if necessary) ...'
 	compile_generic ${ARGS} modules
@@ -127,4 +128,5 @@ kernel_config::()
 	# make the kernel
 	print_info 1 '>> Compiling kernel ...'
 	compile_generic ${ARGS}
+##### These things should be their own modules
 }
