@@ -52,7 +52,7 @@ genkernel_lookup_packages()
 		if [ "${__INTERNAL__PKG__CALLBACK__STATUS}" = "false" ]
 		then
 			provide "${myPkg}"
-			echo Registering ${myPkg}
+			# echo Registering ${myPkg}
 		fi
 	done
 

@@ -39,12 +39,6 @@ logicTrue ${__INTERNAL__CONFIG_PARSING_FAILED} && die 'Fatal error processing ar
 set_color
 logicTrue $(config_get_key help) && show_help # --help
 
-# Set DEBUGFILE if log-override is defined
-[ -n "$(config_get_key log-override)" ] && DEBUGFILE="$(config_get_key log-override)"
-
-# Set TEMP if tempdir is defined
-[ -n "$(config_get_key tempdir)" ] && TEMP="$(config_get_key tempdir)"
-
 if [ -n "$(config_get_key profile)" ]
 then
 	for i in "$(config_get_key profile)"
@@ -52,6 +46,12 @@ then
 		config_profile_read $i
 	done
 fi	
+
+# Set DEBUGFILE if log-override is defined
+[ -n "$(config_get_key log-override)" ] && DEBUGFILE="$(config_get_key log-override)"
+
+# Set TEMP if tempdir is defined
+[ -n "$(config_get_key tempdir)" ] && TEMP="$(config_get_key tempdir)"
 
 [ -n "$(config_get_key profile-dump)" ] && config_profile_dump
 

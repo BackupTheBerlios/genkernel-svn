@@ -370,14 +370,19 @@ config_profile_read() {
 	[ -f "$1" ] || die "parse_profile: No such file $1!"
 
 	local identifier data set_config
+
+	__INTERNAL_PROFILES_READ="${__INTERNAL_PROFILES_READ} ${1}"
 	while read i
 	do
 		# { identifier }{" := "}{quote}{data}{quote} or
+		# "require "{profiles} or
+		# "::"{module} or
+		# "#"{comment}
 
 		# Strip out inline comments
 		i="${i/[ 	]\#*/}"
 
-		if [[ "${i}" =~ '^\w+ := \".*\"$' ]]
+		if [[ "${i}" =~ '[a-z\-]+ := \".*\"$' ]]
 		then
 			identifier="${i% :=*}"
 			data="${i#*:= \"}" # Remove up to first quote inclusive
@@ -385,8 +390,22 @@ config_profile_read() {
 
 			set_config="${set_config} ${identifier}"
 			config_set_key "${identifier}" "${data}"
-		# FIXME: profile deps
-		elif [[ "${i}" =~ '^#' ]]
+		elif [[ "${i}" =~ '^import ' ]]
+		then
+			identifier="${i/import /}"
+			for j in "${identifier}"
+			do
+				if has "${j}" "${__INTERNAL_PROFILES_READ}"
+				then
+					echo "# Cyclic loop detected: ${j} required by ${1} but already processed."
+				else
+					config_profile_read "${j}"
+				fi
+			done
+		elif [[ "${i:0:2}" = '::' ]]
+		then
+			parse_cmdline ${i}
+		elif [[ "${i:0:1}" = '#' ]]
 		then
 			:
 		else

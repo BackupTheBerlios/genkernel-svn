@@ -57,6 +57,7 @@ klibc_compile::() {
 	elif [ "${ARCH}" = 'x86' ]
 	then
 		compile_generic utils "ARCH=i386"
+	## FIXME: Cross-compile
 	else
 		compile_generic utils
 	fi
