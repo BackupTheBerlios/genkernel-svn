@@ -23,7 +23,8 @@ kernel_config::()
 		fi
 	elif [ "$(config_get_key kbuild-output)" == "$(config_get_key kernel-tree)" ]
 	then
-		if [ "$(config_get_key arch-override)" == "um" -o "$(config_get_key arch-override)" == "xen0" -o "$(config_get_key arch-override)" == "xenU" ]
+		if [ 	"$(config_get_key arch-override)" == "um" -o "$(config_get_key arch-override)" == "xen0" \
+			-o "$(config_get_key arch-override)" == "xenU" ]
 		then
 			die "Compiling for ARCH=$(config_get_key arch-override) requires kbuild_output to differ from the kernel-tree"
 		fi
@@ -62,13 +63,14 @@ kernel_config::()
 		logicTrue $(config_get_key clean) && compile_generic ${ARGS} clean
 	fi
 
-	if [ "$(config_get_key arch-override)" == "um" -o "$(config_get_key arch-override)" == "xen0" -o "$(config_get_key arch-override)" == "xenU" ]
+	if [ 	"$(config_get_key arch-override)" == "um" -o "$(config_get_key arch-override)" == "xen0" \
+		 -o "$(config_get_key arch-override)" == "xenU" ]
 	then
-		# We must use kbuild for arch um or xen0 or xenU .. 
+		# We must use kbuild here 
 		compile_generic distclean
-		mkdir -p /tmp/genkernel/um-i386-foo
-		yes '' 2>/dev/null | compile_generic ARCH=i386 KBUILD_OUTPUT=/tmp/genkernel/um-i386-foo oldconfig
-		compile_generic ARCH=i386 KBUILD_OUTPUT=/tmp/genkernel/um-i386-foo prepare
+		mkdir -p "/tmp/genkernel/$(config_get_key arch-override)-i386"
+		yes '' 2>/dev/null | compile_generic ARCH=i386 "KBUILD_OUTPUT=/tmp/genkernel/$(config_get_key arch-override)-i386" oldconfig
+		compile_generic ARCH=i386 "KBUILD_OUTPUT=/tmp/genkernel/$(config_get_key arch-override)-i386" prepare
 	fi
 		
 	# prepare?
@@ -125,11 +127,4 @@ kernel_config::()
 	# make the kernel
 	print_info 1 '>> Compiling kernel ...'
 	compile_generic ${ARGS}
-	
-	# install the kernel
-	if [ ! "$(config_get_key arch-override)" == "um" ]
-	then
-		print_info 1 '>> Installing kernel ...'
-		compile_generic ${ARGS} install
-	fi
 }
