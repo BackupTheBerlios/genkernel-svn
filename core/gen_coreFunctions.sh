@@ -327,17 +327,19 @@ compile_generic() {
 		print_info 2 "COMMAND: ${MAKE} ${MAKEOPTS/-j?/j1} $@" 1 0 1
 		make -s "$@"
 		RET=$?
-	elif [ "${DEBUGLEVEL}" -gt "1" ]
-	then
-		# Output to stdout and debugfile
-		print_info 2 "COMMAND: ${MAKE} ${MAKEOPTS} $@" 1 0 1
-		make $(config_get_key makeopts) "$@" 2>&1 | tee -a ${DEBUGFILE}
-		RET=${PIPESTATUS[0]}
 	else
-		# Output to debugfile only
-		print_info 2 "COMMAND: ${MAKE} ${MAKEOPTS} $@" 1 0 1
-		make $(config_get_key makeopts) "$@" >> ${DEBUGFILE} 2>&1
-		RET=$?
+		if [ "$(config_get_key debuglevel)" -gt "1" ]
+		then
+			# Output to stdout and debugfile
+			print_info 2 "COMMAND: ${MAKE} ${MAKEOPTS} $@" 1 0 1
+			make $(config_get_key makeopts) "$@" 2>&1 | tee -a ${DEBUGFILE}
+			RET=${PIPESTATUS[0]}
+		else
+			# Output to debugfile only
+			print_info 2 "COMMAND: ${MAKE} ${MAKEOPTS} $@" 1 0 1
+			make $(config_get_key makeopts) "$@" >> ${DEBUGFILE} 2>&1
+			RET=$?
+		fi
 	fi
 	[ "${RET}" -eq '0' ] || die "Failed to compile the \"${1}\" target..."
 }
