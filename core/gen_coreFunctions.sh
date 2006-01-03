@@ -313,7 +313,6 @@ logicTrue() {
 
 compile_generic() {
 	local RET myAction
-
 	# $2 may be empty if we don't want to pass any extras to the make.
 	[ "$#" -lt '1' ] && die 'compile_generic(): improper usage!'
 	myAction="$1"
@@ -333,24 +332,25 @@ compile_generic() {
 #		*) ARGS="" ;; # includes runtask
 #	esac
 
-	if [ "${myAction}" == 'runtask' ]
+	if [ "${myAction}" == 'runtask' ] || [ "${myAction}" = 'kernel' ]
 	then
 		print_info 2 "COMMAND: ${MAKE} ${MAKEOPTS/-j?/j1} $@" 1 0 1
 		make -s "$@"
 		RET=$?
-	elif [ "${DEBUGLEVEL}" -gt "1" ]
-	then
-		# Output to stdout and debugfile
-		print_info 2 "COMMAND: ${MAKE} ${MAKEOPTS} $@" 1 0 1
-		make $(config_get_key makeopts) "$@" 2>&1 | tee -a ${DEBUGFILE}
-		RET=${PIPESTATUS[0]}
-	else
-		# Output to debugfile only
-		print_info 2 "COMMAND: ${MAKE} ${MAKEOPTS} $@" 1 0 1
-		make $(config_get_key makeopts) "$@" >> ${DEBUGFILE} 2>&1
-		RET=$?
+		if [ "${DEBUGLEVEL}" -gt "1" ]
+		then
+			# Output to stdout and debugfile
+			print_info 2 "COMMAND: ${MAKE} ${MAKEOPTS} $@" 1 0 1
+			make $(config_get_key makeopts) "$@" 2>&1 | tee -a ${DEBUGFILE}
+			RET=${PIPESTATUS[0]}
+		else
+			# Output to debugfile only
+			print_info 2 "COMMAND: ${MAKE} ${MAKEOPTS} $@" 1 0 1
+			make $(config_get_key makeopts) "$@" >> ${DEBUGFILE} 2>&1
+			RET=$?
+		fi
 	fi
-	[ "${RET}" -ne '0' ] && die "Failed to compile the \"${1}\" target..."
+	[ "${RET}" -eq '0' ] || die "Failed to compile the \"${1}\" target..."
 }
 
 ## Genkernel functions
