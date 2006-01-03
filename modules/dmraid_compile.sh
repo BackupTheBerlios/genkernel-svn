@@ -24,7 +24,7 @@ dmraid_compile::() {
 	LDFLAGS="-L${DEVICE_MAPPER}/lib" \
 	CFLAGS="-I${DEVICE_MAPPER}/include" \
 	CPPFLAGS="-I${DEVICE_MAPPER}/include" \
-	compile_generic utils # Compile
+	compile_generic # Compile
 
 	mkdir "${TEMP}/dmraid/sbin"
 	install -m 0755 -s tools/dmraid "${TEMP}/dmraid/sbin/dmraid"

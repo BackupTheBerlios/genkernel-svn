@@ -13,8 +13,8 @@ device_mapper_compile::()
 		die 'Configuring device-mapper failed!'
 	print_info 1 'device-mapper: >> Compiling...'
 
-	compile_generic utils # Compile
-	compile_generic utils 'install'
+	compile_generic # Compile
+	compile_generic install
 
 	cd "${TEMP}"
 	rm -rf "${TEMP}/device-mapper/man" || die 'Could not remove manual pages!'

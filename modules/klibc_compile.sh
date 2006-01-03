@@ -45,7 +45,13 @@ klibc_compile::() {
 
 	if [ ! "$(config_get_key kbuild-output)" == "$(config_get_key kernel-tree)" ]
 	then
-		echo "KRNLOBJ = $(config_get_key kbuild-output)" >> MCONFIG
+		if [ "$(config_get_key arch-override)" == "um" -o "$(config_get_key arch-override)" == "xen0" \
+				-o "$(config_get_key arch-override)" == "xenU" ]
+		then
+			echo "KRNLOBJ = /tmp/genkernel/um-i386-foo" >> MCONFIG
+		else
+			echo "KRNLOBJ = $(config_get_key kbuild-output)" >> MCONFIG
+		fi
 	fi
 	
 	# PPC fixup for 2.6.14+
@@ -59,7 +65,13 @@ klibc_compile::() {
 
 	if [ "${ARCH}" = 'um' ]
 	then
-		compile_generic "ARCH=um"
+		compile_generic "ARCH=i386"
+	elif [ "${ARCH}" = 'xen0' ]
+	then
+		compile_generic "ARCH=i386"
+	elif [ "${ARCH}" = 'xenU' ]
+	then
+		compile_generic "ARCH=i386"
 	elif [ "${ARCH}" = 'sparc64' ]
 	then
 		compile_generic "ARCH=sparc64 CROSS=sparc64-unknown-linux-gnu-"
