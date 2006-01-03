@@ -59,6 +59,6 @@ genkernel_lookup_kernel() {
 	# Decide whether to keep config or update it
 	# If the tree looks good provide it...
 
-	NORMAL=${BOLD} print_info 1 "Kernel Tree: Linux Kernel ${BOLD}${KV}${NORMAL} for ${BOLD}${ARCH}${NORMAL}..."
+	[ "$1" != 'silent' ] && NORMAL=${BOLD} print_info 1 "Kernel Tree: Linux Kernel ${BOLD}${KV}${NORMAL} for ${BOLD}${ARCH}${NORMAL}..."
 	provide kernel_src_tree
 }
