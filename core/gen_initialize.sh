@@ -16,4 +16,5 @@ __INTERNAL__CONFIG_PARSING_FAILED=false
 #Set some defaults
 config_set_key usecolor true
 config_set_key kernel-tree '/usr/src/linux'
+config_set_key debuglevel '1'
 
