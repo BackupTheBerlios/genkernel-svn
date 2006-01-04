@@ -37,7 +37,7 @@ done
 logicTrue ${__INTERNAL__CONFIG_PARSING_FAILED} && die 'Fatal error processing arguments; exiting...'
 
 set_color
-logicTrue $(config_get_key help) && show_help # --help
+logicTrue $(config_get_key help) && show_help && echo && exit 0 # --help
 
 if [ -n "$(config_get_key profile)" ]
 then
