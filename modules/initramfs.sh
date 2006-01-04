@@ -9,15 +9,19 @@ logicTrue $(config_get_key lvm2) && require lvm2
 # Get kernel modules
 # Register a new cpio of the kernel modules
 
-# Turn on the overlays if they are enabled
-# TODO
-
-
 initramfs::() {
 
 	# Add any external cpios if defined
 	[ -n "$(config_get_key external-cpio)" ] && initramfs_register_external_cpio $(config_get_key external-cpio)
 	
+	# Add the initramfs-overlay 	
+	if [ -n "$(config_get_key initramfs-overlay)" ]
+	then
+		cd "$(config_get_key initramfs-overlay)"
+		genkernel_generate_cpio_path initramfs-overlay .
+		initramfs_register_cpio initramfs-overlay
+	fi
+
 	print_info 1 'Merging:'
 	for i in $(initramfs_register_cpio_read)
 	do
