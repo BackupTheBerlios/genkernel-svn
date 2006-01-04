@@ -103,7 +103,7 @@ kernel_config::()
 		[ "$?" ] || gen_die 'Error: gconfig failed!'
 	fi
 
-	# Override the config???
+	# FIXME: config_cleanup_register events need dealing with here
 
 	# apply the ppc fix?
 	if [ "$(config_get_key arch)" = 'ppc' -o "$(config_get_key arch)" = 'ppc64' ]
@@ -111,7 +111,6 @@ kernel_config::()
 		print_info 1 '>> Applying hack to workaround 2.6.14+ PPC header breakages...'
 		compile_generic ${ARGS} 'include/asm'
 	fi
-
 
 ##### These things should be their own modules now
 	# make the modules	
@@ -126,6 +125,7 @@ kernel_config::()
 	# Optionally pack the initramfs into the kernel sources 
 	
 	# make the kernel
+	# FIXME: Needs to use KERNEL_MAKE_DIRECTIVE
 	print_info 1 '>> Compiling kernel ...'
 	compile_generic ${ARGS}
 ##### These things should be their own modules

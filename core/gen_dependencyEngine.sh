@@ -72,7 +72,9 @@ require () {
 	myCaller=$(basename ${BASH_SOURCE[1]} .sh)
 
 	__INTERNAL__MODULES_LOADED="${__INTERNAL__MODULES_LOADED} ${__INTERNAL__MODULES_LOADING}"
+
 	# Process dependency list
+	myDeps="$(require_lookup ${myCaller})"
 	for i in $*; do
 		# Special-case for 'null'
 		[ "${i}" = 'null' ] && continue
@@ -136,8 +138,7 @@ require () {
 	done
 
 	# For $myCaller deps are $myDeps
-	__INTERNAL__DEPS__REQ_N[${#__INTERNAL__DEPS__REQ_N[@]}]="${myCaller}"
-	__INTERNAL__DEPS__REQ_D[${#__INTERNAL__DEPS__REQ_D[@]}]="${myDeps}"
+	require_set "${myCaller}" "${myDeps}"
 
 	for i in ${myDeps}; do
 		if ! $(has "${i}" "${__INTERNAL__MODULES_LOADED}")
@@ -191,6 +192,21 @@ require_lookup() {
         done
 }
 
+require_set() {
+	# See if we have n, if we do overwrite. Otherwise append.
+        for (( n = 0 ; n <= ${#__INTERNAL__DEPS__REQ_N[@]}; ++n )) ; do
+		if [ "${__INTERNAL__DEPS__REQ_N[${n}]}" = "$1" ]
+		then
+			__INTERNAL__DEPS__REQ_D[${n}]="$2"
+			return
+		fi
+        done
+
+	# For $myCaller deps are $myDeps
+	__INTERNAL__DEPS__REQ_N[${#__INTERNAL__DEPS__REQ_N[@]}]="${myCaller}"
+	__INTERNAL__DEPS__REQ_D[${#__INTERNAL__DEPS__REQ_D[@]}]="${myDeps}"	
+}
+
 require_DebugStack() {
 	local name data
 
@@ -200,18 +216,6 @@ require_DebugStack() {
 		echo "(${name}:${data})"
         done
 }
-
-#require_DebugStack() {
-#	# From eselect
-#
-#        echo "Call stack:" 1>&2
-#        for (( n = 1 ; n < ${#FUNCNAME[@]} ; ++n )) ; do
-#            funcname=${FUNCNAME[${n}]}
-#            sourcefile=$(basename ${BASH_SOURCE[$(( n - 1 ))]})
-#            lineno=${BASH_LINENO[$(( n - 1 ))]}
-#            echo "    * ${funcname} (${sourcefile}:${lineno})" 1>&2
-#        done
-#}
 
 require_SearchStackForRecursion() {
 	# Ignore the last n = since that is the original require call

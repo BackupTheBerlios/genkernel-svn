@@ -7,8 +7,6 @@ Things to fix:
 Modules to merge in:
 
 * kernel
-  * prepare
-  * config
   * image
   * modules
 * grub [gen_bootloader.sh]
@@ -16,4 +14,3 @@ Modules to merge in:
 * evms2
 * e2fsprogs needs cpio code
 * packaging output for catalyst
-* profiles
