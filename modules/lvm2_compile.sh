@@ -22,8 +22,8 @@ lvm2_compile::() {
 	LDFLAGS="-L${DEVICE_MAPPER}/lib" \
 	CFLAGS="-I${DEVICE_MAPPER}/include" \
 	CPPFLAGS="-I${DEVICE_MAPPER}/include" \
-	compile_generic utils # Compile
-	compile_generic utils install
+	compile_generic # Compile
+	compile_generic install
 
 	cd "${TEMP}/LVM2"
 	chmod u+w sbin/lvm.static # Fix crazy permissions to strip

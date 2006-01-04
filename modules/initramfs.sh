@@ -1,4 +1,5 @@
 require busybox udev gmi
+#require busybox udev gmi evms_host_compiled
 
 initramfs::() {
 	print_info 1 'Merging:'
