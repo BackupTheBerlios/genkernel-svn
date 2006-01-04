@@ -1,1 +1,1 @@
-require kernel initrd
+require initramfs
