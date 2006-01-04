@@ -13,18 +13,26 @@ logicTrue $(config_get_key lvm2) && require lvm2
 # TODO
 
 
-
 initramfs::() {
+
+	# Add any external cpios if defined
+	[ -n "$(config_get_key external-cpio)" ] && initramfs_register_external_cpio $(config_get_key external-cpio)
+	
 	print_info 1 'Merging:'
 	for i in $(initramfs_register_cpio_read)
 	do
-		if [ ! -f "${TEMP}/$i.cpio.gz" ]
+		if [ ! -f "$i" ]
 		then
 			die "Invalid CPIO file in registry: ${i} -- file does not exist."
 		fi
-		print_info 1 "    $i"
+		if [ "$(dirname ${i})" == "${TEMP}" ]
+		then
+			print_info 1 "    $(basename ${i} .cpio.gz)"
+		else
+			print_info 1 "    ${i}"
+		fi
 
 		# Can't use < file; bash seems to barf on binary data...
-		cat "${TEMP}/$i.cpio.gz" >> "${TEMP}/initramfs-output.cpio.gz"
+		cat "$i" >> "${TEMP}/initramfs-output.cpio.gz"
 	done
 }
