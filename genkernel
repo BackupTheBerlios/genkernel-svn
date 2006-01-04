@@ -65,13 +65,16 @@ fi
 
 clear_log
 
-genkernel_print_header
-genkernel_determine_arch
-
 CACHE_DIR="$(arch_replace ${CACHE_DIR})"
 CONFIG_DIR="$(arch_replace ${CONFIG_DIR})"
 [ -e "${CACHE_DIR}" ] || mkdir -p "${CACHE_DIR}"
 [ -e "${CONFIG_DIR}" ] || mkdir -p "${CONFIG_DIR}"
+
+genkernel_print_header
+genkernel_determine_arch
+
+# Read arch-specific config
+source ${ARCH_CONFIG} || die "Could not read ${ARCH_CONFIG}"
 
 genkernel_lookup_packages
 genkernel_lookup_kernel

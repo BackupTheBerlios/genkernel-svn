@@ -17,7 +17,8 @@ initramfs::() {
 	# Add the initramfs-overlay 	
 	if [ -n "$(config_get_key initramfs-overlay)" ]
 	then
-		cd "$(config_get_key initramfs-overlay)"
+		cd "$(config_get_key initramfs-overlay)" \
+			|| die "Failed to generate the initramfs overlay from $(config_get_key initramfs-overlay)"
 		genkernel_generate_cpio_path initramfs-overlay .
 		initramfs_register_cpio initramfs-overlay
 	fi

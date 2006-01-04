@@ -1,3 +1,4 @@
+require @kernel_src_tree:null:fail
 kernel_config::()
 {
 	# config_set_key kbuild-output '/tmp/genkernel/2.6.14'
@@ -114,19 +115,19 @@ kernel_config::()
 
 ##### These things should be their own modules now
 	# make the modules	
-	print_info 1 '>> Compiling kernel modules (if necessary) ...'
-	compile_generic ${ARGS} modules
+	#print_info 1 '>> Compiling kernel modules (if necessary) ...'
+	#ompile_generic ${ARGS} modules
 	
 	# install the modules	
-	print_info 1 '>> Installing kernel modules (if necessary) ...'
-	compile_generic ${ARGS} modules_install
+	#print_info 1 '>> Installing kernel modules (if necessary) ...'
+	#ompile_generic ${ARGS} modules_install
 	
 	# Create the initramfs 
 	# Optionally pack the initramfs into the kernel sources 
 	
 	# make the kernel
 	# FIXME: Needs to use KERNEL_MAKE_DIRECTIVE
-	print_info 1 '>> Compiling kernel ...'
-	compile_generic ${ARGS}
+	#rint_info 1 '>> Compiling kernel ...'
+	#ompile_generic ${ARGS}
 ##### These things should be their own modules
 }

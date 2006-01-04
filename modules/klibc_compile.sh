@@ -4,7 +4,7 @@
 # Used by the klibc module which defines KLCC to point to the klcc binary
 # for usage by other modules.
 
-require @kernel_src_tree:null:fail
+require kernel_config
 klibc_compile::() {
 	local KLIBC_DIR="klibc-${KLIBC_VER}" KLIBC_SRCTAR="${SRCPKG_DIR}/klibc-1.1.1.tar.gz"
 

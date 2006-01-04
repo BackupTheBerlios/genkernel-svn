@@ -386,7 +386,7 @@ genkernel_determine_arch() {
 		esac
 	fi
 
-	ARCH_CONFIG="${GK_SHARE}/${ARCH}/config.sh"
+	ARCH_CONFIG="${CONFIG_DIR}/${ARCH}/config.sh"
 	[ -f "${ARCH_CONFIG}" ] || die "${ARCH} not yet supported by genkernel. Please add the arch-specific config file, ${ARCH_CONFIG}"
 }
 
