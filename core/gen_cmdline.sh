@@ -146,6 +146,12 @@ show_help() {
 			myFPrint="${myFPrint}=<...>"
 			myPrint="${myPrint}=<...>"
 		fi
+		
+		if [ "${myTakesData}" == 'true!m' ]
+		then
+			myFPrint="${myFPrint}=<...> (multiple)"
+			myPrint="${myPrint}=<...> (multiple)"
+		fi
 
 		# Work out tab lengths:
 		myTabLen=$(show_help__internal__tabulation_lookup "${myGroup}") # Fetch
@@ -266,6 +272,7 @@ __register_config_option 'Internals' 'callback'	'true' 'false' 'Run the specifie
 __register_config_option 'Internals' 'cachedir' 'true' 'false' 'Override the default cache location.'
 __register_config_option 'Internals' 'tempdir' 'true' 'false' "Location of Genkernel's temporary directory."
 __register_config_option 'Internals' 'postclear' 'false' 'false' 'Clear all temporary files and caches afterwards.'
+# Allow multiple entries for the profile
 __register_config_option 'Internals' 'profile' 'true!m' 'false' 'Use specified profile.'
 __register_config_option 'Internals' 'profile-dump' 'false' 'false' 'Use specified profile.'
 __register_config_option 'Internals' 'mountboot' 'false' 'true' 'Mount /boot automatically.'
@@ -275,10 +282,11 @@ __register_config_option 'Internals' 'usecolor' 'false' 'true' 'Color output.'
 __register_config_option 'Output Settings' 'kerncache' 'true' 'false' "File to output a .tar.bz2'd kernel, the contents of /lib/modules/ and the kernel config; this is done before callbacks."
 __register_config_option 'Output Settings' 'kernel-name' 'true' 'false' 'Tag the kernel and initrd with a name; if not defined the option defaults to "genkernel".'
 __register_config_option 'Output Settings' 'initramfs-overlay' 'true' 'false' 'Directory structure to include in the initramfs.'
-__register_config_option 'Output Settings' 'minkernpackage' 'true' 'false' "File to output a .tar.bz2'd kernel and initrd: No modules outside of the initrd will be included..."
-__register_config_option 'Output Settings' 'modulespackage' 'true' 'false' "File to output a .tar.bz2'd modules after the callbacks have run."
+__register_config_option 'Output Settings' 'external-cpio' 'true!m' 'false' 'Include an external cpio file.'
+#__register_config_option 'Output Settings' 'minkernpackage' 'true' 'false' "File to output a .tar.bz2'd kernel and initrd: No modules outside of the initrd will be included..."
+#__register_config_option 'Output Settings' 'modulespackage' 'true' 'false' "File to output a .tar.bz2'd modules after the callbacks have run."
 __register_config_option 'Output Settings' 'no-initrdmodules'	'false' 'false' 'Do not install any modules into the initramfs.'
-__register_config_option 'Output Settings' 'no-kernel-sources' 'false' 'false' 'If there is a valid kerncache no checks will be made against a kernel source tree.'
+#__register_config_option 'Output Settings' 'no-kernel-sources' 'false' 'false' 'If there is a valid kerncache no checks will be made against a kernel source tree.'
 __register_config_option 'Output Settings' 'log-override' 'true' 'false' '' # Hide
 
 ## Miscellaneous

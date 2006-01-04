@@ -6,6 +6,9 @@ logicTrue $(config_get_key evms2) && require evms_host_compiled
 # Turn on lvm2 if enabled on the command line
 logicTrue $(config_get_key lvm2) && require lvm2
 
+# Get kernel modules
+# Register a new cpio of the kernel modules
+
 # Turn on the overlays if they are enabled
 # TODO
 
