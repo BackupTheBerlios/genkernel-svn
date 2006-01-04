@@ -1,6 +1,7 @@
 require kernel_compile
 kernel_install::()
 {
+	local ARGS CP_ARGS
 	# Override the default arch being built
 	[ -n "$(config_get_key arch-override)" ] && ARGS="${ARGS} ARCH=$(config_get_key arch-override)"
 
@@ -29,9 +30,22 @@ kernel_install::()
 	fi
 	
 	cd $(config_get_key kernel-tree)
+	cd $(config_get_key kbuild-output)
 
 	# install the kernel
 	print_info 1 '>> Installing kernel ...'
 	# TODO Read the directive that states where the files are being created and use that instead .. 
-	compile_generic ${ARGS} install || die "Kernel failed to install with the default install directive .. TODO fix me still"
+	#compile_generic ${ARGS} install || die "Kernel failed to install with the default install directive .. TODO fix me still"
+
+	[ "$(config_get_key debuglevel)" -gt "1" ] && CP_ARGS="-v"
+	if [ -n "$(config_get_key install-path)" ]
+	then
+		cp ${CP_ARGS} "${KERNEL_BINARY}" "$(config_get_key install-path)"
+		cp ${CP_ARGS} "System.map" "$(config_get_key install-path)"
+
+	else
+		# TODO need to get kname-arch-kv yet....
+		cp ${CP_ARGS} "${KERNEL_BINARY}" /boot
+		cp ${CP_ARGS} "System.map" /boot
+	fi
 }

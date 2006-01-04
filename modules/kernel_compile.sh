@@ -30,6 +30,5 @@ kernel_compile::()
 	# make the kernel
 	# FIXME: Needs to use KERNEL_MAKE_DIRECTIVE
 	print_info 1 '>> Compiling kernel ...'
-	echo "The kernel make directive is ${KERNEL_MAKE_DIRECTIVE}"
 	compile_generic ${ARGS} ${KERNEL_MAKE_DIRECTIVE}
 }

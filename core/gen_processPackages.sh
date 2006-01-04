@@ -32,7 +32,6 @@ package_check_register () {
 genkernel_lookup_packages()
 {
 	local myPkg myCallbacks myCallbacksStatus
-
 	for i in ${CACHE_DIR}/pkg_*.tar.bz2
 	do
 		[ "${i}" = "${CACHE_DIR}/pkg_*.tar.bz2" ] && break # No matches found

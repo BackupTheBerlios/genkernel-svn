@@ -77,7 +77,7 @@ gmi::()
 	logicTrue "$(config_get_key bladecenter)" && echo 'MY_HWOPTS="${MY_HWOPTS} bladecenter"' >> ${TEMP}/initramfs-base-temp/etc/initrd.defaults
 
 	mkdir -p "${TEMP}/initramfs-base-temp/lib/keymaps"
-	/bin/tar -C "${TEMP}/initramfs-base-temp/lib/keymaps" -zxf "${GK_SHARE}/generic/keymaps.tar.gz"
+	/bin/tar -C "${TEMP}/initramfs-base-temp/lib/keymaps" -zxf "${GMI_DIR}/generic/keymaps.tar.gz"
 
 	cd ${TEMP}/initramfs-base-temp/sbin && ln -s ../init init
 	chmod +x "${TEMP}/initramfs-base-temp/init"

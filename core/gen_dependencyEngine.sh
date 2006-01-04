@@ -126,7 +126,6 @@ require () {
 			# Get first term (our variable name) and look it up
 			myConditionalVar="${i%%:*}"
 			myConditionalVar="$(require_dep_lookup ${myConditionalVar})"
-
 			[ -z "${myConditionalVar}" ] && myConditionalVar=2 || myConditionalVar=$(( ${myConditionalVar} + 2 ))
 			myDeps="${myDeps} $(echo ${i} | cut -d: -f${myConditionalVar})"
 
@@ -253,7 +252,7 @@ buildDepTreeGeneric () {
 			myDone="${myDone} ${dep}"
 
 			# Find deps of ${dep}
-			returnVal=$(buildDepTreeGeneric "${dep}" "${myDone}" "${3}a")
+			returnVal=$(buildDepTreeGeneric "${dep}" "${myDone}" "${3}")
 
 			# ${dep} doesn't need to be removed from ${myDone} as ${myDone} is reloaded
 			# on each cycle anyway.

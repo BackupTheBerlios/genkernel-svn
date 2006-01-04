@@ -26,6 +26,9 @@ kernel_modules_install::()
 	then
 		ARGS="${ARGS} INSTALL_MOD_PATH=$(config_get_key install-mod-path)"
 		mkdir -p $(config_get_key install-mod-path) || die 'Failed to create module install path!'
+		[ "$(config_get_key debuglevel)" -gt "1" ] && print_info 1 ">> Installing kernel modules to $(config_get_key install-mod-path)"
+	else
+		[ "$(config_get_key debuglevel)" -gt "1" ] && print_info 1 ">> Installing kernel modules to /"
 	fi
 
 	cd $(config_get_key kernel-tree)

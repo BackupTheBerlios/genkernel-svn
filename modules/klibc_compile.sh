@@ -31,10 +31,11 @@ klibc_compile::() {
 
 	# Don't install to "//lib" fix
 	sed -e 's:$(INSTALLROOT)/$(SHLIBDIR):$(INSTALLROOT)$(INSTALLDIR)/$(CROSS)lib:' -i klibc/Makefile
-	if [ -f ${GK_SHARE}/pkg/byteswap.h ]
+	
+	if [ -f ${FIXES_FILES_DIR}/byteswap.h -a "${KLIBC_VER}" == '1.1.1' ]
 	then
-		# echo "Inserting byteswap.h into klibc"
-		cp "${GK_SHARE}/pkg/byteswap.h" "include/"
+		print_info 1 '>> Inserting byteswap.h'
+		cp "${FIXES_FILES_DIR}/byteswap.h" "include/"
 	fi
 
 	print_info 1 'klibc: >> Compiling...'
