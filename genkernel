@@ -89,7 +89,7 @@ source ${CORE_DIR}/gen_dependencyEngine.sh || die "Failed to resource gen_depend
 genkernel_lookup_packages
 genkernel_lookup_kernel silent
 require "${__INTERNAL__CONFIG_PARSING_DEPTREE}"
-require_DebugStack
+
 # Generate TEMP dir
 if [ ! -d "${TEMP}" ]
 then

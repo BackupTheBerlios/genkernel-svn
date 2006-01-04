@@ -1,10 +1,15 @@
-require busybox udev gmi
+require gmi busybox udev 
 
 # Turn on evms if enabled on the command line
 logicTrue $(config_get_key evms2) && require evms_host_compiled
 
 # Turn on lvm2 if enabled on the command line
 logicTrue $(config_get_key lvm2) && require lvm2
+
+# Turn on the overlays if they are enabled
+# TODO
+
+
 
 initramfs::() {
 	print_info 1 'Merging:'
