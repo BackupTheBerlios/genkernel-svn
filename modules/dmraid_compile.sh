@@ -14,8 +14,7 @@ dmraid_compile::() {
 	LDFLAGS="-L${DEVICE_MAPPER}/lib" \
 	CFLAGS="-I${DEVICE_MAPPER}/include" \
 	CPPFLAGS="-I${DEVICE_MAPPER}/include" \
-	./configure --enable-static_link --prefix=${TEMP}/dmraid >> ${DEBUGFILE} 2>&1 ||
-		die 'Configure of dmraid failed!'
+	configure_generic --enable-static_link --prefix=${TEMP}/dmraid
 
 	mkdir -p "${TEMP}/dmraid"
 	sed -i tools/Makefile -e "s|DMRAIDLIBS += -lselinux||g"

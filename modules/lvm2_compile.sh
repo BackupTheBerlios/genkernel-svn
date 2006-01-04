@@ -14,8 +14,7 @@ lvm2_compile::() {
 	LDFLAGS="-L${DEVICE_MAPPER}/lib" \
 	CFLAGS="-I${DEVICE_MAPPER}/include" \
 	CPPFLAGS="-I${DEVICE_MAPPER}/include" \
-	./configure --enable-static_link --prefix=${TEMP}/LVM2 >> ${DEBUGFILE} 2>&1 ||
-		die 'Configure of LVM2 failed!'
+	configure_generic --enable-static_link --prefix=${TEMP}/LVM2 
 
 	mkdir -p "${TEMP}/LVM2"
 	print_info 1 'LVM2: >> Compiling...'

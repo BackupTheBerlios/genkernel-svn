@@ -14,7 +14,7 @@ e2fsprogs_compile::() {
 	cd "${E2FSPROGS_DIR}"
 
 	print_info 1 'e2fsprogs: >> Configuring...'
-	./configure  --with-ldopts=-static >> ${DEBUGFILE} 2>&1 || die 'Configuring e2fsprogs failed!'
+	configure_generic  --with-ldopts=-static
 
 	print_info 1 'e2fsprogs: >> Compiling...'
 	compile_generic utils # Run make

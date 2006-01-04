@@ -341,7 +341,22 @@ compile_generic() {
 			RET=$?
 		fi
 	fi
-	[ "${RET}" -eq '0' ] || die "Failed to compile the \"${1}\" target..."
+	[ "${RET}" -eq '0' ] || die "Failed to compile ..."
+}
+
+configure_generic() {
+	local RET
+	if [ "$(config_get_key debuglevel)" -gt "1" ]
+	then
+		# Output to stdout and debugfile
+		./configure $(config_get_key makeopts) "$@" 2>&1 | tee -a ${DEBUGFILE}
+		RET=${PIPESTATUS[0]}
+	else
+		# Output to debugfile only
+		./configure $(config_get_key makeopts) "$@" >> ${DEBUGFILE} 2>&1
+		RET=$?
+	fi
+	[ "${RET}" -eq '0' ] || die "Failed to configure ..."
 }
 
 ## Genkernel functions

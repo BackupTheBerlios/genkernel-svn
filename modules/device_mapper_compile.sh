@@ -9,11 +9,11 @@ device_mapper_compile::()
 	[ ! -d "${DEVICE_MAPPER_DIR}" ] && die "device-mapper directory ${DEVICE_MAPPER_DIR} invalid"
 
 	cd "${DEVICE_MAPPER_DIR}"
-	./configure  --prefix=${TEMP}/device-mapper --enable-static_link >> ${DEBUGFILE} 2>&1 ||
-		die 'Configuring device-mapper failed!'
+	configure_generic  --prefix=${TEMP}/device-mapper --enable-static_link
+	
 	print_info 1 'device-mapper: >> Compiling...'
-
 	compile_generic # Compile
+	
 	compile_generic install
 
 	cd "${TEMP}"
