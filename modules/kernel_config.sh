@@ -1,16 +1,9 @@
 require @kernel_src_tree:null:fail
 kernel_config::()
 {
-	# config_set_key kbuild-output '/tmp/genkernel/2.6.14'
-	# config_set_key arch 'i386'
-	# config_set_key install-path '/tmp/genkernel/2.6.14/output'
-	# config_set_key install-mod-path '/tmp/genkernel/2.6.14/output'
-	# config_set_key clean true
-	# config_set_key oldconfig true
-	# config_set_key menuconfig true
-	# config_set_key gconfig true
-	# config_set_key xconfig true
-
+	# Set kbuild-output to be the same as the kernel-tree if not defined	
+	[ ! -n "$(config_get_key kbuild-output)" ] &&  config_set_key kbuild-output "$(config_get_key kernel-tree)"
+	
 	# Override the default arch being built
 	[ -n "$(config_get_key arch-override)" ] && ARGS="${ARGS} ARCH=$(config_get_key arch-override)"
 

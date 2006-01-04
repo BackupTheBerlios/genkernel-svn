@@ -28,9 +28,6 @@ kernel_install::()
 		mkdir -p $(config_get_key install-path) || die 'Failed to create install path!'
 	fi
 	
-	# Kernel cross compiling support
-	#[ -n "$(config_get_key kernel-cross-compile)" ] && ARGS="${ARGS} CROSS_COMPILE=$(config_get_key kernel-cross-compile)"
-
 	cd $(config_get_key kernel-tree)
 
 	# install the kernel
