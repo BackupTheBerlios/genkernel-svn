@@ -18,7 +18,7 @@ get_KV() {
 		# Local version
 		local myLookup myList=''
 		[[ -e "${KERNEL_DIR}/localversion" ]] && myList='localversion'
-		[[ -n "${KERNEL_DIR}/localversion*[^~]" ]] && myList="${myList} ${KERNEL_DIR}/localversion*[^~]"
+		[[ "${KERNEL_DIR}/localversion*[^~]" != "${KERNEL_DIR}/localversion\*[^~]" ]] && myList="${myList} ${KERNEL_DIR}/localversion*[^~]"
 
 		for i in "${myList}"
 		do
@@ -53,14 +53,18 @@ get_extconfig_var() {
 	local myOut
 
 	myOut="$(grep -m 1 $2 $1)"
-	[ "$?" -ne '0' ] && return '%lookup_fail%'
+	if [ "$?" -ne '0' ]
+	then
+		echo '%lookup_fail%'
+		return
+	fi
 
 	# ... So it worked
 	# Strip $2= out of the grep to get our result
 	myOut="${myOut#$2=}"
 
 	# Get rid of any double quotes
-	return "${myOut//\"/}"
+	echo "${myOut//\"/}"
 }
 
 linux_chkconfig_present() {
