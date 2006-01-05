@@ -2,7 +2,7 @@ require @kernel_src_tree:null:fail
 kernel_config::()
 {
 	# Set kbuild-output to be the same as the kernel-tree if not defined	
-	[ ! -n "$(config_get_key kbuild-output)" ] &&  config_set_key kbuild-output "$(config_get_key kernel-tree)"
+	#[ ! -n "$(config_get_key kbuild-output)" ] &&  config_set_key kbuild-output "$(config_get_key kernel-tree)"
 	
 	# Override the default arch being built
 	[ -n "$(config_get_key arch-override)" ] && ARGS="${ARGS} ARCH=$(config_get_key arch-override)"
@@ -105,6 +105,10 @@ kernel_config::()
 		print_info 1 '>> Applying hack to workaround 2.6.14+ PPC header breakages...'
 		compile_generic ${ARGS} 'include/asm'
 	fi
+
+	# Kernel configuration may have changed our output names ..
+	unset KV_FULL
+	get_KV
 
 ##### These things should be their own modules now
 	# make the modules	

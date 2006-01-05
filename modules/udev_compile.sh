@@ -17,9 +17,10 @@ udev_compile::() {
 	# use selinux && myconf="${myconf} USE_SELINUX=true"
 
 	print_info 1 'udev: >> Compiling...'
+	
 	# PPC fixup for 2.6.14
-	if [ "${VER}" -eq '2' -a "${PAT}" -eq '6' -a "${SUB}" -ge '14' ]
-        then
+	if kernel_is ge 2 6 14
+	then
 		if [ "${ARCH}" = 'ppc' -o "${ARCH}" = 'ppc64' ]
         	then
 			# Headers are moving around .. need to make them available

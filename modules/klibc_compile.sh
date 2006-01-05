@@ -55,7 +55,7 @@ klibc_compile::() {
 	fi
 	
 	# PPC fixup for 2.6.14+
-	if [ "${VER}" -eq '2' -a "${PAT}" -eq '6' -a "${SUB}" -ge '14' ]
+	if kernel_is ge 2 6 14
 	then
 		if [ "${ARCH}" = 'ppc' -o "${ARCH}" = 'ppc64' ]
       	then

@@ -80,7 +80,6 @@ source ${ARCH_CONFIG} || die "Could not read ${ARCH_CONFIG}"
 
 genkernel_lookup_packages
 genkernel_lookup_kernel
-
 # Process depends
 print_info 1 '>> Processing dependency tree...'
 require "${__INTERNAL__CONFIG_PARSING_DEPTREE}"
@@ -197,6 +196,7 @@ then
 	fi
 	
 	# KV may have changed due to the configuration
+
 	get_KV
 
 	# Compile kernel; If using --genzimage, or building a mips kernel, skip compile
