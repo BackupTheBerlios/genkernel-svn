@@ -70,13 +70,20 @@ kernel_config::()
 	#compile_generic ${ARGS} prepare
 	
 	# Configure
+	if logicTrue $(config_get_key defconfig)
+	then
+		print_info 1 '>> Running defconfig...'
+		compile_generic ${ARGS} defconfig
+		[ "$?" ] || gen_die 'Error: defconfig failed!'
+	fi
+	
 	if logicTrue $(config_get_key oldconfig)
 	then
 		print_info 1 '>> Running oldconfig...'
 		yes '' 2>/dev/null | compile_generic ${ARGS} oldconfig
 		[ "$?" ] || gen_die 'Error: oldconfig failed!'
 	fi
-
+	
 	if logicTrue $(config_get_key menuconfig)
 	then 
 		print_info 1 '>> Running menuconfig...'
@@ -96,7 +103,28 @@ kernel_config::()
 		compile_generic ${ARGS} gconfig
 		[ "$?" ] || gen_die 'Error: gconfig failed!'
 	fi
-
+	
+	if logicTrue $(config_get_key allmodconfig)
+	then
+		print_info 1 '>> Running allmodconfig...'
+		compile_generic ${ARGS} allmodconfig
+		[ "$?" ] || gen_die 'Error: allmodconfig failed!'
+	fi
+	
+	if logicTrue $(config_get_key allyesconfig)
+	then
+		print_info 1 '>> Running allyesconfig...'
+		compile_generic ${ARGS} allyesconfig
+		[ "$?" ] || gen_die 'Error: allyesconfig failed!'
+	fi
+	
+	if logicTrue $(config_get_key allnoconfig)
+	then
+		print_info 1 '>> Running allnoconfig...'
+		compile_generic ${ARGS} allnoconfig
+		[ "$?" ] || gen_die 'Error: allnoconfig failed!'
+	fi
+	
 	# FIXME: config_cleanup_register events need dealing with here
 
 	# apply the ppc fix?
@@ -106,25 +134,13 @@ kernel_config::()
 		compile_generic ${ARGS} 'include/asm'
 	fi
 
+	# Set or unset any config option
+	#config_unset "AUDIT"
+	#config_set_module "AUDIT"
+	#config_set_builtin "AUDIT"
+	
 	# Kernel configuration may have changed our output names ..
 	unset KV_FULL
 	get_KV
 
-##### These things should be their own modules now
-	# make the modules	
-	#print_info 1 '>> Compiling kernel modules (if necessary) ...'
-	#ompile_generic ${ARGS} modules
-	
-	# install the modules	
-	#print_info 1 '>> Installing kernel modules (if necessary) ...'
-	#ompile_generic ${ARGS} modules_install
-	
-	# Create the initramfs 
-	# Optionally pack the initramfs into the kernel sources 
-	
-	# make the kernel
-	# FIXME: Needs to use KERNEL_MAKE_DIRECTIVE
-	#rint_info 1 '>> Compiling kernel ...'
-	#ompile_generic ${ARGS}
-##### These things should be their own modules
 }

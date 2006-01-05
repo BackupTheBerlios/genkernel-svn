@@ -271,4 +271,32 @@ check_modules_supported() {
 }
 
 	
+config_set_builtin() {
+    # if we haven't determined the version yet, we need too.
+    get_KV;
+	sed -i ${KV_OUT_DIR}/.config -e "s/CONFIG_${1}=m/CONFIG_${1}=y/g"
+	sed -i ${KV_OUT_DIR}/.config -e "s/#\? \?CONFIG_${1} is.*/CONFIG_${1}=y/g"
+	echo "CONFIG_${1}: Should be a builtin"
+	grep "CONFIG_${1}=" ${KV_OUT_DIR}/.config
+	grep "CONFIG_${1} is" ${KV_OUT_DIR}/.config
+}
 
+config_set_module() {
+    # if we haven't determined the version yet, we need too.
+    get_KV;
+	sed -i ${KV_OUT_DIR}/.config -e "s/CONFIG_${1}=y/CONFIG_${1}=m/g"
+	sed -i ${KV_OUT_DIR}/.config -e "s/#\? \?CONFIG_${1} is.*/CONFIG_${1}=m/g"
+	echo "CONFIG_${1}: Should be a module"
+	grep "CONFIG_${1}=" ${KV_OUT_DIR}/.config
+	grep "CONFIG_${1} is" ${KV_OUT_DIR}/.config
+}
+
+config_unset() {
+    # if we haven't determined the version yet, we need too.
+    get_KV;
+	sed -i ${KV_OUT_DIR}/.config -e "s/CONFIG_${1}=y/# CONFIG_${1} is not set/g"
+	sed -i ${KV_OUT_DIR}/.config -e "s/CONFIG_${1}=m/# CONFIG_${1} is not set/g"
+	echo "CONFIG_${1}: Should be not set"
+	grep "CONFIG_${1}=" ${KV_OUT_DIR}/.config
+	grep "CONFIG_${1} is" ${KV_OUT_DIR}/.config
+}
