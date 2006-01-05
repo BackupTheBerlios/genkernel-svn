@@ -56,15 +56,20 @@ kernel_config::()
 	if [ ! "$(config_get_key kbuild-output)" == "$(config_get_key kernel-tree)" ]
 	then
 		compile_generic distclean
+		logicTrue $(config_get_key mrproper) && compile_generic ${ARGS} mrproper
 		logicTrue $(config_get_key clean) && compile_generic ${ARGS} clean
 		# Setup fake i386 kbuild_output for arch=um or xen0 or xenU 
 		# Some proggies need a i386 configured kernel tree
 		if [ 	"$(config_get_key arch-override)" == "um" -o "$(config_get_key arch-override)" == "xen0" \
 			 -o "$(config_get_key arch-override)" == "xenU" ]
 		then
-			mkdir -p "/tmp/genkernel/$(config_get_key arch-override)-i386"
-			yes '' 2>/dev/null | compile_generic ARCH=i386 "KBUILD_OUTPUT=/tmp/genkernel/$(config_get_key arch-override)-i386" oldconfig
-			compile_generic ARCH=i386 "KBUILD_OUTPUT=/tmp/genkernel/$(config_get_key arch-override)-i386" prepare
+			KRNL_TMP_DIR="${TEMP}/genkernel-kernel-$(config_get_key arch-override)-i386"
+			
+			mkdir -p "${KRNL_TMP_DIR}"
+			compile_generic ARCH=i386 "KBUILD_OUTPUT=${KRNL_TMP_DIR}" mrproper
+			yes '' 2>/dev/null | compile_generic ARCH=i386 "KBUILD_OUTPUT=${KRNL_TMP_DIR}" oldconfig
+			compile_generic ARCH=i386 "KBUILD_OUTPUT=${KRNL_TMP_DIR}" prepare
+			compile_generic ARCH=i386 "KBUILD_OUTPUT=${KRNL_TMP_DIR}" modules_prepare
 		fi
 	else
 		# Cleanup the tree ... everything ...
@@ -74,8 +79,15 @@ kernel_config::()
 		logicTrue $(config_get_key clean) && compile_generic ${ARGS} clean
 	fi
 
-	# prepare?
-	#compile_generic ${ARGS} prepare
+	
+	# Configure
+
+	if logicTrue $(config_get_key oldconfig)  # Should be default enabled
+	then
+		print_info 1 '>> Running oldconfig...'
+		yes '' 2>/dev/null | compile_generic ${ARGS} oldconfig
+		[ "$?" ] || gen_die 'Error: oldconfig failed!'
+	fi
 	
 	# Configure
 	if logicTrue $(config_get_key defconfig)
@@ -84,14 +96,7 @@ kernel_config::()
 		compile_generic ${ARGS} defconfig
 		[ "$?" ] || gen_die 'Error: defconfig failed!'
 	fi
-	
-	if logicTrue $(config_get_key oldconfig)
-	then
-		print_info 1 '>> Running oldconfig...'
-		yes '' 2>/dev/null | compile_generic ${ARGS} oldconfig
-		[ "$?" ] || gen_die 'Error: oldconfig failed!'
-	fi
-	
+
 	if logicTrue $(config_get_key menuconfig)
 	then 
 		print_info 1 '>> Running menuconfig...'
@@ -99,6 +104,13 @@ kernel_config::()
 		[ "$?" ] || gen_die 'Error: menuconfig failed!'
 	fi
 
+	if logicTrue $(config_get_key config)
+	then 
+		print_info 1 '>> Running config...'
+		compile_generic runtask ${ARGS} config
+		[ "$?" ] || gen_die 'Error: config failed!'
+	fi
+	
 	if logicTrue $(config_get_key xconfig)
 	then 
 		print_info 1 '>> Running xconfig...'

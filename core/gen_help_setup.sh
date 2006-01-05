@@ -1,5 +1,4 @@
 #!/bin/bash
-
 #  GROUP -> OPTION -> DATA (Boolean):[DEFAULT] -> Allow no'X' (Boolean) -> DESCRIPTION
 ## Debug
 __register_config_option 'Debug' 'debuglevel' 'true' 'false' 'Debug verbosity level'
@@ -8,6 +7,8 @@ __register_config_option 'Debug' 'debugfile'  'true' 'false' 'Output file for de
 ## Kernel Config
 __register_config_option 'Kernel Configuration'	'menuconfig'	 'false' 'true'	 'Run menuconfig after oldconfig.'
 __register_config_option 'Kernel Configuration'	'no-save-config' 'false' 'false' "Don't save the configuration to /etc/kernels."
+__register_config_option 'Kernel Configuration'	'oldconfig'	 'false:true' 'false' 'Run oldconfig.'
+__register_config_option 'Kernel Configuration'	'config'	 'false' 'false' 'Run config after oldconfig.'
 __register_config_option 'Kernel Configuration'	'gconfig'	 'false' 'false' 'Run gconfig after oldconfig.'
 __register_config_option 'Kernel Configuration'	'xconfig'	 'false' 'false' 'Run xconfig after oldconfig.'
 
@@ -21,6 +22,7 @@ __register_config_option 'Kernel Compile' 'gensplash'		'true:true' 'false' 'Inst
 ## Kernel Settings
 __register_config_option 'Kernel Settings' 'kernel-config' 'true' 'false' 'Kernel configuration file to use for compilation.'
 __register_config_option 'Kernel Settings' 'kernel-tree'   'true' 'false' 'Location of kernel sources.'
+__register_config_option 'Kernel Settings' 'kbuild-output'   'true' 'false' 'Location of kernel sources.'
 __register_config_option 'Kernel Settings' 'module-prefix' 'true' 'false' 'Prefix to kernel module destination, modules will be installed in <prefix>/lib/modules.'
 
 ## Low Level Kernel
