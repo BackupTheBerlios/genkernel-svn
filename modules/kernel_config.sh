@@ -1,9 +1,6 @@
 require @kernel_src_tree:null:fail
 kernel_config::()
 {
-	# Set kbuild-output to be the same as the kernel-tree if not defined	
-	#[ ! -n "$(config_get_key kbuild-output)" ] &&  config_set_key kbuild-output "$(config_get_key kernel-tree)"
-	
 	# Override the default arch being built
 	[ -n "$(config_get_key arch-override)" ] && ARGS="${ARGS} ARCH=$(config_get_key arch-override)"
 
@@ -17,13 +14,24 @@ kernel_config::()
 		fi
 	elif [ "$(config_get_key kbuild-output)" == "$(config_get_key kernel-tree)" ]
 	then
-		if [ 	"$(config_get_key arch-override)" == "um" -o "$(config_get_key arch-override)" == "xen0" \
-			-o "$(config_get_key arch-override)" == "xenU" ]
+		if [ "${ARCH}" == "um" -o "${ARCH}" == "xen0" \
+			-o "${ARCH}" == "xenU" ]
 		then
-			die "Compiling for ARCH=$(config_get_key arch-override) requires kbuild_output to differ from the kernel-tree"
+			die "Compiling for ARCH=${ARCH} requires kbuild_output to differ from the kernel-tree"
 		fi
 	fi
 
+	# Check that the asm-${ARCH} link is valid
+	if [ "${ARCH}" == "xen0" -o "${ARCH}" == "xenU" ]
+	then
+		check_asm_link_ok xen || die "Bad asm link.  The output directory has already been configured for a different arch"
+	elif [ "${ARCH}" == "x86" ]
+	then
+		check_asm_link_ok i386 || die "Bad asm link.  The output directory has already been configured for a different arch"
+	else
+		check_asm_link_ok ${ARCH} || die "Bad asm link.  The output directory has already been configured for a different arch"
+	fi
+	
 	# Set the destination path for the kernel
 	if [ -n "$(config_get_key install-path)" ]
 	then

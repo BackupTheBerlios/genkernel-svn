@@ -270,6 +270,31 @@ check_modules_supported() {
 	[ linux_chkconfig_builtin "MODULES" ] && return 0 || return 1
 }
 
+check_asm_link_ok() {
+	workingdir=${PWD}
+	cd ${KV_OUT_DIR}/include
+	if [ -e "asm" ]
+	then
+		if [ -h "asm" ]
+		then 
+			asmlink="$(readlink -f asm)"
+			echo $(basename ${asmlink})
+			echo asm-${1}
+			if [ $(basename ${asmlink}) == "asm-${1}" ]
+			then
+				cd ${workingdir}
+				return 0
+			else
+				cd ${workingdir}
+				return 1
+			fi
+		fi	
+	else
+		cd ${workingdir}
+		# No link setup yet which is ok...
+		return 0
+	fi
+}
 	
 config_set_builtin() {
     # if we haven't determined the version yet, we need too.
