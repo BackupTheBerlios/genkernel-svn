@@ -318,8 +318,16 @@ config_profile_read() {
 			data="${i#*:= \"}" # Remove up to first quote inclusive
 			data="${data%\"}" # Remove end quote
 
-			set_config="${set_config} ${identifier}"
-			config_set_key "${identifier}" "${data}"
+			if [[ "${identifier:0:7}" = 'module_' ]]
+			then
+				identifier="${identifier:7}"
+				# Call module merge here; a '-module' in the module list will
+				# remove the module if it already is added; otherwise add the
+				# module to the list.
+			else
+				set_config="${set_config} ${identifier}"
+				config_set_key "${identifier}" "${data}"
+			fi
 		elif [[ "${i}" =~ '^import ' ]]
 		then
 			identifier="${i/import /}"
