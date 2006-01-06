@@ -208,7 +208,7 @@ show_help() {
 show_usage() {
   echo "Gentoo Linux Genkernel ${GK_V}"
   echo "Usage: "
-  echo "	genkernel [options] [::module...]+"
+  echo "	genkernel [options] [module::]+"
   echo
   echo 'For a detailed list of supported options, flags and modules; issue:'
   echo '	genkernel --help'
@@ -247,10 +247,10 @@ parse_cmdline() {
 			fi
 		else
 			# See if we have a module specification
-			if [ "${myRequest:0:2}" = '::' ]
+			if [ "${myRequest:(-2)}" = '::' ]
 			then
 				# Add to deptree
-				__INTERNAL__CONFIG_PARSING_DEPTREE="${__INTERNAL__CONFIG_PARSING_DEPTREE} ${myRequest:2}"
+				__INTERNAL__CONFIG_PARSING_DEPTREE="${__INTERNAL__CONFIG_PARSING_DEPTREE} ${myRequest%::}"
 				myMatched=true
 			elif logicTrue ${myTakesData}
 			then
@@ -306,7 +306,7 @@ config_profile_read() {
 	do
 		# { identifier }{" := "}{quote}{data}{quote} or
 		# "require "{profiles} or
-		# "::"{module} or
+		# {module}"::" or
 		# "#"{comment}
 
 		# Strip out inline comments
@@ -317,13 +317,15 @@ config_profile_read() {
 			identifier="${i% :=*}"
 			data="${i#*:= \"}" # Remove up to first quote inclusive
 			data="${data%\"}" # Remove end quote
-
 			if [[ "${identifier:0:7}" = 'module_' ]]
 			then
 				identifier="${identifier:7}"
 				# Call module merge here; a '-module' in the module list will
 				# remove the module if it already is added; otherwise add the
 				# module to the list.
+			elif [[ "${identifier:0:16}" = 'genkernel_module' ]]
+			then
+				__INTERNAL__CONFIG_PARSING_DEPTREE="${__INTERNAL__CONFIG_PARSING_DEPTREE} ${data}"
 			else
 				set_config="${set_config} ${identifier}"
 				config_set_key "${identifier}" "${data}"
@@ -340,7 +342,7 @@ config_profile_read() {
 					config_profile_read "${j}"
 				fi
 			done
-		elif [[ "${i:0:2}" = '::' ]]
+		elif [[ "${i:(-2)}" = '::' ]]
 		then
 			parse_cmdline ${i}
 		elif [[ "${i:0:1}" = '#' ]]
@@ -365,5 +367,6 @@ config_profile_dump() {
 			;;
 		esac
 	done
+	echo "genkernel_module := \"${__INTERNAL__CONFIG_PARSING_DEPTREE}\""
 	exit 0
 }
