@@ -235,8 +235,14 @@ parse_cmdline() {
 				myMatched=true
 			elif [ "${myTakesData}" = 'true!m' ]
 			then
-				config_set_key "${myName}" "$(config_get_key ${myName}) ${myRequest##*\=}"
-				myMatched=true
+				if [ "${myName}" = "profile" ]
+				then
+					config_profile_read ${myRequest##*\=}
+					myMatched=true
+				else
+					config_set_key "${myName}" "$(config_get_key ${myName}) ${myRequest##*\=}"
+					myMatched=true
+				fi
 			else
 				# Data but we don't take data!
 				show_usage
