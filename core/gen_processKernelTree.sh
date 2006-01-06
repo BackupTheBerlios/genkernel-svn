@@ -4,47 +4,44 @@ get_KV() {
 	KERNEL_DIR="$1"
 	[ ! -e "$1/Makefile" ] && die 'Kernel source tree invalid, no Makefile found!'
 
-	if [ "$(config_get_key no-kernel-sources)" = 'true' ]
-	then
-		die '--no-kernel-sources requires a valid --kerncache!'
-	else
-		# Configure the kernel
+	# Configure the kernel
 
-		KV_MAJOR=`grep ^VERSION\ \= ${KERNEL_DIR}/Makefile | awk '{ print $3 };'`
-		KV_MINOR=`grep ^PATCHLEVEL\ \= ${KERNEL_DIR}/Makefile | awk '{ print $3 };'`
-		KV_PATCH=`grep ^SUBLEVEL\ \= ${KERNEL_DIR}/Makefile | awk '{ print $3 };'`
+	KV_MAJOR=`grep ^VERSION\ \= ${KERNEL_DIR}/Makefile | awk '{ print $3 };'`
+	KV_MINOR=`grep ^PATCHLEVEL\ \= ${KERNEL_DIR}/Makefile | awk '{ print $3 };'`
+	KV_PATCH=`grep ^SUBLEVEL\ \= ${KERNEL_DIR}/Makefile | awk '{ print $3 };'`
 
-		KV_CODE="$(linux_kv_to_code ${KV_MAJOR} ${KV_MINOR} ${KV_PATCH})"
-		KV_EXTRA=`grep ^EXTRAVERSION\ \= ${KERNEL_DIR}/Makefile | sed -e "s/EXTRAVERSION =//" -e "s/ //g" -e 's/\$([a-z]*)//gi'`
+	KV_CODE="$(linux_kv_to_code ${KV_MAJOR} ${KV_MINOR} ${KV_PATCH})"
+	KV_EXTRA=`grep ^EXTRAVERSION\ \= ${KERNEL_DIR}/Makefile | sed -e "s/EXTRAVERSION =//" -e "s/ //g" -e 's/\$([a-z]*)//gi'`
 
-		# Local version
-		local myLookup myList=''
-		[[ -e "${KERNEL_DIR}/localversion" ]] && myList='localversion'
-		[[ "${KERNEL_DIR}/localversion*[^~]" != "${KERNEL_DIR}/localversion\*[^~]" ]] && myList="${myList} ${KERNEL_DIR}/localversion*[^~]"
-
-		for i in "${myList}"
-		do
-			KV_LOCAL="${KV_LOCAL}$(<${i})"
-		done
+	# Local version
+	local myLookup myList
+	[[ -e "${KERNEL_DIR}/localversion" ]] && myList='localversion'
 		
-		if [ -n "$(config_get_key kbuild-output)" ]
-		then
-			KBUILD_OUTPUT="$(config_get_key kbuild-output)"
-		else
-			KBUILD_OUTPUT=${KERNEL_DIR}
-		fi
+	[[ -n "$(ls ${KERNEL_DIR}/localversion*[^~] 2>/dev/null)" ]] && myList="${myList} $(ls ${KERNEL_DIR}/localversion*[^~])"
 
-		if [ -f ${KBUILD_OUTPUT}/.config ]
-		then
-			myLookup="$(get_extconfig_var ${KBUILD_OUTPUT}/.config CONFIG_LOCALVERSION)"
-			[ "${myLookup}" != '%lookup_fail%' ] && KV_LOCAL="${KV_LOCAL}${myLookup}"
-		fi
-		KV_LOCAL="${KV_LOCAL// /}"
+	for i in "${myList}"
+	do
+		[ "${i}" == '' ] && continue 
+		KV_LOCAL="${KV_LOCAL}$(<${i})"
+	done
+		
+	if [ -n "$(config_get_key kbuild-output)" ]
+	then
+		KBUILD_OUTPUT="$(config_get_key kbuild-output)"
+	else
+		KBUILD_OUTPUT=${KERNEL_DIR}
+	fi
 
-		if [ "${KV_MINOR}" -lt '6' -a "${KV_MAJOR}" -eq '2' ]
-		then
-			die 'Kernel unsupported (2.6 or newer needed); exiting.'
-		fi
+	if [ -f ${KBUILD_OUTPUT}/.config ]
+	then
+		myLookup="$(get_extconfig_var ${KBUILD_OUTPUT}/.config CONFIG_LOCALVERSION)"
+		[ "${myLookup}" != '%lookup_fail%' ] && KV_LOCAL="${KV_LOCAL}${myLookup}"
+	fi
+	KV_LOCAL="${KV_LOCAL// /}"
+
+	if [ "${KV_MINOR}" -lt '6' -a "${KV_MAJOR}" -eq '2' ]
+	then
+		die 'Kernel unsupported (2.6 or newer needed); exiting.'
 	fi
 
 	KV_FULL="${KV_MAJOR}.${KV_MINOR}.${KV_PATCH}${KV_EXTRA}${KV_LOCAL}"

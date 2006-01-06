@@ -161,6 +161,6 @@ kernel_config::()
 	
 	# Kernel configuration may have changed our output names ..
 	unset KV_FULL
-	get_KV
+	get_KV $(config_get_key kernel-tree)
 
 }
