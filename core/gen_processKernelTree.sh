@@ -13,6 +13,8 @@ get_KV() {
 		KV_MAJOR=`grep ^VERSION\ \= ${KERNEL_DIR}/Makefile | awk '{ print $3 };'`
 		KV_MINOR=`grep ^PATCHLEVEL\ \= ${KERNEL_DIR}/Makefile | awk '{ print $3 };'`
 		KV_PATCH=`grep ^SUBLEVEL\ \= ${KERNEL_DIR}/Makefile | awk '{ print $3 };'`
+
+		KV_CODE="$(linux_kv_to_code ${KV_MAJOR} ${KV_MINOR} ${KV_PATCH})"
 		KV_EXTRA=`grep ^EXTRAVERSION\ \= ${KERNEL_DIR}/Makefile | sed -e "s/EXTRAVERSION =//" -e "s/ //g" -e 's/\$([a-z]*)//gi'`
 
 		# Local version
@@ -75,6 +77,44 @@ get_extconfig_var() {
 
 	# Get rid of any double quotes
 	echo "${myOut//\"/}"
+}
+
+linux_kv_cmp() {
+	# [version1] [operator] [version2]
+
+	local a=$1 b=$3 operator
+	case ${2} in
+	  lt) operator="-lt"; shift;;
+	  gt) operator="-gt"; shift;;
+	  le) operator="-le"; shift;;
+	  ge) operator="-ge"; shift;;
+	  eq) operator="-eq"; shift;;
+	   *) operator="-eq";;
+	esac
+
+	# See if our version is non-numerical and if so convert
+	[ "$a" != "${a/[. ]//}" ] && a="$(linux_kv_to_code ${a})"
+	[ "$b" != "${b/[. ]//}" ] && b="$(linux_kv_to_code ${b})"
+
+	[ ${a} "${operator}" ${b} ]
+	return $?
+}
+
+# Arguments: {(a)(b)(c)}|{"a.b.c"}|{"a b c"}
+# Output: Magnitude comparable integer
+linux_kv_to_code() {
+	local a b c in
+	if [ "$#" -eq '1' ]
+	then
+		in=${1//./ }
+		a=${in%% *}
+		b=${in#* }
+		b=${b%% *}
+		c=${in##* }
+		echo "$(( ($a << 16) + ($b << 8) + $c ))"
+	else
+		echo "$(( ($1 << 16) + ($2 << 8) + $3 ))"
+	fi
 }
 
 linux_chkconfig_present() {
