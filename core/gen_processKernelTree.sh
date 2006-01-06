@@ -182,3 +182,37 @@ config_unset() {
 	sed -i ${KBUILD_OUTPUT}/.config -e "s/CONFIG_${1}=y/# CONFIG_${1} is not set/g"
 	sed -i ${KBUILD_OUTPUT}/.config -e "s/CONFIG_${1}=m/# CONFIG_${1} is not set/g"
 }
+
+determine_config_file() {
+    if [ -n "$(config_get_key kernel-config)" ]
+    then
+        KERNEL_CONFIG="$(config_get_key kernel-config)"
+		
+    elif [ -f "/etc/kernels/kernel-config-${ARCH}-${KV_FULL}" ]
+    then
+        KERNEL_CONFIG="/etc/kernels/kernel-config-${ARCH}-${KV_FULL}"
+    elif [ -f "${CONFIG_DIR}/kernel-config-${KV_FULL}" ]
+    then
+        KERNEL_CONFIG="${CONFIG_DIR}/kernel-config-${KV_FULL}"
+	elif [ "${DEFAULT_KERNEL_CONFIG}" != "" -a -f "${DEFAULT_KERNEL_CONFIG}" ]
+    then
+        KERNEL_CONFIG="${DEFAULT_KERNEL_CONFIG}"
+    elif [ -f "${CONFIG_DIR}/kernel-config-${KV_MAJOR}.${KV_MINOR}" ]
+    then
+        KERNEL_CONFIG="${CONFIG_DIR}/kernel-config-${KV_MAJOR}.${KV_MINOR}"
+    elif [ -f "${CONFIG_DIR}/kernel-config" ]
+    then
+        KERNEL_CONFIG="${CONFIG_DIR}/kernel-config"
+    else
+        die 'Error: No kernel .config specified, or file not found!'
+    fi
+}
+
+kbuild_enabled() {
+	if [ ! "$(config_get_key kbuild-output)" == "$(config_get_key kernel-tree)" ]
+	then 
+		return 0
+	else
+		return 1
+	fi
+}
