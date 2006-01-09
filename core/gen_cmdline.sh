@@ -406,7 +406,6 @@ config_profile_read() {
 	do
 		# { identifier }{" := "}{quote}{data}{quote} or
 		# "require "{profiles} or
-		# {module}"::" or
 		# "#"{comment}
 
 		# Strip out inline comments
@@ -442,9 +441,6 @@ config_profile_read() {
 					config_profile_read "${j}" 
 				fi
 			done
-		elif [[ "${i:(-2)}" = '::' ]]
-		then
-			parse_cmdline ${i}
 		elif [[ "${i:0:1}" = '#' ]]
 		then
 			:
