@@ -184,7 +184,14 @@ config_unset() {
 }
 
 determine_config_file() {
-    if [ -n "$(config_get_key kernel-config)" ]
+	#echo "$(config_get_key kernel-config)"
+	#echo "/etc/kernels/kernel-config-${ARCH}-${KV_FULL}"
+	#echo "${CONFIG_DIR}/kernel-config-${KV_FULL}"
+	#echo "${DEFAULT_KERNEL_CONFIG}"
+	#echo "${CONFIG_DIR}/kernel-config-${KV_MAJOR}.${KV_MINOR}"
+	#echo "${CONFIG_DIR}/kernel-config"
+    
+	if [ -n "$(config_get_key kernel-config)" ]
     then
         KERNEL_CONFIG="$(config_get_key kernel-config)"
 		

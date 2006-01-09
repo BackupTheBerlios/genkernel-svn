@@ -35,10 +35,10 @@ do
 done
 
 genkernel_determine_arch
+import_arch_profile 
 
 # Failed to parse the cmdline properly, die so we can investigate...
 logicTrue ${__INTERNAL__CONFIG_PARSING_FAILED} && die 'Fatal error processing arguments; exiting...'
-
 
 # Start Importing profiles into the running profile space
 
@@ -47,17 +47,16 @@ profile_copy "system"
 
 # import the arch specific profile. Arch specific system overrides.
 profile_copy "arch"
-# Read arch-specific config
-#ARCH_CONFIG="${CONFIG_DIR}/config.sh"
-#[ -f "${ARCH_CONFIG}" ] || die "${ARCH} not yet supported by genkernel. Please add the arch-specific config file, ${ARCH_CONFIG}"
-#source ${ARCH_CONFIG} || die "Could not read ${ARCH_CONFIG}"
 
 # Copy the user profile created with the setup_userspace function. Last profile to import
 # as this one overrides the rest of them.
 profile_copy "user"
 
 # End Importing profiles into the running profile space
-
+echo "${__INTERNAL__OPTIONS__KEY[@]}"
+echo "${__INTERNAL__OPTIONS__VALUE[@]}"
+echo "${__INTERNAL__OPTIONS__PROFILE[@]}"
+echo "MODULES: $(config_get_key 'evms' 'modules')"
 
 set_color 
 logicTrue $(config_get_key help user) && show_help && echo && exit 0 # --help

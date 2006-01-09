@@ -25,7 +25,11 @@ __register_config_option 'Kernel Compile' 'gensplash'		'true:true' 'false' 'Inst
 
 ## Kernel Settings
 __register_config_option 'Kernel Settings' 'kernel-config' 'true' 'false' 'Kernel configuration file to use for compilation.'
+
 __register_config_option 'Kernel Settings' 'kernel-tree'   'true' 'false' 'Location of kernel sources.'
+# kernel-tree default
+config_set_key kernel-tree '/usr/src/linux'
+
 __register_config_option 'Kernel Settings' 'kbuild-output'   'true' 'false' 'Location of kernel sources.'
 __register_config_option 'Kernel Settings' 'module-prefix' 'true' 'false' 'Prefix to kernel module destination, modules will be installed in <prefix>/lib/modules.'
 

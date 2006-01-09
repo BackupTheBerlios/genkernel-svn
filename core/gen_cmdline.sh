@@ -105,7 +105,6 @@ import_arch_profile() {
 	# Copy the arch profile we just imported into the arch profile	
 	setup_arch_profile
 }
-
 config_get_key() {
 	# <Key> <Profile (optional)> 
 	###<Return on lookup failure (Bool)> Disabled for profile feature 
@@ -132,9 +131,32 @@ config_set_key() {
 		value=${__INTERNAL__OPTIONS__VALUE[${n}]}
 		profile=${__INTERNAL__OPTIONS__PROFILE[${n}]}
 
-		[ "$1" = "${key}" ] && [ "${__internal_profile}" = "${profile}" ] && __INTERNAL__OPTIONS__VALUE[${n}]=$2 && return
+		[ "$1" = "${key}" ] && [ "${__internal_profile}" = "${profile}" ] && \
+				__INTERNAL__OPTIONS__VALUE[${n}]=$2 && return
 	done
 
+	# Unmatched
+	# echo "$1 $2 $__internal_profile"
+	__INTERNAL__OPTIONS__KEY[${#__INTERNAL__OPTIONS__KEY[@]}]=$1
+	__INTERNAL__OPTIONS__VALUE[${#__INTERNAL__OPTIONS__VALUE[@]}]=$2
+	__INTERNAL__OPTIONS__PROFILE[${#__INTERNAL__OPTIONS__PROFILE[@]}]=$__internal_profile
+}
+
+config_append_key() {
+	# <Key> <Value> <Profile (optional)>
+	local n
+	[ "$3" = "" ] && __internal_profile="running" || __internal_profile="$3"
+	
+	# Check key is not already set, if it is overwrite, append it.
+	for (( n = 0 ; n < ${#__INTERNAL__OPTIONS__KEY[@]}; ++n )) ; do
+		key=${__INTERNAL__OPTIONS__KEY[${n}]}
+		value=${__INTERNAL__OPTIONS__VALUE[${n}]}
+		profile=${__INTERNAL__OPTIONS__PROFILE[${n}]}
+		[ "$1" = "${key}" ] && [ "${__internal_profile}" = "${profile}" ] && \
+				__INTERNAL__OPTIONS__VALUE[${n}]="'${value} $2'" && \
+				echo "append: ${__INTERNAL__OPTIONS__VALUE[${n}]}" && \
+				return
+	done
 	# Unmatched
 	# echo "$1 $2 $__internal_profile"
 	__INTERNAL__OPTIONS__KEY[${#__INTERNAL__OPTIONS__KEY[@]}]=$1
@@ -457,9 +479,8 @@ config_profile_read() {
 			if [[ "${identifier:0:7}" = 'module_' ]]
 			then
 				identifier="${identifier:7}"
-				# Call module merge here; a '-module' in the module list will
-				# remove the module if it already is added; otherwise add the
-				# module to the list.
+				# Append the data into the modules profile space.
+				config_append_key "${identifier}" "${data}" 'modules'
 			elif [[ "${identifier:0:16}" = 'genkernel_module' ]]
 			then
 				__INTERNAL__CONFIG_PARSING_DEPTREE="${__INTERNAL__CONFIG_PARSING_DEPTREE} ${data}"
@@ -467,6 +488,7 @@ config_profile_read() {
 				set_config="${set_config} ${identifier}"
 				config_set_key "${identifier}" "${data}" "${profile}"
 			fi
+
 		elif [[ "${i}" =~ '^import ' ]]
 		then
 			identifier="${i/import /}"
