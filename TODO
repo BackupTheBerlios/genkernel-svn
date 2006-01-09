@@ -6,11 +6,9 @@ Things to fix:
 
 Modules to merge in:
 
-* kernel
-  * image
-  * modules
+* kernel {subtargets done, dependencies need cleaning up or checking}
+  -> genzimage
+  -> MIPS embedded image
 * grub [gen_bootloader.sh]
-* unionfs
-* evms2
 * e2fsprogs needs cpio code
-* packaging output for catalyst
+* kernel_modules code
