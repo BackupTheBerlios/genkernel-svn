@@ -99,7 +99,7 @@ import_arch_profile() {
 	[ -e "${CONFIG_DIR}" ] || mkdir -p "${CONFIG_DIR}"
 
 	# Read arch-specific config
-	ARCH_CONFIG="${CONFIG_DIR}/profile.sh"
+	ARCH_CONFIG="${CONFIG_DIR}/profile.gk"
 	[ -f "${ARCH_CONFIG}" ] && config_profile_read ${ARCH_CONFIG} "arch"
 	
 	# Copy the arch profile we just imported into the arch profile	
