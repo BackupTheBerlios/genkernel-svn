@@ -368,7 +368,9 @@ genkernel_print_header() {
 }
 
 genkernel_determine_arch() {
-	local myArch=$(config_get_key arch-override)
+	# Need to see if the user has overridden this; Setup the user profile space
+	setup_userspace
+	local myArch=$(config_get_key arch-override user)
 	if [ "${myArch}" != '' ]
 	then
 		ARCH=${myArch}
@@ -385,6 +387,28 @@ genkernel_determine_arch() {
 			;;
 		esac
 	fi
+
+	config_set_key "arch" "${ARCH}" "running"
+}
+
+setup_userspace() {
+	# Create the userspace profile
+	PREFIX='profile'
+	profile_delete "profile"
+	for i in $(profile_list); do
+	    [ "${i:0:${#PREFIX}}" = ${PREFIX} ] && profile_copy $i $PREFIX
+	done
+
+	profile_delete "user"
+	profile_copy "profile" "user"
+	profile_copy "cmdline" "user"
+}
+
+setup_arch_profile() {
+	PREFIX='arch'
+	for i in $(profile_list); do
+	    [ "${i:0:${#PREFIX}}" = ${PREFIX} ] && profile_copy $i "arch" && profile_delete $i
+	done
 }
 
 print_list()

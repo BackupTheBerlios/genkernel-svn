@@ -2,7 +2,11 @@
 #  GROUP -> OPTION -> DATA (Boolean):[DEFAULT] -> Allow no'X' (Boolean) -> DESCRIPTION
 ## Debug
 __register_config_option 'Debug' 'debuglevel' 'true' 'false' 'Debug verbosity level'
+# Now set the debuglevel system default
+config_set_key debuglevel '1' 'system'
+
 __register_config_option 'Debug' 'debugfile'  'true' 'false' 'Output file for debug info'
+config_set_key usecolor true 'system'
 
 ## Kernel Config
 __register_config_option 'Kernel Configuration'	'menuconfig'	 'false' 'true'	 'Run menuconfig after oldconfig.'
@@ -65,6 +69,8 @@ __register_config_option 'Internals' 'profile' 'true!m' 'false' 'Use specified p
 __register_config_option 'Internals' 'profile-dump' 'false' 'false' 'Use specified profile.'
 __register_config_option 'Internals' 'mountboot' 'false' 'true' 'Mount /boot automatically.'
 __register_config_option 'Internals' 'usecolor' 'false' 'true' 'Color output.'
+# usecolor default
+config_set_key usecolor true 'system'
 
 ## Output Settings
 __register_config_option 'Output Settings' 'kerncache' 'true' 'false' "File to output a .tar.bz2'd kernel, the contents of /lib/modules/ and the kernel config; this is done before callbacks."

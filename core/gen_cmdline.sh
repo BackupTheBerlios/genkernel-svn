@@ -92,6 +92,20 @@ profile_list() {
 	echo "${myOut}"
 }
 
+import_arch_profile() {
+	CACHE_DIR="$(arch_replace ${CACHE_DIR})"
+	CONFIG_DIR="$(arch_replace ${CONFIG_DIR})"
+	[ -e "${CACHE_DIR}" ] || mkdir -p "${CACHE_DIR}"
+	[ -e "${CONFIG_DIR}" ] || mkdir -p "${CONFIG_DIR}"
+
+	# Read arch-specific config
+	ARCH_CONFIG="${CONFIG_DIR}/profile.sh"
+	[ -f "${ARCH_CONFIG}" ] && config_profile_read ${ARCH_CONFIG} "arch"
+	
+	# Copy the arch profile we just imported into the arch profile	
+	setup_arch_profile
+}
+
 config_get_key() {
 	# <Key> <Profile (optional)> 
 	###<Return on lookup failure (Bool)> Disabled for profile feature 
@@ -321,17 +335,38 @@ parse_cmdline() {
 		then
 			if logicTrue ${myTakesData}
 			then
-				config_set_key "${myName}" "${myRequest##*\=}" "${cmdline_profile}"
-				myMatched=true
-			elif [ "${myTakesData}" = 'true!m' ]
-			then
-				if [ "${myName}" = "profile" ]
+				if [ ! "${myRequest##*\=}" == "" ]
 				then
-					config_profile_read ${myRequest##*\=}
+					config_set_key "${myName}" "${myRequest##*\=}" "${cmdline_profile}"
 					myMatched=true
 				else
-					config_set_key "${myName}" "$(config_get_key ${myName}) ${myRequest##*\=}" "${cmdline_profile}"
-					myMatched=true
+					# Nothing behind the = sign
+					show_usage
+					echo
+					echo "Configuration parsing error: '${myRequest}' given but --${myName}= requires an argument!"
+					__INTERNAL__CONFIG_PARSING_FAILED=true
+					return 1
+				fi
+
+			elif [ "${myTakesData}" = 'true!m' ]
+			then
+				if [ ! "${myRequest##*\=}" == "" ]
+				then
+					if [ "${myName}" = "profile" ]
+					then
+						config_profile_read ${myRequest##*\=}
+						myMatched=true
+					else
+						config_set_key "${myName}" "$(config_get_key ${myName}) ${myRequest##*\=}" "${cmdline_profile}"
+						myMatched=true
+					fi
+				else
+					# Nothing behind the = sign
+					show_usage
+					echo
+					echo "Configuration parsing error: '${myRequest}' given but --${myName}= requires an argument!"
+					__INTERNAL__CONFIG_PARSING_FAILED=true
+					return 1
 				fi
 			else
 				# Data but we don't take data!
@@ -463,7 +498,8 @@ config_profile_dump() {
 				:
 			;;
 			*)
-				echo "${__INTERNAL__OPTIONS__KEY[${n}]} := \"${__INTERNAL__OPTIONS__VALUE[${n}]}\""
+				[ "${__INTERNAL__OPTIONS__PROFILE[${n}]}" == 'user' ] && \
+					echo "${__INTERNAL__OPTIONS__KEY[${n}]} := \"${__INTERNAL__OPTIONS__VALUE[${n}]}\""
 			;;
 		esac
 	done
