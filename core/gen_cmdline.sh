@@ -105,6 +105,12 @@ import_arch_profile() {
 	# Copy the arch profile we just imported into the arch profile	
 	setup_arch_profile
 }
+
+import_kernel_module_load_list() {
+	MODULES_LOAD="${CONFIG_DIR}/modules_load"
+	[ -f "${MODULES_LOAD}" ] && config_profile_read ${MODULES_LOAD} "modules"
+}	
+
 config_get_key() {
 	# <Key> <Profile (optional)> 
 	###<Return on lookup failure (Bool)> Disabled for profile feature 
@@ -135,28 +141,6 @@ config_set_key() {
 				__INTERNAL__OPTIONS__VALUE[${n}]=$2 && return
 	done
 
-	# Unmatched
-	# echo "$1 $2 $__internal_profile"
-	__INTERNAL__OPTIONS__KEY[${#__INTERNAL__OPTIONS__KEY[@]}]=$1
-	__INTERNAL__OPTIONS__VALUE[${#__INTERNAL__OPTIONS__VALUE[@]}]=$2
-	__INTERNAL__OPTIONS__PROFILE[${#__INTERNAL__OPTIONS__PROFILE[@]}]=$__internal_profile
-}
-
-config_append_key() {
-	# <Key> <Value> <Profile (optional)>
-	local n
-	[ "$3" = "" ] && __internal_profile="running" || __internal_profile="$3"
-	
-	# Check key is not already set, if it is overwrite, append it.
-	for (( n = 0 ; n < ${#__INTERNAL__OPTIONS__KEY[@]}; ++n )) ; do
-		key=${__INTERNAL__OPTIONS__KEY[${n}]}
-		value=${__INTERNAL__OPTIONS__VALUE[${n}]}
-		profile=${__INTERNAL__OPTIONS__PROFILE[${n}]}
-		[ "$1" = "${key}" ] && [ "${__internal_profile}" = "${profile}" ] && \
-				__INTERNAL__OPTIONS__VALUE[${n}]="'${value} $2'" && \
-				echo "append: ${__INTERNAL__OPTIONS__VALUE[${n}]}" && \
-				return
-	done
 	# Unmatched
 	# echo "$1 $2 $__internal_profile"
 	__INTERNAL__OPTIONS__KEY[${#__INTERNAL__OPTIONS__KEY[@]}]=$1
@@ -471,7 +455,7 @@ config_profile_read() {
 		# Strip out inline comments
 		i="${i/[ 	]\#*/}"
 
-		if [[ "${i}" =~ '[a-z\-]+ := \".*\"$' ]]
+		if [[ "${i}" =~ '[a-z0-9\-]+ := \".*\"$' ]]
 		then
 			identifier="${i% :=*}"
 			data="${i#*:= \"}" # Remove up to first quote inclusive
@@ -480,7 +464,7 @@ config_profile_read() {
 			then
 				identifier="${identifier:7}"
 				# Append the data into the modules profile space.
-				config_append_key "${identifier}" "${data}" 'modules'
+				kernel_modules_register_to_category "${identifier}" "${data}"
 			elif [[ "${identifier:0:16}" = 'genkernel_module' ]]
 			then
 				__INTERNAL__CONFIG_PARSING_DEPTREE="${__INTERNAL__CONFIG_PARSING_DEPTREE} ${data}"
@@ -502,6 +486,9 @@ config_profile_read() {
 				fi
 			done
 		elif [[ "${i:0:1}" = '#' ]]
+		then
+			:
+		elif [[ "${i}" = '' ]]
 		then
 			:
 		else

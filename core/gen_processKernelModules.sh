@@ -3,7 +3,6 @@ declare -a __INTERNAL__MODULES__D # Modules list
 
 kernel_modules_category_lookup() {
 	local category data
-
 	for (( n = 0 ; n <= ${#__INTERNAL__MODULES__C[@]}; ++n )) ; do
 		category=${__INTERNAL__MODULES__C[${n}]}
 		data=${__INTERNAL__MODULES__D[${n}]}
@@ -28,3 +27,19 @@ kernel_modules_register_to_category () {
 	__INTERNAL__MODULES__C[${#__INTERNAL__MODULES__C[@]}]="$1"
 	__INTERNAL__MODULES__D[${#__INTERNAL__MODULES__D[@]}]="$2"
 }
+
+kernel_modules_category_list() {
+    local myOut n
+    local array_length=${#__INTERNAL__MODULES__C[@]}
+    for (( n = 0 ; n < ${array_length}; ++n )) ; do
+        if ! has "${__INTERNAL__MODULES__C[${n}]}" "${myOut}"
+        then
+            [ ! "${__INTERNAL__MODULES__C[${n}]}" == "" ] && \
+                myOut="${__INTERNAL__MODULES__C[${n}]} ${myOut}"
+        fi
+    done
+    echo "${myOut}"
+}
+
+#kernel_modules_register_to_category scsi 'aic999 blahblahblah'
+#echo $(kernel_modules_category_lookup scsi)
