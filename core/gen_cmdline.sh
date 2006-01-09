@@ -394,11 +394,14 @@ parse_cmdline() {
 # <file>
 config_profile_read() {
 	[ -f "$1" ] || die "parse_profile: No such file $1!"
+	
+	# If prefix is not specified default to profile
+	[ -z "$2" ] && PROFILE_PREFIX="profile" || PROFILE_PREFIX="${2}"
 
 	local identifier data set_config profile
-	
+
 	# replace /'s with _'s to create a new profile name
-	profile="profile_${1//\//_}"
+	profile="${PROFILE_PREFIX}_${1//\//_}"
 	
 
 	__INTERNAL_PROFILES_READ="${__INTERNAL_PROFILES_READ} ${1}"
