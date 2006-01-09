@@ -37,16 +37,15 @@ done
 # Failed to parse the cmdline properly, die so we can investigate...
 logicTrue ${__INTERNAL__CONFIG_PARSING_FAILED} && die 'Fatal error processing arguments; exiting...'
 
-set_color
-logicTrue $(config_get_key help) && show_help && echo && exit 0 # --help
 
-#if [ -n "$(config_get_key profile)" ]
-#then
-#	for i in "$(config_get_key profile)"
-#	do
-#		config_profile_read $i
-#	done
-#fi	
+#profile_list
+#profile_delete "profile__home_eje001_profile"
+profile_copy "profile__home_eje001_profile" "running"
+profile_copy "cmdline" "running"
+
+
+set_color 
+logicTrue $(config_get_key help) && show_help && echo && exit 0 # --help
 
 # Set DEBUGFILE if log-override is defined
 [ -n "$(config_get_key log-override)" ] && DEBUGFILE="$(config_get_key log-override)"
@@ -120,6 +119,16 @@ done
 
 # End of execution for now
 exit 255
+
+
+
+
+
+
+
+
+
+
 
 # Read arch-specific config
 source ${ARCH_CONFIG} || die "Could not read ${ARCH_CONFIG}"
