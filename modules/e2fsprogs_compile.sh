@@ -17,14 +17,14 @@ e2fsprogs_compile::() {
 	configure_generic  --with-ldopts=-static
 
 	print_info 1 'e2fsprogs: >> Compiling...'
-	compile_generic utils # Run make
+	compile_generic # Run make
 
 	print_info 1 'blkid: >> Copying to cache...'
 	[ -f "${TEMP}/${E2FSPROGS_DIR}/misc/blkid" ] || die 'Blkid executable does not exist!'
 	strip "${TEMP}/${E2FSPROGS_DIR}/misc/blkid" || die 'Could not strip blkid binary!'
 
 	cd misc
-	genkernel_generate_package "e2fsprogs-${E2FSPROGS_VER}-blkid.tar.bz2" "./blkid" || die 'Could not generate blkid binary package!'
+	genkernel_generate_package "e2fsprogs-${E2FSPROGS_VER}-blkid" "./blkid" || die 'Could not generate blkid binary package!'
 	cd "${TEMP}"
 	rm -rf "${E2FSPROGS_DIR}" > /dev/null
 }

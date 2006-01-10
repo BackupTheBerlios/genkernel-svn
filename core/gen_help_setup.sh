@@ -57,6 +57,7 @@ __register_config_option 'Initialization' 'bootloader=grub' 'false' 'false' 'Add
 __register_config_option 'Initialization' 'do-keymap-auto' 'false' 'false' 'Force keymap selection at boot.'
 __register_config_option 'Initialization' 'evms2' 'false' 'false' 'Include EVMS2 support.'
 __register_config_option 'Initialization' 'lvm2' 'false' 'false' 'Include LVM2 support.'
+__register_config_option 'Initialization' 'e2fsprogs' 'false' 'false' 'Include e2fsprogs blkid support.'
 __register_config_option 'Initialization' 'disklabel' 'false' 'false' 'Include disk label and uuid support in your initramfs.'
 __register_config_option 'Initialization' 'linuxrc' 'true' 'false' 'Use a user specified linuxrc.'
 __register_config_option 'Initialization' 'gensplash-res' 'true' 'false' 'Gensplash resolutions to include; this is passed to splash_geninitramfs in the "-r" flag.'

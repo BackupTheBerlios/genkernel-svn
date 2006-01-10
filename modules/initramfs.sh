@@ -6,6 +6,9 @@ logicTrue $(config_get_key evms2) && require evms_host_compiled
 # Turn on lvm2 if enabled on the command line
 logicTrue $(config_get_key lvm2) && require lvm2
 
+# Turn on e2fsprogs if enabled on the command line (BLKID)
+logicTrue $(config_get_key e2fsprogs) && require e2fsprogs
+
 # Get kernel modules
 # Register a new cpio of the kernel modules
 
@@ -25,6 +28,7 @@ initramfs::() {
 	if logicTrue $(config_get_key internal-initramfs)
 	then
 		# Build a single uncompressed cpio file
+		print_info 1 'Preparing internal initramfs directory space'
 		mkdir "${TEMP}/initramfs-internal"
 		
 		for i in $(initramfs_register_cpio_read)
