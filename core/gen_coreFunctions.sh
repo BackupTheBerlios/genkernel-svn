@@ -6,7 +6,7 @@ die() {
 }
 
 set_color() {
-    if logicTrue $(config_get_key usecolor)
+    if logicTrue $(profile_get_key usecolor)
     then
         GOOD=$'\e[32;01m'
         WARN=$'\e[33;01m'
@@ -338,16 +338,16 @@ compile_generic() {
 		make -s "$@"
 		RET=$?
 	else
-		if [ "$(config_get_key debuglevel)" -gt "1" ]
+		if [ "$(profile_get_key debuglevel)" -gt "1" ]
 		then
 			# Output to stdout and debugfile
 			print_info 2 "COMMAND: ${MAKE} ${MAKEOPTS} $@" 1 0 1
-			make $(config_get_key makeopts) "$@" 2>&1 | tee -a ${DEBUGFILE}
+			make $(profile_get_key makeopts) "$@" 2>&1 | tee -a ${DEBUGFILE}
 			RET=${PIPESTATUS[0]}
 		else
 			# Output to debugfile only
 			print_info 2 "COMMAND: ${MAKE} ${MAKEOPTS} $@" 1 0 1
-			make $(config_get_key makeopts) "$@" >> ${DEBUGFILE} 2>&1
+			make $(profile_get_key makeopts) "$@" >> ${DEBUGFILE} 2>&1
 			RET=$?
 		fi
 	fi
@@ -356,14 +356,14 @@ compile_generic() {
 
 configure_generic() {
 	local RET
-	if [ "$(config_get_key debuglevel)" -gt "1" ]
+	if [ "$(profile_get_key debuglevel)" -gt "1" ]
 	then
 		# Output to stdout and debugfile
-		./configure $(config_get_key makeopts) "$@" 2>&1 | tee -a ${DEBUGFILE}
+		./configure $(profile_get_key makeopts) "$@" 2>&1 | tee -a ${DEBUGFILE}
 		RET=${PIPESTATUS[0]}
 	else
 		# Output to debugfile only
-		./configure $(config_get_key makeopts) "$@" >> ${DEBUGFILE} 2>&1
+		./configure $(profile_get_key makeopts) "$@" >> ${DEBUGFILE} 2>&1
 		RET=$?
 	fi
 	[ "${RET}" -eq '0' ] || die "Failed to configure ..."
@@ -380,7 +380,7 @@ genkernel_print_header() {
 genkernel_determine_arch() {
 	# Need to see if the user has overridden this; Setup the user profile space
 	setup_userspace
-	local myArch=$(config_get_key arch-override user)
+	local myArch=$(profile_get_key arch-override user)
 	if [ "${myArch}" != '' ]
 	then
 		ARCH=${myArch}
@@ -398,7 +398,7 @@ genkernel_determine_arch() {
 		esac
 	fi
 
-	config_set_key "arch" "${ARCH}" "running"
+	profile_set_key "arch" "${ARCH}" "running"
 }
 
 setup_userspace() {

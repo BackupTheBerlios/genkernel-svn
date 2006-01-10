@@ -17,6 +17,7 @@ source ${CORE_DIR}/gen_processPackages.sh || die "Failed to source gen_processPa
 source ${CORE_DIR}/gen_processKernelTree.sh || die "Failed to source gen_processKernelTree.sh"
 source ${CORE_DIR}/gen_processKernelModules.sh || die "Failed to source gen_processKernelModules.sh"
 source ${CORE_DIR}/gen_cmdline.sh || die "Failed to source gen_cmdline.sh"
+source ${CORE_DIR}/gen_profile.sh || die "Failed to source gen_profile.sh"
 source ${CORE_DIR}/gen_help_setup.sh || die "Failed to source gen_help_setup.sh"
 source ${CORE_DIR}/gen_initialize.sh || die "Failed to source gen_initialize.sh"
 source ${CORE_DIR}/gen_initramfs.sh || die "Failed to source gen_initramfs.sh"
@@ -58,14 +59,14 @@ profile_copy "user"
 # End Importing profiles into the running profile space
 
 set_color 
-logicTrue $(config_get_key help user) && show_help && echo && exit 0 # --help
+logicTrue $(profile_get_key help user) && show_help && echo && exit 0 # --help
 
 
 # Set DEBUGFILE if log-override is defined
-[ -n "$(config_get_key log-override)" ] && DEBUGFILE="$(config_get_key log-override)"
+[ -n "$(profile_get_key log-override)" ] && DEBUGFILE="$(profile_get_key log-override)"
 
 # Set TEMP if tempdir is defined
-[ -n "$(config_get_key tempdir)" ] && TEMP="$(config_get_key tempdir)"
+[ -n "$(profile_get_key tempdir)" ] && TEMP="$(profile_get_key tempdir)"
 
 # Generate TEMP dir
 if [ ! -d "${TEMP}" ]
@@ -73,7 +74,7 @@ then
 	mkdir -p "${TEMP}" || die "Failed to create temporary directory!"
 fi
 
-[ -n "$(config_get_key profile-dump)" ] && config_profile_dump
+[ -n "$(profile_get_key profile-dump)" ] && config_profile_dump
 
 # Check if any modules to execute were specified
 if [ "${__INTERNAL__CONFIG_PARSING_DEPTREE}" = '' ]
@@ -114,7 +115,7 @@ genkernel::()
 }
 
 # If we have a callback set require the callback module
-[ -n "$(config_get_key callback)" ] && require callback
+[ -n "$(profile_get_key callback)" ] && require callback
 
 for i in $(buildDepTreeSolution)
 do

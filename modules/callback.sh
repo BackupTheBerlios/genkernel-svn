@@ -2,7 +2,7 @@ require kernel
 
 callback::()
 {
-	local CMD_CALLBACK="$(config_get_key callback)"
+	local CMD_CALLBACK="$(profile_get_key callback)"
 
 	if [ -n "${CMD_CALLBACK}" ]
 	then

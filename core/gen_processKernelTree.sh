@@ -25,9 +25,9 @@ get_KV() {
 		KV_LOCAL="${KV_LOCAL}$(<${i})"
 	done
 		
-	if [ -n "$(config_get_key kbuild-output)" ]
+	if [ -n "$(profile_get_key kbuild-output)" ]
 	then
-		KBUILD_OUTPUT="$(config_get_key kbuild-output)"
+		KBUILD_OUTPUT="$(profile_get_key kbuild-output)"
 	else
 		KBUILD_OUTPUT=${KERNEL_DIR}
 	fi
@@ -47,11 +47,11 @@ get_KV() {
 	KV_FULL="${KV_MAJOR}.${KV_MINOR}.${KV_PATCH}${KV_EXTRA}${KV_LOCAL}"
 
 	# Fixme; process CLI specified stuff
-	config_set_key kbuild-output ${KBUILD_OUTPUT}
+	profile_set_key kbuild-output ${KBUILD_OUTPUT}
 }
 
 genkernel_lookup_kernel() {
-	get_KV $(config_get_key kernel-tree)
+	get_KV $(profile_get_key kernel-tree)
 
 	[ "$1" != 'silent' ] && NORMAL=${BOLD} print_info 1 "Kernel Tree: Linux Kernel ${BOLD}${KV_FULL}${NORMAL} for ${BOLD}${ARCH}${NORMAL}..."
 	provide kernel_src_tree
@@ -189,16 +189,16 @@ config_unset() {
 
 
 determine_config_file() {
-	#echo "$(config_get_key kernel-config)"
+	#echo "$(profile_get_key kernel-config)"
 	#echo "/etc/kernels/kernel-config-${ARCH}-${KV_FULL}"
 	#echo "${CONFIG_DIR}/kernel-config-${KV_FULL}"
 	#echo "${DEFAULT_KERNEL_CONFIG}"
 	#echo "${CONFIG_DIR}/kernel-config-${KV_MAJOR}.${KV_MINOR}"
 	#echo "${CONFIG_DIR}/kernel-config"
     
-	if [ -n "$(config_get_key kernel-config)" ]
+	if [ -n "$(profile_get_key kernel-config)" ]
     then
-        KERNEL_CONFIG="$(config_get_key kernel-config)"
+        KERNEL_CONFIG="$(profile_get_key kernel-config)"
 		
     elif [ -f "/etc/kernels/kernel-config-${ARCH}-${KV_FULL}" ]
     then
@@ -221,7 +221,7 @@ determine_config_file() {
 }
 
 kbuild_enabled() {
-	if [ ! "$(config_get_key kbuild-output)" == "$(config_get_key kernel-tree)" ]
+	if [ ! "$(profile_get_key kbuild-output)" == "$(profile_get_key kernel-tree)" ]
 	then 
 		return 0
 	else

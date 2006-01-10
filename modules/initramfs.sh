@@ -1,31 +1,31 @@
 require gmi busybox udev kernel_modules_cpio
 
 # Turn on evms if enabled on the command line
-logicTrue $(config_get_key evms2) && require evms_host_compiled
+logicTrue $(profile_get_key evms2) && require evms_host_compiled
 
 # Turn on lvm2 if enabled on the command line
-logicTrue $(config_get_key lvm2) && require lvm2
+logicTrue $(profile_get_key lvm2) && require lvm2
 
 # Turn on e2fsprogs if enabled on the command line (BLKID)
-logicTrue $(config_get_key e2fsprogs) && require e2fsprogs
+logicTrue $(profile_get_key e2fsprogs) && require e2fsprogs
 
 # Get kernel modules
 # Register a new cpio of the kernel modules
 
 initramfs::() {
 	# Add any external cpios if defined
-	[ -n "$(config_get_key external-cpio)" ] && initramfs_register_external_cpio $(config_get_key external-cpio)
+	[ -n "$(profile_get_key external-cpio)" ] && initramfs_register_external_cpio $(profile_get_key external-cpio)
 	
 	# Add the initramfs-overlay 	
-	if [ -n "$(config_get_key initramfs-overlay)" ]
+	if [ -n "$(profile_get_key initramfs-overlay)" ]
 	then
-		cd "$(config_get_key initramfs-overlay)" \
-			|| die "Failed to generate the initramfs overlay from $(config_get_key initramfs-overlay)"
+		cd "$(profile_get_key initramfs-overlay)" \
+			|| die "Failed to generate the initramfs overlay from $(profile_get_key initramfs-overlay)"
 		genkernel_generate_cpio_path initramfs-overlay .
 		initramfs_register_cpio initramfs-overlay
 	fi
 
-	if logicTrue $(config_get_key internal-initramfs)
+	if logicTrue $(profile_get_key internal-initramfs)
 	then
 		# Build a single uncompressed cpio file
 		print_info 1 'Preparing internal initramfs directory space'

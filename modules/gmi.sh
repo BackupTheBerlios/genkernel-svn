@@ -34,7 +34,7 @@ gmi::()
 	cp "${GMI_DIR}/gmi-core-devices.cpio.gz" "${TEMP}" || die "Failed to copy over core device CPIO!"
 	initramfs_register_cpio gmi-core-devices
 
-	local LINUXRC=$(config_get_key linuxrc)
+	local LINUXRC=$(profile_get_key linuxrc)
 	if [ -f "${LINUXRC}" ]
 	then
 		cp "${LINUXRC}" "${TEMP}/initramfs-base-temp/init"
@@ -74,8 +74,8 @@ gmi::()
 	echo '"' >> "${TEMP}/initramfs-base-temp/etc/initrd.defaults"	
 
 	cp "${GMI_DIR}/generic/modprobe" "${TEMP}/initramfs-base-temp/sbin/modprobe"
-	logicTrue "$(config_get_key do-keymap-auto)" && echo 'MY_HWOPTS="${MY_HWOPTS} keymap"' >> ${TEMP}/initramfs-base-temp/etc/initrd.defaults
-	logicTrue "$(config_get_key bladecenter)" && echo 'MY_HWOPTS="${MY_HWOPTS} bladecenter"' >> ${TEMP}/initramfs-base-temp/etc/initrd.defaults
+	logicTrue "$(profile_get_key do-keymap-auto)" && echo 'MY_HWOPTS="${MY_HWOPTS} keymap"' >> ${TEMP}/initramfs-base-temp/etc/initrd.defaults
+	logicTrue "$(profile_get_key bladecenter)" && echo 'MY_HWOPTS="${MY_HWOPTS} bladecenter"' >> ${TEMP}/initramfs-base-temp/etc/initrd.defaults
 
 	mkdir -p "${TEMP}/initramfs-base-temp/lib/keymaps"
 	/bin/tar -C "${TEMP}/initramfs-base-temp/lib/keymaps" -zxf "${GMI_DIR}/generic/keymaps.tar.gz"

@@ -40,17 +40,17 @@ klibc_compile::() {
 
 	print_info 1 'klibc: >> Compiling...'
 	
-	ln -snf "$(config_get_key kernel-tree)" linux || die "Could not link to $(config_get_key kernel-tree)"
+	ln -snf "$(profile_get_key kernel-tree)" linux || die "Could not link to $(profile_get_key kernel-tree)"
 	sed -i MCONFIG -e "s|prefix      =.*|prefix      = ${TEMP}/klibc-build-${KLIBC_VER}|g" # Set the build directory
 
-	if [ ! "$(config_get_key kbuild-output)" == "$(config_get_key kernel-tree)" ]
+	if [ ! "$(profile_get_key kbuild-output)" == "$(profile_get_key kernel-tree)" ]
 	then
-		if [ "$(config_get_key arch-override)" == "um" -o "$(config_get_key arch-override)" == "xen0" \
-		     -o "$(config_get_key arch-override)" == "xenU" ]
+		if [ "$(profile_get_key arch-override)" == "um" -o "$(profile_get_key arch-override)" == "xen0" \
+		     -o "$(profile_get_key arch-override)" == "xenU" ]
 		then
-			echo "KRNLOBJ = ${TEMP}/$(config_get_key arch-override)-i386" >> MCONFIG
+			echo "KRNLOBJ = ${TEMP}/$(profile_get_key arch-override)-i386" >> MCONFIG
 		else
-			echo "KRNLOBJ = $(config_get_key kbuild-output)" >> MCONFIG
+			echo "KRNLOBJ = $(profile_get_key kbuild-output)" >> MCONFIG
 		fi
 	fi
 	
