@@ -247,7 +247,7 @@ parse_cmdline() {
 
 	done
 	
-	if [[ "${myMatched}" = 'false' ]] || [[ "${showUsage}" = 'true' ]]
+	if [ "${myMatched}" = 'false' ] 
 	then
 		show_usage
 		echo
