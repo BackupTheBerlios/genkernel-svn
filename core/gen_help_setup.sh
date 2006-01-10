@@ -27,7 +27,7 @@ __register_config_option 'Kernel Compile' 'gensplash'		'true:true' 'false' 'Inst
 __register_config_option 'Kernel Settings' 'kernel-config' 'true' 'false' 'Kernel configuration file to use for compilation.'
 
 __register_config_option 'Kernel Settings' 'kernel-tree'   'true' 'false' 'Location of kernel sources.'
-__register_config_option 'Kernel Settings' 'kernel-modules'   'true!m' 'false' 'Add or subtract kernel modules' 'register_kernel_modules'
+__register_config_option 'Kernel Settings' 'kernel-modules'   'true!m' 'false' 'Add or subtract kernel modules' 'cmdline_modules_register'
 __register_config_option 'Kernel Settings' 'internal-initramfs' 'false' 'false' 'compile initramfs-internally'
 
 # kernel-tree default
@@ -73,7 +73,7 @@ __register_config_option 'Internals' 'cachedir' 'true' 'false' 'Override the def
 __register_config_option 'Internals' 'tempdir' 'true' 'false' "Location of Genkernel's temporary directory."
 __register_config_option 'Internals' 'postclear' 'false' 'false' 'Clear all temporary files and caches afterwards.'
 # Allow multiple entries for the profile
-__register_config_option 'Internals' 'profile' 'true!m' 'false' 'Use specified profile.'
+__register_config_option 'Internals' 'profile' 'true!m' 'false' 'Use specified profile.' 'config_profile_read'
 __register_config_option 'Internals' 'profile-dump' 'false' 'false' 'Use specified profile.'
 __register_config_option 'Internals' 'mountboot' 'false' 'true' 'Mount /boot automatically.'
 __register_config_option 'Internals' 'usecolor' 'false' 'true' 'Color output.'

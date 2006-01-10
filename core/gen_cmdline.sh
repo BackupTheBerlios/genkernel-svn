@@ -190,128 +190,64 @@ show_usage() {
 parse_cmdline() {
 	# Iterate over each registered config option and see if we have a match.
 	local myRequest myName myTakesData myHasInversion myDataDefault myMatched=false cmdline_profile="cmdline" data
-	local kernel_modules category i j
+	local kernel_modules category i j showUsage
 	myRequest=$*
 	for (( i = 0 ; i < ${#__INTERNAL__OPTIONS__NAME[@]}; ++i )) ; do
 		myName=${__INTERNAL__OPTIONS__NAME[${i}]}
 		myTakesData=${__INTERNAL__OPTIONS__NEEDE[${i}]}
 		myHasInversion=${__INTERNAL__OPTIONS__HAVEO[${i}]}
 		myDataDefault=${__INTERNAL__OPTIONS__DDEFT[${i}]}
-
+		myfunction=${__INTERNAL__OPTIONS__FUNC[${i}]}
+	
 		# See if we have data and check we have a match of the option
-		if [ "${myRequest/\=/}" != "${myRequest}" -a "${myRequest%%\=*}" = "--${myName}" ]
+		if [ "${myRequest/\=/}" != "${myRequest}" -a "${myRequest%%\=*}" = "--${myName}" -a "${myRequest##*\=}" != "" ]
 		then
-			if logicTrue ${myTakesData}
+			if logicTrue ${myTakesData} || [[ "${myTakesData}" = 'true!m' ]]
 			then
-				if [ ! "${myRequest##*\=}" == "" ]
+				if [ "${myfunction}" != "" ]
 				then
-					profile_set_key "${myName}" "${myRequest##*\=}" "${cmdline_profile}"
-					myMatched=true
+					# Function call defined in __register_config_option + data behind the = sign from myRequest"
+					"${myfunction}" "${myRequest##*\=}"
 				else
-					# Nothing behind the = sign
-					show_usage
-					echo
-					echo "Configuration parsing error: '${myRequest}' given but --${myName}= requires an argument!"
-					__INTERNAL__CONFIG_PARSING_FAILED=true
-					return 1
-				fi
-
-			elif [ "${myTakesData}" = 'true!m' ]
-			then
-				# Special case (kernel-modules) look into changing this to a call back for better generic support"
-				if [ "${myRequest%%\=*}" = "--kernel-modules" ]
-				then
-					if [ ! "${myRequest##*\=}" == "" ]
-					then
-						data="${myRequest##*\=}"
-						if [ "${data}" == "${data%%:*}" ]
-						then
-							kernel_modules="${data}"
-							category="extra"
-						else
-							kernel_modules="${data##*:}"
-							category="${data%%:*}"
-						fi
-						for j in $kernel_modules
-						do
-							kernel_modules_register_to_category "${category}" "${j}"
-						done
-						myMatched=true
-					else
-						# Nothing behind the = sign
-						show_usage
-						echo
-						echo "Configuration parsing error: '${myRequest}' given but --${myName}= requires an argument!"
-						__INTERNAL__CONFIG_PARSING_FAILED=true
-					fi
-				# On to the regular cases now of true!m
-				elif [ ! "${myRequest##*\=}" == "" ]
-				then
-					if [ "${myName}" = "profile" ]
-					then
-						config_profile_read ${myRequest##*\=}
-						myMatched=true
-					else
+					logicTrue ${myTakesData} && profile_set_key "${myName}" "${myRequest##*\=}" "${cmdline_profile}"
+				
+					[[ "${myTakesData}" = 'true!m' ]] && \
 						profile_set_key "${myName}" "$(profile_get_key ${myName}) ${myRequest##*\=}" "${cmdline_profile}"
-						myMatched=true
-					fi
-				else
-					# Nothing behind the = sign
-					show_usage
-					echo
-					echo "Configuration parsing error: '${myRequest}' given but --${myName}= requires an argument!"
-					__INTERNAL__CONFIG_PARSING_FAILED=true
-					return 1
 				fi
-			else
-				# Data but we don't take data!
-				show_usage
-				echo
-				echo "Configuration parsing error: '${myRequest}' given but --${myName} does not take arguments!"
-				__INTERNAL__CONFIG_PARSING_FAILED=true
-				return 1
-			fi
-		else
-			# See if we have a module specification
-			if [ "${myRequest:(-2)}" = '::' ]
-			then
-				# Add to deptree
-				__INTERNAL__CONFIG_PARSING_DEPTREE="${__INTERNAL__CONFIG_PARSING_DEPTREE} ${myRequest%::}"
 				myMatched=true
-			elif logicTrue ${myTakesData}
-			then
-				if [ "${myRequest}" = "--${myName}" ]
-				then
-					if [ -n "${myDataDefault}" ]
-					then
-						profile_set_key "${myName}" "${myDataDefault}" "${cmdline_profile}"
-						myMatched=true
-					else
-						show_usage
-						echo
-						echo "Configuration parsing error: --${myName} requires an argument!"
-						__INTERNAL__CONFIG_PARSING_FAILED=true
-						return 1
-					fi
-				fi
-			else
-				if [ "${myRequest}" = "--${myName}" ]
-				then
-					profile_set_key "${myName}" 'true' "${cmdline_profile}"
-					myMatched=true
-				elif logicTrue ${myHasInversion} && [ "${myRequest}" = "--no-${myName}" ]
-				then
-					profile_set_key "${myName}" 'false' "${cmdline_profile}"
-					myMatched=true
-				# else: We are unmatched...
-				fi
+				break	
 			fi
 		fi
+		
+		# See if we have a module specification
+		if [ "${myRequest:(-2)}" = '::' ]
+		then
+			# Add to deptree
+			__INTERNAL__CONFIG_PARSING_DEPTREE="${__INTERNAL__CONFIG_PARSING_DEPTREE} ${myRequest%::}"
+			myMatched=true
+			break
 
-		[ "${myMatched}" != 'false' ] && break
+		fi
+		
+		# Option that doesnt take data
+		if [ "${myRequest}" = "--${myName}" ]
+		then
+			profile_set_key "${myName}" 'true' "${cmdline_profile}"
+			myMatched=true
+			break
+		fi
+		
+		# check for negative Option that doesnt take data
+		if logicTrue ${myHasInversion} && [ "${myRequest}" = "--no-${myName}" ]
+		then
+			profile_set_key "${myName}" 'false' "${cmdline_profile}"
+			myMatched=true
+			break
+		fi
+
 	done
-
-	if [ "${myMatched}" = 'false' ]
+	
+	if [[ "${myMatched}" = 'false' ]] || [[ "${showUsage}" = 'true' ]]
 	then
 		show_usage
 		echo

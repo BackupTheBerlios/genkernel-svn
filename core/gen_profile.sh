@@ -151,7 +151,6 @@ import_kernel_module_load_list() {
 # <file>
 config_profile_read() {
 	[ -f "$1" ] || die "parse_profile: No such file $1!"
-	
 	# If prefix is not specified default to profile
 	[ -z "$2" ] && PROFILE_PREFIX="profile" || PROFILE_PREFIX="${2}"
 
