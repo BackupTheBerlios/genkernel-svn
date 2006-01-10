@@ -1,0 +1,24 @@
+kernel_make_directive := "vmlinux"
+kernel_binary := "arch/sparc64/boot/image"
+#####KERNEL_CC=sparc64-linux-gcc
+#####KERNEL_MAKE_DIRECTIVE_2="image"
+
+# Busybox 1.00-pre3 won't build with dietlibc, when it does we
+# can turn this flag on
+#USE_DIETLIBC=0
+#
+#MAKEOPTS="-j2"
+#
+#KERNEL_MAKE=make
+#UTILS_MAKE=make
+#
+##KERNEL_AS=as
+##KERNEL_LD=ld
+#
+#UTILS_CC=gcc
+#UTILS_AS=as
+#UTILS_LD=ld
+#
+#COMPRESS_INITRD=yes
+#BOOTSPLASH="no"
+##USECOLOR="no"

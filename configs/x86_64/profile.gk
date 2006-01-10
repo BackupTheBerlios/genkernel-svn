@@ -1,0 +1,22 @@
+kernel_make_directive := "bzImage"
+kernel_binary := "arch/x86_64/boot/bzImage"
+
+#KERNEL_MAKE_DIRECTIVE_2=""
+#
+#USE_DIETLIBC=1
+#
+#MAKEOPTS="-j2"
+#
+#KERNEL_MAKE=make
+#UTILS_MAKE=make
+#
+#KERNEL_CC=gcc
+#KERNEL_AS=as
+#KERNEL_LD=ld
+#
+#UTILS_CC=gcc
+#UTILS_AS=as
+#UTILS_LD=ld
+#
+#COMPRESS_INITRD=yes
+

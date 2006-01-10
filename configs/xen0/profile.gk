@@ -1,0 +1,23 @@
+kernel_make_directive := ""
+kernel_binary := "vmlinuz"
+
+
+# The dietlibc portion of busybox is commented out right now
+# other stuff seems to compile fine though
+#KERNEL_MAKE_DIRECTIVE_2=""
+#USE_DIETLIBC=0
+#
+#MAKEOPTS="-j2"
+#
+#KERNEL_MAKE="make ARCH=xen"
+#UTILS_MAKE=make
+#
+#KERNEL_CC=gcc
+#KERNEL_AS=as
+#KERNEL_LD=ld
+#
+#UTILS_CC=gcc
+##UTILS_AS=as
+#UTILS_LD=ld
+#
+#COMPRESS_INITRD=yes

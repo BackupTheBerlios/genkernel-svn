@@ -1,0 +1,23 @@
+kernel_make_directive := "vmlinux"
+kernel_binary := "vmlinux"
+
+
+# The dietlibc portion of busybox is commented out right now
+# other stuff seems to compile fine though
+#KERNEL_MAKE_DIRECTIVE_2=""
+#USE_DIETLIBC=0
+#
+#MAKEOPTS="-j1"
+#
+#KERNEL_MAKE=make
+#UTILS_MAKE=make
+#
+#KERNEL_CC=gcc
+#
+#UTILS_CC=gcc
+#UTILS_AS=as
+#UTILS_LD=ld
+#
+#COMPRESS_INITRD=yes
+#BOOTSPLASH="no"
+#USECOLOR="no"

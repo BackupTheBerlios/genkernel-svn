@@ -107,6 +107,11 @@ import_arch_profile() {
 }
 
 import_kernel_module_load_list() {
+	# Read the generic modules list first 
+	GENERIC_MODULES_LOAD="${CONFIG_GENERIC_DIR}/modules_load"
+	[ -f "${GENERIC_MODULES_LOAD}" ] && config_profile_read ${GENERIC_MODULES_LOAD} "modules"
+
+	# override with the arch specific one
 	MODULES_LOAD="${CONFIG_DIR}/modules_load"
 	[ -f "${MODULES_LOAD}" ] && config_profile_read ${MODULES_LOAD} "modules"
 }	
