@@ -291,6 +291,16 @@ clear_tmpdir()
 	fi
 }
 
+# subtract_from_list item list
+subtract_from_list() {
+	local test=${1} item output
+	shift
+	for item in $@; do
+		[[ "${item}" != "${test}" ]] && output="${output} ${item}"
+	done
+	echo "${output}"
+}
+
 # has test list
 # Return true if list contains test
 has() {
