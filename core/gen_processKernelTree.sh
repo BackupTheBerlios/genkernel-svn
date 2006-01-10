@@ -167,7 +167,11 @@ check_asm_link_ok() {
 		return 0
 	fi
 }
-	
+
+config_set_string() {
+	sed -i ${KBUILD_OUTPUT}/.config -e "s|#\? \?CONFIG_${1} is.*|CONFIG_${1}=\"${2}\"|g"
+	sed -i ${KBUILD_OUTPUT}/.config -e "s|CONFIG_${1}=.*|CONFIG_${1}=\"${2}\"|g"
+}
 config_set_builtin() {
 	sed -i ${KBUILD_OUTPUT}/.config -e "s/CONFIG_${1}=m/CONFIG_${1}=y/g"
 	sed -i ${KBUILD_OUTPUT}/.config -e "s/#\? \?CONFIG_${1} is.*/CONFIG_${1}=y/g"
@@ -182,6 +186,7 @@ config_unset() {
 	sed -i ${KBUILD_OUTPUT}/.config -e "s/CONFIG_${1}=y/# CONFIG_${1} is not set/g"
 	sed -i ${KBUILD_OUTPUT}/.config -e "s/CONFIG_${1}=m/# CONFIG_${1} is not set/g"
 }
+
 
 determine_config_file() {
 	#echo "$(config_get_key kernel-config)"

@@ -1,4 +1,7 @@
 require kernel_config
+
+logicTrue $(config_get_key internal-initramfs) && require initramfs
+
 kernel_compile::()
 {
 
@@ -25,8 +28,8 @@ kernel_compile::()
 	# Kernel cross compiling support
 	[ -n "$(config_get_key kernel-cross-compile)" ] && ARGS="${ARGS} CROSS_COMPILE=$(config_get_key kernel-cross-compile)"
 
-	cd $(config_get_key kernel-tree)
-
+	cd $(config_get_key kbuild-output)
+	config_set_string "INITRAMFS_SOURCE" "${TEMP}/initramfs-internal/"
 	# make the kernel
 	# FIXME: Needs to use KERNEL_MAKE_DIRECTIVE
 	print_info 1 '>> Compiling kernel ...'

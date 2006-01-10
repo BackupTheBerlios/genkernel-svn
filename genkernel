@@ -40,8 +40,6 @@ import_arch_profile
 
 import_kernel_module_load_list
 
-echo "Module category list: $(kernel_modules_category_list)"
-echo "$(kernel_modules_category_lookup scsi)"
 # Failed to parse the cmdline properly, die so we can investigate...
 logicTrue ${__INTERNAL__CONFIG_PARSING_FAILED} && die 'Fatal error processing arguments; exiting...'
 

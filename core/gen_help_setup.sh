@@ -27,6 +27,9 @@ __register_config_option 'Kernel Compile' 'gensplash'		'true:true' 'false' 'Inst
 __register_config_option 'Kernel Settings' 'kernel-config' 'true' 'false' 'Kernel configuration file to use for compilation.'
 
 __register_config_option 'Kernel Settings' 'kernel-tree'   'true' 'false' 'Location of kernel sources.'
+__register_config_option 'Kernel Settings' 'kernel-modules'   'true!m' 'false' 'Add or subtract kernel modules'
+__register_config_option 'Kernel Settings' 'internal-initramfs' 'false' 'false' 'compile initramfs-internally'
+
 # kernel-tree default
 config_set_key kernel-tree '/usr/src/linux'
 

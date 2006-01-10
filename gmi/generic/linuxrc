@@ -53,10 +53,10 @@ then
 
     fi
 
-    if [ -e /bin/lvm ]
+    if [ -e /sbin/lvm.static ]
     then
-	ln -s /bin/lvm /bin/vgscan
-	ln -s /bin/lvm /bin/vgchange
+	ln -s /sbin/lvm.static /sbin/vgscan
+	ln -s /sbin/lvm.static /sbin/vgchange
     fi
 fi
 

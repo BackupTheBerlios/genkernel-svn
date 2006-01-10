@@ -29,7 +29,6 @@ kernel_install::()
 		mkdir -p $(config_get_key install-path) || die 'Failed to create install path!'
 	fi
 	
-	cd $(config_get_key kernel-tree)
 	cd $(config_get_key kbuild-output)
 
 	# install the kernel
@@ -40,12 +39,14 @@ kernel_install::()
 	[ "$(config_get_key debuglevel)" -gt "1" ] && CP_ARGS="-v"
 	if [ -n "$(config_get_key install-path)" ]
 	then
-		cp ${CP_ARGS} "${KERNEL_BINARY}" "$(config_get_key install-path)"
+		cp ${CP_ARGS} "$(config_get_key kernel_binary)" "$(config_get_key install-path)"
 		cp ${CP_ARGS} "System.map" "$(config_get_key install-path)"
 
 	else
 		# TODO need to get kname-arch-kv yet....
-		cp ${CP_ARGS} "${KERNEL_BINARY}" /boot
+		ls
+		echo "$(config_get_key kernel_binary)"
+		cp ${CP_ARGS} "$(config_get_key kernel_binary)" /boot
 		cp ${CP_ARGS} "System.map" /boot
 	fi
 }

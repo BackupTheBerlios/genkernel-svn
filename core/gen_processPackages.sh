@@ -1,3 +1,4 @@
+#!/bin/bash
 declare -a __INTERNAL__PKG__CALLBACK__S # Source
 declare -a __INTERNAL__PKG__CALLBACK__D # Data
 
@@ -59,11 +60,54 @@ genkernel_lookup_packages()
 }
 
 genkernel_generate_cpio() {
-	cpio --quiet -o -H newc | gzip -9 > "${TEMP}/$1.cpio.gz"
+	if [ -z "$2" ]
+	then
+		cpio --quiet -o -H newc | gzip -9 > "${TEMP}/$1.cpio.gz"
+	else
+		cpio --quiet -o -H newc > "${TEMP}/$1.cpio"
+	fi
+}
+
+genkernel_extract_cpio() {
+    [ -e "$1" ] || die "File to unpack not present: $1!"
+	
+	if [ -n "$2" ]
+	then
+		mypwd=$PWD
+		cd $2
+	fi
+
+    case "$1" in
+        *.cpio)
+			false
+        ;;
+        *.cpio.gz)
+			gzipped=true
+        ;;
+        *.cpio.bz2)
+            bzipped=true
+        ;;
+        *)
+            die "Unrecognized filetype to unpack: $1!"
+        ;;
+    esac
+
+    print_info 1 "unpack cpio: Processing $(basename ${1})..."
+	if $gzipped
+	then
+		cat $1 |gunzip|cpio -i --quiet || die "Failed to unpack $1!"
+	elif $bzipped
+	then
+		cat $1 |bunzip2|cpio -i --quiet || die "Failed to unpack $1!"
+	else
+		cat $1 |cpio -i --quiet || die "Failed to unpack $1!"
+	fi
+
+	[ -n "$mypwd" ] && cd $mypwd
 }
 
 genkernel_generate_cpio_path() {
-	find $2 -print | genkernel_generate_cpio "$1"
+	find $2 -print | genkernel_generate_cpio "$1" "$3"
 }
 
 genkernel_generate_cpio_files() {

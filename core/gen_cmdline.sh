@@ -327,8 +327,8 @@ show_usage() {
 # Match $* against configuration registry and process...
 parse_cmdline() {
 	# Iterate over each registered config option and see if we have a match.
-	local myRequest myName myTakesData myHasInversion myDataDefault myMatched=false cmdline_profile="cmdline"
-
+	local myRequest myName myTakesData myHasInversion myDataDefault myMatched=false cmdline_profile="cmdline" data
+	local kernel_modules category i j
 	myRequest=$*
 	for (( i = 0 ; i < ${#__INTERNAL__OPTIONS__NAME[@]}; ++i )) ; do
 		myName=${__INTERNAL__OPTIONS__NAME[${i}]}
@@ -356,7 +356,34 @@ parse_cmdline() {
 
 			elif [ "${myTakesData}" = 'true!m' ]
 			then
-				if [ ! "${myRequest##*\=}" == "" ]
+				# Special case (kernel-modules) look into changing this to a call back for better generic support"
+				if [ "${myRequest%%\=*}" = "--kernel-modules" ]
+				then
+					if [ ! "${myRequest##*\=}" == "" ]
+					then
+						data="${myRequest##*\=}"
+						if [ "${data}" == "${data%%:*}" ]
+						then
+							kernel_modules="${data}"
+							category="extra"
+						else
+							kernel_modules="${data##*:}"
+							category="${data%%:*}"
+						fi
+						for j in $kernel_modules
+						do
+							kernel_modules_register_to_category "${category}" "${j}"
+						done
+						myMatched=true
+					else
+						# Nothing behind the = sign
+						show_usage
+						echo
+						echo "Configuration parsing error: '${myRequest}' given but --${myName}= requires an argument!"
+						__INTERNAL__CONFIG_PARSING_FAILED=true
+					fi
+				# On to the regular cases now of true!m
+				elif [ ! "${myRequest##*\=}" == "" ]
 				then
 					if [ "${myName}" = "profile" ]
 					then
@@ -496,7 +523,7 @@ config_profile_read() {
 		fi
 	done < "$1"
 
-	[ -n "${set_config}" ] && echo "# Profile $1 set config vars:${set_config}"
+	#[ -n "${set_config}" ] && echo "# Profile $1 set config vars:${set_config}"
 }
 
 config_profile_dump() {

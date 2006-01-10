@@ -4,6 +4,7 @@ gmi::()
 
 	rm -rf "${TEMP}/initramfs-base-temp"
 	mkdir -p ${TEMP}/initramfs-base-temp/{bin,etc,usr,proc,temp,sbin,sys}
+	mkdir -p ${TEMP}/initramfs-base-temp/etc/modules
 	mkdir -p ${TEMP}/initramfs-base-temp/usr/{s,}bin
 	mkdir -p ${TEMP}/initramfs-base-temp/var/lock/dmraid
 
