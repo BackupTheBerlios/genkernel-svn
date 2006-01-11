@@ -21,15 +21,20 @@ profile_copy() {
 
 	for identifier in $(profile_list_keys $1); do
 		values=$(profile_get_key "${identifier}" "${1}")
+		if has '=' "${values}"
+		then
+			# Nuke'm
+			profile_delete_key "${identifier}" "${__destination_profile}"
+		fi
 		for arg in $values; do
 			if [ "${arg}" == "=" ]
 			then
-				profile_delete_key "${identifier}" "${__destination_profile}"
+				:
 			elif [ "${arg:0:1}" == "-" ]
 			then
 				profile_shrink_key "${identifier}" "${arg#-}" "${__destination_profile}"
 			else
-				profile_set_key "${identifier}" "${arg}" "${__destination_profile}"
+				profile_append_key "${identifier}" "${arg}" "${__destination_profile}"
 			fi
 		done
 		#typeset -p __INTERNAL__OPTIONS__KEY # Key
