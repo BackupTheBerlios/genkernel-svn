@@ -250,9 +250,14 @@ profile_append_key() {
 	[ "$3" = "" ] && __internal_profile="running" || __internal_profile="$3"
 
 	orig_key="$(profile_get_key ${1} ${__internal_profile})"
-	
-	new_key="${orig_key} ${2}"
-	new_key="${new_key# }"
+	if ! has $2 ${orig_key}
+	then
+		new_key="${orig_key} ${2}"
+		new_key="${new_key# }"
+	else
+		new_key="${orig_key}"
+	fi
+
 	
 	profile_set_key "${1}" "${new_key}" "${__internal_profile}"
 }

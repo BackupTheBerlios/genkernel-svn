@@ -52,6 +52,7 @@ kernel_modules_category_list() {
 cmdline_modules_register(){
 	local i data
 	data=$1
+	echo $data
 	if [ "${data}" == "${data%:*}" ]
 	then
 		kernel_modules="${data}"
