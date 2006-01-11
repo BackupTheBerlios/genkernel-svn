@@ -1,6 +1,5 @@
-kernel_make_directive := "vmlinux"
-kernel_binary := "./vmlinux"
-
+kernel-make-directive := "vmlinux"
+kernel-binary := "./vmlinux"
 
 # Kernel Build Info
 #KERNEL_MAKE=make

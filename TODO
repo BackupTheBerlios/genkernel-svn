@@ -11,4 +11,4 @@ Modules to merge in:
   -> MIPS embedded image
 * grub [gen_bootloader.sh]
 * e2fsprogs needs cpio code
-* kernel_modules code
+* epatch function

@@ -126,6 +126,7 @@ profile_delete_item() {
 	unset __INTERNAL__OPTIONS__VALUE_TMP
 	unset __INTERNAL__OPTIONS__PROFILE_TMP
 }
+
 profile_list_items() {
 	local key value profile array_length=${#__INTERNAL__OPTIONS__KEY[@]} n __internal_profile myOut
 	[ "$1" = "" ] && __internal_profile="running" || __internal_profile="$1"
@@ -156,8 +157,7 @@ import_arch_profile() {
 
 profile_get_key() {
 	# <Key> <Profile (optional)> 
-	###<Return on lookup failure (Bool)> Disabled for profile feature 
-	local key value __internal_profile n	
+	local n key value profile __internal_profile
 	[ "$2" = "" ] && __internal_profile="running" || __internal_profile="$2"
 
 	for (( n = 0 ; n < ${#__INTERNAL__OPTIONS__KEY[@]}; ++n )) ; do
@@ -166,13 +166,13 @@ profile_get_key() {
 		profile=${__INTERNAL__OPTIONS__PROFILE[${n}]}
 		[ "$1" = "${key}" ] && [ "${__internal_profile}" = "${profile}" ] && echo "${value}" && return
 	done
-	#logicTrue $2 && echo 'error::lookup-failure'
 }
 
 profile_set_key() {
 	# <Key> <Value> <Profile (optional)>
-	local n
+	local n key value profile __internal_profile
 	[ "$3" = "" ] && __internal_profile="running" || __internal_profile="$3"
+
 	# Check key is not already set, if it is overwrite, else set it.
 	for (( n = 0 ; n < ${#__INTERNAL__OPTIONS__KEY[@]}; ++n )) ; do
 		key=${__INTERNAL__OPTIONS__KEY[${n}]}
@@ -183,17 +183,18 @@ profile_set_key() {
 				__INTERNAL__OPTIONS__VALUE[${n}]="${2}" && \
 				return
 	done
+
 	# Unmatched
 	__INTERNAL__OPTIONS__KEY[${#__INTERNAL__OPTIONS__KEY[@]}]="$1"
 	__INTERNAL__OPTIONS__VALUE[${#__INTERNAL__OPTIONS__VALUE[@]}]="$2"
 	__INTERNAL__OPTIONS__PROFILE[${#__INTERNAL__OPTIONS__PROFILE[@]}]="$__internal_profile"
-
 }
 
 profile_append_key() {
 	# <Key> <Value> <Profile (optional)>
-	local n
+	local n key value profile __internal_profile
 	[ "$3" = "" ] && __internal_profile="running" || __internal_profile="$3"
+
 	# Check key is not already set, if it is overwrite, else set it.
 	for (( n = 0 ; n < ${#__INTERNAL__OPTIONS__KEY[@]}; ++n )) ; do
 		key=${__INTERNAL__OPTIONS__KEY[${n}]}
@@ -206,6 +207,7 @@ profile_append_key() {
 				return
 		fi
 	done
+
 	# Unmatched
 	__INTERNAL__OPTIONS__KEY[${#__INTERNAL__OPTIONS__KEY[@]}]="$1"
 	__INTERNAL__OPTIONS__VALUE[${#__INTERNAL__OPTIONS__VALUE[@]}]="$2"
@@ -214,7 +216,7 @@ profile_append_key() {
 
 profile_shrink_key() {
 	# <Key> <Value> <Profile (optional)>
-	local n
+	local n key value profile __internal_profile
 	[ "$3" = "" ] && __internal_profile="running" || __internal_profile="$3"
 	
 	for (( n = 0 ; n < ${#__INTERNAL__OPTIONS__KEY[@]}; ++n )) ; do
@@ -264,11 +266,22 @@ config_profile_read() {
 		# Strip out inline comments
 		i="${i/[ 	]\#*/}"
 
-		if [[ "${i}" =~ '[a-z0-9\-]+ := \".*\"$' ]]
+		if [[ "${i}" =~ '^[a-z0-9-]+ [-\+:]= ".*"' ]]
 		then
-			identifier="${i% :=*}"
-			data="${i#*:= \"}" # Remove up to first quote inclusive
+			if [[ "${i}" =~ '^[a-z0-9\-]+ :' ]]
+			then
+				operator=':'
+			elif [[ "${i}" =~ '^[a-z0-9\-]+ -' ]] 
+			then
+				operator='-'
+			else
+				operator='+'
+			fi
+
+			identifier="${i% ${operator}=*}"
+			data="${i#*${operator}= \"}" # Remove up to first quote inclusive
 			data="${data%\"}" # Remove end quote
+
 			if [[ "${identifier:0:7}" = 'module_' ]]
 			then
 				identifier="${identifier:7}"
@@ -278,8 +291,23 @@ config_profile_read() {
 			then
 				__INTERNAL__CONFIG_PARSING_DEPTREE="${__INTERNAL__CONFIG_PARSING_DEPTREE} ${data}"
 			else
-				set_config="${set_config} ${identifier}"
-				profile_set_key "${identifier}" "${data}" "${profile}"
+				## Fix: make set_config more verbose
+				set_config="${set_config} ${operator}${identifier}"
+
+				case "${operator}" in
+					':')
+						profile_set_key "${identifier}" "${data}" "${profile}"
+					;;
+					'-')
+						for j in ${data}
+						do
+							profile_shrink_key "${identifier}" "${j}" "${profile}"
+						done
+					;;
+					'+')
+						profile_append_key "${identifier}" "${data}" "${profile}"
+					;;
+				esac
 			fi
 
 		elif [[ "${i}" =~ '^import ' ]]
@@ -305,7 +333,7 @@ config_profile_read() {
 		fi
 	done < "$1"
 
-	#[ -n "${set_config}" ] && echo "# Profile $1 set config vars:${set_config}"
+	[ -n "${set_config}" ] && echo "# Profile $1 set config vars:${set_config}"
 }
 
 config_profile_dump() {

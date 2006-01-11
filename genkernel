@@ -38,7 +38,6 @@ done
 
 genkernel_determine_arch
 import_arch_profile 
-
 import_kernel_module_load_list
 
 #echo
@@ -53,7 +52,6 @@ import_kernel_module_load_list
 logicTrue ${__INTERNAL__CONFIG_PARSING_FAILED} && die 'Fatal error processing arguments; exiting...'
 
 # Start Importing profiles into the running profile space
-
 # Copy in the system wide defaults
 profile_copy "system"
 # import the arch specific profile. Arch specific system overrides.
@@ -62,23 +60,19 @@ profile_copy "arch"
 # Copy the user profile created with the setup_userspace function. Last profile to import
 # as this one overrides the rest of them.
 profile_copy "user"
+echo test: $(profile_get_key test)
+
 # End Importing profiles into the running profile space
 
 profile_list_items
-
 profile_get_key "extra" "modules"
-
 profile_shrink_key "extra" "foo" "modules"
-
 profile_get_key "extra" "modules"
-
 #profile_list_items "modules"
-
 #profile_delete_item "evms" "modules"
 
 set_color 
 logicTrue $(profile_get_key help user) && show_help && echo && exit 0 # --help
-
 
 # Set DEBUGFILE if log-override is defined
 [ -n "$(profile_get_key log-override)" ] && DEBUGFILE="$(profile_get_key log-override)"
