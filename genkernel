@@ -60,6 +60,11 @@ profile_copy "arch"
 # Copy the user profile created with the setup_userspace function. Last profile to import
 # as this one overrides the rest of them.
 profile_copy "user"
+
+#typeset -p __INTERNAL__OPTIONS__KEY 
+#typeset -p __INTERNAL__OPTIONS__VALUE 
+#typeset -p __INTERNAL__OPTIONS__PROFILE
+
 echo test: $(profile_get_key test)
 
 # End Importing profiles into the running profile space

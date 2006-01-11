@@ -414,12 +414,6 @@ setup_userspace() {
 	profile_copy "cmdline" "user"
 }
 
-setup_arch_profile() {
-	PREFIX='arch'
-	for i in $(profile_list); do
-	    [ "${i:0:${#PREFIX}}" = ${PREFIX} ] && profile_copy $i "arch" && profile_delete $i
-	done
-}
 
 print_list()
 {

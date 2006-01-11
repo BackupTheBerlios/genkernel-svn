@@ -8,17 +8,17 @@ profile_copy() {
 	# <Source Profile> <Destination Profile (optional)> 
 
 	[ "${1}" == "" ] && die "profile_copy <Source Profile> <Destination Profile (optional)>"
+	[ "$2" = "" ] && __destination_profile="running" || __destination_profile="$2"
 	local key value profile array_length n
-	
 	array_length=${#__INTERNAL__OPTIONS__KEY[@]}
-	
 	for (( n = 0 ; n < ${array_length}; ++n )) ; do
 		key=${__INTERNAL__OPTIONS__KEY[${n}]}
 		value=${__INTERNAL__OPTIONS__VALUE[${n}]}
 		profile=${__INTERNAL__OPTIONS__PROFILE[${n}]}
+
 		if [ "${1}" == "${profile}" ] 
 		then
-			profile_set_key "${key}" "${value}" "${2}"
+			profile_set_key "${key}" "${value}" "${__destination_profile}"
 		fi
 	done
 }
@@ -47,11 +47,14 @@ profile_delete() {
 		value=${__INTERNAL__OPTIONS__VALUE[${n}]}
 		profile=${__INTERNAL__OPTIONS__PROFILE[${n}]}
 		
-		[  "$1" != "${profile}" ] && \
-			__INTERNAL__OPTIONS__KEY_TMP[${z}]="$key"
+		if [  "$1" != "${profile}" ]
+		then
+			__INTERNAL__OPTIONS__KEY_TMP[${z}]="$key" 
 			__INTERNAL__OPTIONS__VALUE_TMP[${z}]="$value"
 			__INTERNAL__OPTIONS__PROFILE_TMP[${z}]="$profile"
 			let z=${z}+1
+		fi
+
 	done
 	
 	# Clear the original array vars and recreate them
@@ -153,6 +156,13 @@ import_arch_profile() {
 	
 	# Copy the arch profile we just imported into the arch profile	
 	setup_arch_profile
+}
+
+setup_arch_profile() {
+    PREFIX='arch'
+    for i in $(profile_list); do
+        [ "${i:0:${#PREFIX}}" = ${PREFIX} ] && profile_copy $i "arch" && profile_delete $i
+    done
 }
 
 profile_get_key() {
