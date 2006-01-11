@@ -15,7 +15,6 @@ source ${CORE_DIR}/gen_coreFunctions.sh || die "Failed to source gen_coreFunctio
 source ${CORE_DIR}/gen_dependencyEngine.sh || die "Failed to source gen_dependencyEngine.sh"
 source ${CORE_DIR}/gen_processPackages.sh || die "Failed to source gen_processPackages.sha"
 source ${CORE_DIR}/gen_processKernelTree.sh || die "Failed to source gen_processKernelTree.sh"
-source ${CORE_DIR}/gen_processKernelModules.sh || die "Failed to source gen_processKernelModules.sh"
 source ${CORE_DIR}/gen_cmdline.sh || die "Failed to source gen_cmdline.sh"
 source ${CORE_DIR}/gen_profile.sh || die "Failed to source gen_profile.sh"
 source ${CORE_DIR}/gen_help_setup.sh || die "Failed to source gen_help_setup.sh"
