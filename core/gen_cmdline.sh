@@ -224,7 +224,7 @@ parse_cmdline() {
 		if [ "${myRequest:(-2)}" = '::' ]
 		then
 			# Add to deptree
-			__INTERNAL__CONFIG_PARSING_DEPTREE="${__INTERNAL__CONFIG_PARSING_DEPTREE} ${myRequest%::}"
+			profile_append_key "gk-run-modules" "${myRequest%::}" "${cmdline_profile}"
 			myMatched=true
 			break
 

@@ -60,12 +60,16 @@ profile_copy "system"
 # import the arch specific profile. Arch specific system overrides.
 profile_copy "arch"
 
-profile_copy "modules-cmdline"
+profile_copy "modules-cmdline" "modules"
 # Copy the user profile created with the setup_userspace function. Last profile to import
 # as this one overrides the rest of them.
+profile_copy "user"
 profile_list_contents "profile"
 profile_list_contents "user"
 profile_list_contents "arch"
+profile_list_contents "modules"
+profile_list_keys "modules"
+
 profile_list_contents
 profile_list_keys "running"
 
@@ -98,7 +102,7 @@ fi
 [ -n "$(profile_get_key profile-dump)" ] && config_profile_dump
 
 # Check if any modules to execute were specified
-if [ "${__INTERNAL__CONFIG_PARSING_DEPTREE}" = '' ]
+if [ -z "$(profile_get_key 'gk-run-modules')" ]
 then
 	echo 'Fatal error: no modules to execute specified...'
 	show_usage
@@ -114,7 +118,7 @@ genkernel_lookup_kernel
 
 # Process depends
 print_info 1 '>> Processing dependency tree...'
-require "${__INTERNAL__CONFIG_PARSING_DEPTREE}"
+require "$(profile_get_key 'gk-run-modules')"
 
 # Repeat the process since we now (might) have package-based callbacks
 # Sourcing the dependency engine an additional engine makes the scrubber code erase
@@ -124,7 +128,7 @@ source ${CORE_DIR}/gen_dependencyEngine.sh || die "Failed to resource gen_depend
 # Reprocess
 genkernel_lookup_packages
 genkernel_lookup_kernel silent
-require "${__INTERNAL__CONFIG_PARSING_DEPTREE}"
+require "$(profile_get_key 'gk-run-modules')"
 
 #Create the cache dir if it doesnt exist
 setup_cache_dir

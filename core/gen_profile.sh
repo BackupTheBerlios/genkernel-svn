@@ -196,6 +196,13 @@ setup_arch_profile() {
     done
 }
 
+setup_modules() {
+    PREFIX='modules'
+    for i in $(profile_list); do
+        [ "${i:0:${#PREFIX}}" = ${PREFIX} ] && profile_copy $i "modules"
+    done
+}
+
 setup_userspace() {
     # Create the userspace profile
     PREFIX='profile'
@@ -246,49 +253,49 @@ profile_set_key() {
 
 profile_append_key() {
 	# <Key> <Value> <Profile (optional)>
-	local n key value profile __internal_profile
+	local n key orig_value new_value profile __internal_profile
 	[ "$3" = "" ] && __internal_profile="running" || __internal_profile="$3"
 
-	orig_key="$(profile_get_key ${1} ${__internal_profile})"
-	if ! has $2 ${orig_key}
+	orig_value="$(profile_get_key ${1} ${__internal_profile})"
+	if ! has $2 ${orig_value}
 	then
-		new_key="${orig_key} ${2}"
-		new_key="${new_key# }"
+		new_value="${orig_value} ${2}"
+		new_value="${new_value# }"
 	else
-		new_key="${orig_key}"
+		new_value="${orig_value}"
 	fi
 
 	
-	profile_set_key "${1}" "${new_key}" "${__internal_profile}"
+	profile_set_key "${1}" "${new_value}" "${__internal_profile}"
 }
 
 profile_shrink_key() {
 	# <Key> <Value> <Profile (optional)>
-	local n key value profile __internal_profile
+	local n key value new_value profile __internal_profile
 	[ "$3" = "" ] && __internal_profile="running" || __internal_profile="$3"
 	
-	for (( n = 0 ; n < ${#__INTERNAL__OPTIONS__KEY[@]}; ++n )) ; do
-		key=${__INTERNAL__OPTIONS__KEY[${n}]}
-		value=${__INTERNAL__OPTIONS__VALUE[${n}]}
-		profile=${__INTERNAL__OPTIONS__PROFILE[${n}]}
-		
-		if [ "${1}" = "${key}" -a "${__internal_profile}" = "${profile}" ]
-		then
-			new_value="$(subtract_from_list "$2" "${value}")"
-			new_value=${new_value# }
-			__INTERNAL__OPTIONS__VALUE[${n}]="${new_value}"
-		fi
-	done
+	orig_value="$(profile_get_key ${1} ${__internal_profile})"
+	new_value="$(subtract_from_list "$2" "${orig_value}")"
+	new_value=${new_value# }
+	profile_set_key "${1}" "${new_value}" "${__internal_profile}"
+	
+	if [[ $(profile_get_key "${1}" "${__internal_profile}") == "" ]]
+	then
+		profile_delete_key "${1}" "${__internal_profile}"
+	fi
 }
 
 import_kernel_module_load_list() {
 	# Read the generic modules list first 
-	GENERIC_MODULES_LOAD="${CONFIG_GENERIC_DIR}/modules_load"
+	GENERIC_MODULES_LOAD="${CONFIG_GENERIC_DIR}/modules_load.gk"
 	[ -f "${GENERIC_MODULES_LOAD}" ] && config_profile_read ${GENERIC_MODULES_LOAD} "modules"
 
 	# override with the arch specific one
 	MODULES_LOAD="${CONFIG_DIR}/modules_load"
 	[ -f "${MODULES_LOAD}" ] && config_profile_read ${MODULES_LOAD} "modules"
+
+	# Merge the modules profiles into one modules profile
+	setup_modules
 }	
 
 
@@ -334,36 +341,30 @@ config_profile_read() {
 			#	identifier="${identifier:7}"
 			#	# Append the data into the modules profile space.
 			#	kernel_modules_register_to_category "${identifier}" "${data}"
-			if [[ "${identifier:0:16}" = 'genkernel_module' ]]
-			then
-				__INTERNAL__CONFIG_PARSING_DEPTREE="${__INTERNAL__CONFIG_PARSING_DEPTREE} ${data}"
-			else
-				case "${operator}" in
-					':')
-						profile_append_key "${identifier}" "=" "${profile}"
-						for j in ${data}
-						do
-							#echo "appending ${j}"
-							profile_append_key "${identifier}" "${j}" "${profile}"
-						done
-					;;
-					'-')
-						for j in ${data}
-						do
-							#echo "appending -${j}"
-							profile_append_key "${identifier}" "-${j}" "${profile}"
-						done
-					;;
-					'+')
-						for j in ${data}
-						do
-							#echo "appending ${j}"
-							profile_append_key "${identifier}" "${j}" "${profile}"
-						done
-					;;
-				esac
-				#echo "${identifier} \"$(profile_get_key "${identifier}" "${profile}")\""
-			fi
+			case "${operator}" in
+				':')
+					profile_append_key "${identifier}" "=" "${profile}"
+					for j in ${data}
+					do
+						#echo "appending ${j}"
+						profile_append_key "${identifier}" "${j}" "${profile}"
+					done
+				;;
+				'-')
+					for j in ${data}
+					do
+						#echo "appending -${j}"
+						profile_append_key "${identifier}" "-${j}" "${profile}"
+					done
+				;;
+				'+')
+					for j in ${data}
+					do
+						#echo "appending ${j}"
+						profile_append_key "${identifier}" "${j}" "${profile}"
+					done
+				;;
+			esac
 
 		elif [[ "${i}" =~ '^import ' ]]
 		then
@@ -404,7 +405,6 @@ config_profile_dump() {
 			;;
 		esac
 	done
-	echo "genkernel_module := \"${__INTERNAL__CONFIG_PARSING_DEPTREE}\""
 	exit 0
 }
 
