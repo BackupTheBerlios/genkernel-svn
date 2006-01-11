@@ -64,6 +64,7 @@ cmdline_modules_register(){
 
 	for i in $kernel_modules
 	do
+		profile_append_key "${category}" "${i}" "modules"
 		kernel_modules_register_to_category "${category}" "${i}"
 	done
 }

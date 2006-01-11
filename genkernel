@@ -41,6 +41,14 @@ import_arch_profile
 
 import_kernel_module_load_list
 
+#echo
+#echo "listing keys"
+#for (( n = 0 ; n < ${#__INTERNAL__OPTIONS__KEY[@]}; ++n )) ; do
+#	echo "$n ${__INTERNAL__OPTIONS__VALUE[$n]}"
+#done
+##echo "end listing keys"
+#echo
+
 # Failed to parse the cmdline properly, die so we can investigate...
 logicTrue ${__INTERNAL__CONFIG_PARSING_FAILED} && die 'Fatal error processing arguments; exiting...'
 
@@ -48,15 +56,15 @@ logicTrue ${__INTERNAL__CONFIG_PARSING_FAILED} && die 'Fatal error processing ar
 
 # Copy in the system wide defaults
 profile_copy "system"
-
 # import the arch specific profile. Arch specific system overrides.
 profile_copy "arch"
 
 # Copy the user profile created with the setup_userspace function. Last profile to import
 # as this one overrides the rest of them.
 profile_copy "user"
-
 # End Importing profiles into the running profile space
+profile_list "module"
+
 
 set_color 
 logicTrue $(profile_get_key help user) && show_help && echo && exit 0 # --help
@@ -116,6 +124,7 @@ genkernel::()
 
 # If we have a callback set require the callback module
 [ -n "$(profile_get_key callback)" ] && require callback
+
 
 for i in $(buildDepTreeSolution)
 do

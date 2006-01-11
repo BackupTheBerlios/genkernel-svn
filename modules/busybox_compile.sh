@@ -20,6 +20,7 @@ busybox_compile::()
 	sed -i -e 's/#\? \?CONFIG_FEATURE_INSTALLER[ =].*/CONFIG_FEATURE_INSTALLER=y/g' .config
 
 	print_info 1 'busybox: >> Configuring...'
+	# TODO Add busybox config changing support
 	yes '' 2>/dev/null | compile_generic oldconfig
 	print_info 1 'busybox: >> Compiling...'
 	compile_generic all

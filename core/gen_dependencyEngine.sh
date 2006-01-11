@@ -70,7 +70,6 @@ require () {
 	# Get Caller Module; step back twice in the execution list to get to the caller.
 	local myCaller myDeps myConditonalVar myLookup
 	myCaller=$(basename ${BASH_SOURCE[1]} .sh)
-
 	__INTERNAL__MODULES_LOADED="${__INTERNAL__MODULES_LOADED} ${__INTERNAL__MODULES_LOADING}"
 
 	# Process dependency list

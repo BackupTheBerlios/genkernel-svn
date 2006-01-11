@@ -1,4 +1,4 @@
-require kernel
+require kernel_config
 
 callback::()
 {

@@ -10,26 +10,17 @@ profile_copy() {
 	[ "${1}" == "" ] && die "profile_copy <Source Profile> <Destination Profile (optional)>"
 	local key value profile array_length n
 	
-	declare -a __INTERNAL_TMP_KEY=( ${__INTERNAL__OPTIONS__KEY[@]} )
-	declare -a __INTERNAL_TMP_VALUE=( ${__INTERNAL__OPTIONS__VALUE[@]} )
-	declare -a __INTERNAL_TMP_PROFILE=( ${__INTERNAL__OPTIONS__PROFILE[@]} )
-
-	array_length=${#__INTERNAL_TMP_KEY[@]}
+	array_length=${#__INTERNAL__OPTIONS__KEY[@]}
 	
 	for (( n = 0 ; n < ${array_length}; ++n )) ; do
-		key=${__INTERNAL_TMP_KEY[${n}]}
-		value=${__INTERNAL_TMP_VALUE[${n}]}
-		profile=${__INTERNAL_TMP_PROFILE[${n}]}
+		key=${__INTERNAL__OPTIONS__KEY[${n}]}
+		value=${__INTERNAL__OPTIONS__VALUE[${n}]}
+		profile=${__INTERNAL__OPTIONS__PROFILE[${n}]}
 		if [ "${1}" == "${profile}" ] 
 		then
 			profile_set_key "${key}" "${value}" "${2}"
 		fi
 	done
-	
-	# Delete temporary arrays
-	unset __INTERNAL_TMP_KEY
-	unset __INTERNAL_TMP_VALUE
-	unset __INTERNAL_TMP_PROFILE
 }
 
 profile_exists() {
@@ -45,31 +36,28 @@ profile_exists() {
 }
 
 profile_delete() {
+		#THIS IS BROKEN CANT BE USED YET ... messes up "foo bar" for the value
 	local key value profile array_length=${#__INTERNAL__OPTIONS__KEY[@]} x=0 n
-	declare -a __INTERNAL_TMP_KEY	
-	declare -a __INTERNAL_TMP_VALUE
-	declare -a __INTERNAL_TMP_PROFILE	
-	
+	declare -a __INTERNAL__OPTIONS__KEY_TMP
+	declare -a __INTERNAL__OPTIONS__VALUE_TMP
+	declare -a __INTERNAL__OPTIONS__PROFILE_TMP
 	for (( n = 0 ; n < ${array_length}; ++n )) ; do
 		key=${__INTERNAL__OPTIONS__KEY[${n}]}
 		value=${__INTERNAL__OPTIONS__VALUE[${n}]}
 		profile=${__INTERNAL__OPTIONS__PROFILE[${n}]}
+		
 		[ ! "$1" == "${profile}" ] && \
-			__INTERNAL_TMP_KEY[${x}]=${__INTERNAL__OPTIONS__KEY[${n}]} && \
-			__INTERNAL_TMP_VALUE[${x}]=${__INTERNAL__OPTIONS__VALUE[${n}]} && \
-			__INTERNAL_TMP_PROFILE[${x}]=${__INTERNAL__OPTIONS__PROFILE[${n}]} && \
-			let "x = $x + 1"
+			__INTERNAL__OPTIONS__KEY_TMP[${n}]="$key"
+			__INTERNAL__OPTIONS__VALUE_TMP[${n}]="$value"
+			__INTERNAL__OPTIONS__PROFILE_TMP[${n}]="$profile"
 	done
+	__INTERNAL__OPTIONS__KEY=$__INTERNAL__OPTIONS__KEY_TMP
+	__INTERNAL__OPTIONS__VALUE=$__INTERNAL__OPTIONS__VALUE_TMP
+	__INTERNAL__OPTIONS__PROFILE=$__INTERNAL__OPTIONS__PROFILE_TMP
 
-	# Reset arrays to temporary values
-	__INTERNAL__OPTIONS__KEY=( ${__INTERNAL_TMP_KEY[@]} )
-	__INTERNAL__OPTIONS__VALUE=( ${__INTERNAL_TMP_VALUE[@]} )
-	__INTERNAL__OPTIONS__PROFILE=( ${__INTERNAL_TMP_PROFILE[@]} )
-	
-	# Delete temporary arrays
-	unset __INTERNAL_TMP_KEY
-	unset __INTERNAL_TMP_VALUE
-	unset __INTERNAL_TMP_PROFILE
+	unset __INTERNAL__OPTIONS__KEY_TMP
+	unset __INTERNAL__OPTIONS__VALUE_TMP
+	unset __INTERNAL__OPTIONS__PROFILE_TMP
 }
 
 profile_list() {
@@ -118,24 +106,44 @@ profile_set_key() {
 	# <Key> <Value> <Profile (optional)>
 	local n
 	[ "$3" = "" ] && __internal_profile="running" || __internal_profile="$3"
-
 	# Check key is not already set, if it is overwrite, else set it.
 	for (( n = 0 ; n < ${#__INTERNAL__OPTIONS__KEY[@]}; ++n )) ; do
 		key=${__INTERNAL__OPTIONS__KEY[${n}]}
 		value=${__INTERNAL__OPTIONS__VALUE[${n}]}
 		profile=${__INTERNAL__OPTIONS__PROFILE[${n}]}
-
-		[ "$1" = "${key}" ] && [ "${__internal_profile}" = "${profile}" ] && \
-				__INTERNAL__OPTIONS__VALUE[${n}]=$2 && return
+	
+		[ "${1}" = "${key}" ] && [ "${__internal_profile}" = "${profile}" ] && \
+				__INTERNAL__OPTIONS__VALUE[${n}]="${2}" && \
+				return
 	done
-
 	# Unmatched
-	# echo "$1 $2 $__internal_profile"
-	__INTERNAL__OPTIONS__KEY[${#__INTERNAL__OPTIONS__KEY[@]}]=$1
-	__INTERNAL__OPTIONS__VALUE[${#__INTERNAL__OPTIONS__VALUE[@]}]=$2
-	__INTERNAL__OPTIONS__PROFILE[${#__INTERNAL__OPTIONS__PROFILE[@]}]=$__internal_profile
+	__INTERNAL__OPTIONS__KEY[${#__INTERNAL__OPTIONS__KEY[@]}]="$1"
+	__INTERNAL__OPTIONS__VALUE[${#__INTERNAL__OPTIONS__VALUE[@]}]="$2"
+	__INTERNAL__OPTIONS__PROFILE[${#__INTERNAL__OPTIONS__PROFILE[@]}]="$__internal_profile"
+
 }
 
+profile_append_key() {
+	# <Key> <Value> <Profile (optional)>
+	local n
+	[ "$3" = "" ] && __internal_profile="running" || __internal_profile="$3"
+	# Check key is not already set, if it is overwrite, else set it.
+	for (( n = 0 ; n < ${#__INTERNAL__OPTIONS__KEY[@]}; ++n )) ; do
+		key=${__INTERNAL__OPTIONS__KEY[${n}]}
+		value=${__INTERNAL__OPTIONS__VALUE[${n}]}
+		profile=${__INTERNAL__OPTIONS__PROFILE[${n}]}
+	
+		if [ "${1}" = "${key}" -a "${__internal_profile}" = "${profile}" ]
+		then
+				__INTERNAL__OPTIONS__VALUE[${n}]="${__INTERNAL__OPTIONS__VALUE[${n}]} ${2}"
+				return
+		fi
+	done
+	# Unmatched
+	__INTERNAL__OPTIONS__KEY[${#__INTERNAL__OPTIONS__KEY[@]}]="$1"
+	__INTERNAL__OPTIONS__VALUE[${#__INTERNAL__OPTIONS__VALUE[@]}]="$2"
+	__INTERNAL__OPTIONS__PROFILE[${#__INTERNAL__OPTIONS__PROFILE[@]}]="$__internal_profile"
+}
 
 import_kernel_module_load_list() {
 	# Read the generic modules list first 
@@ -230,3 +238,4 @@ config_profile_dump() {
 	echo "genkernel_module := \"${__INTERNAL__CONFIG_PARSING_DEPTREE}\""
 	exit 0
 }
+
