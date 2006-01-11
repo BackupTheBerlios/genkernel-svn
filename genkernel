@@ -36,6 +36,8 @@ do
 	parse_cmdline $Option
 done
 
+profile_copy "modules-cmdline"
+
 genkernel_determine_arch
 import_arch_profile 
 import_kernel_module_load_list
@@ -61,18 +63,15 @@ profile_copy "arch"
 # as this one overrides the rest of them.
 profile_copy "user"
 
-#typeset -p __INTERNAL__OPTIONS__KEY 
-#typeset -p __INTERNAL__OPTIONS__VALUE 
-#typeset -p __INTERNAL__OPTIONS__PROFILE
 
 echo test: $(profile_get_key test)
 
 # End Importing profiles into the running profile space
 
-profile_list_items
-profile_get_key "extra" "modules"
-profile_shrink_key "extra" "foo" "modules"
-profile_get_key "extra" "modules"
+#profile_list_items
+#profile_get_key "extra" "modules"
+#profile_shrink_key "extra" "foo" "modules"
+#profile_get_key "extra" "modules"
 #profile_list_items "modules"
 #profile_delete_item "evms" "modules"
 

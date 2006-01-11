@@ -15,10 +15,25 @@ profile_copy() {
 		key=${__INTERNAL__OPTIONS__KEY[${n}]}
 		value=${__INTERNAL__OPTIONS__VALUE[${n}]}
 		profile=${__INTERNAL__OPTIONS__PROFILE[${n}]}
-
 		if [ "${1}" == "${profile}" ] 
 		then
-			profile_set_key "${key}" "${value}" "${__destination_profile}"
+			for m in ${value} ; do
+				if [ "${m}" == "=" ]
+				then
+					#echo "${key} clear"
+					profile_delete_key "${key}" "${__destination_profile}"
+					#echo "${key} $(profile_get_key "${key}" "${__destination_profile}")"
+				elif [ "${m:0:1}" == "-" ]
+				then
+					#echo "${key} shrink"
+					profile_shrink_key "${key}" "${m#-}" "${__destination_profile}"
+					#echo "${key} $(profile_get_key "${key}" "${__destination_profile}")"
+				else
+					#echo "${key} append"
+					profile_append_key "${key}" "${m}" "${__destination_profile}"
+					#echo "${key} $(profile_get_key "${key}" "${__destination_profile}")"
+				fi
+			done
 		fi
 	done
 }
@@ -89,7 +104,7 @@ profile_list() {
 	echo "${myOut}"
 }
 
-profile_delete_item() {
+profile_delete_key() {
 	local key value profile array_length=${#__INTERNAL__OPTIONS__KEY[@]} n __internal_profile z=0
 	[ "$2" = "" ] && __internal_profile="running" || __internal_profile="$2"
 	
@@ -130,7 +145,7 @@ profile_delete_item() {
 	unset __INTERNAL__OPTIONS__PROFILE_TMP
 }
 
-profile_list_items() {
+profile_list_keys() {
 	local key value profile array_length=${#__INTERNAL__OPTIONS__KEY[@]} n __internal_profile myOut
 	[ "$1" = "" ] && __internal_profile="running" || __internal_profile="$1"
 	
@@ -292,12 +307,12 @@ config_profile_read() {
 			data="${i#*${operator}= \"}" # Remove up to first quote inclusive
 			data="${data%\"}" # Remove end quote
 
-			if [[ "${identifier:0:7}" = 'module_' ]]
-			then
-				identifier="${identifier:7}"
-				# Append the data into the modules profile space.
-				kernel_modules_register_to_category "${identifier}" "${data}"
-			elif [[ "${identifier:0:16}" = 'genkernel_module' ]]
+			#if [[ "${identifier:0:7}" = 'module_' ]]
+			#then
+			#	identifier="${identifier:7}"
+			#	# Append the data into the modules profile space.
+			#	kernel_modules_register_to_category "${identifier}" "${data}"
+			if [[ "${identifier:0:16}" = 'genkernel_module' ]]
 			then
 				__INTERNAL__CONFIG_PARSING_DEPTREE="${__INTERNAL__CONFIG_PARSING_DEPTREE} ${data}"
 			else
@@ -306,12 +321,12 @@ config_profile_read() {
 
 				case "${operator}" in
 					':')
-						profile_set_key "${identifier}" "${data}" "${profile}"
+						profile_append_key "${identifier}" "=" "${profile}"
 					;;
 					'-')
 						for j in ${data}
 						do
-							profile_shrink_key "${identifier}" "${j}" "${profile}"
+							profile_append_key "${identifier}" "-${j}" "${profile}"
 						done
 					;;
 					'+')

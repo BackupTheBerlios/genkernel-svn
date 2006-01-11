@@ -207,12 +207,13 @@ parse_cmdline() {
 				if [ "${myfunction}" != "" ]
 				then
 					# Function call defined in __register_config_option + data behind the = sign from myRequest"
-					"${myfunction}" "${myRequest##*\=}"
+
+					"${myfunction}" "${myRequest#*\=}"
 				else
-					logicTrue ${myTakesData} && profile_set_key "${myName}" "${myRequest##*\=}" "${cmdline_profile}"
+					logicTrue ${myTakesData} && profile_set_key "${myName}" "${myRequest#*\=}" "${cmdline_profile}"
 				
 					[[ "${myTakesData}" = 'true!m' ]] && \
-						profile_set_key "${myName}" "$(profile_get_key ${myName}) ${myRequest##*\=}" "${cmdline_profile}"
+						profile_set_key "${myName}" "$(profile_get_key ${myName}) ${myRequest#*\=}" "${cmdline_profile}"
 				fi
 				myMatched=true
 				break	
