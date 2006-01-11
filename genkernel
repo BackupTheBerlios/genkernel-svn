@@ -63,8 +63,18 @@ profile_copy "arch"
 # as this one overrides the rest of them.
 profile_copy "user"
 # End Importing profiles into the running profile space
-profile_list "module"
 
+profile_list_items
+
+profile_get_key "extra" "modules"
+
+profile_shrink_key "extra" "foo" "modules"
+
+profile_get_key "extra" "modules"
+
+#profile_list_items "modules"
+
+#profile_delete_item "evms" "modules"
 
 set_color 
 logicTrue $(profile_get_key help user) && show_help && echo && exit 0 # --help

@@ -36,29 +36,42 @@ profile_exists() {
 }
 
 profile_delete() {
-		#THIS IS BROKEN CANT BE USED YET ... messes up "foo bar" for the value
-	local key value profile array_length=${#__INTERNAL__OPTIONS__KEY[@]} x=0 n
+	local key value profile array_length=${#__INTERNAL__OPTIONS__KEY[@]} n z=0
 	declare -a __INTERNAL__OPTIONS__KEY_TMP
 	declare -a __INTERNAL__OPTIONS__VALUE_TMP
 	declare -a __INTERNAL__OPTIONS__PROFILE_TMP
+
+	# Find the items that dont match the profile and save them to a tmp array
 	for (( n = 0 ; n < ${array_length}; ++n )) ; do
 		key=${__INTERNAL__OPTIONS__KEY[${n}]}
 		value=${__INTERNAL__OPTIONS__VALUE[${n}]}
 		profile=${__INTERNAL__OPTIONS__PROFILE[${n}]}
 		
-		[ ! "$1" == "${profile}" ] && \
-			__INTERNAL__OPTIONS__KEY_TMP[${n}]="$key"
-			__INTERNAL__OPTIONS__VALUE_TMP[${n}]="$value"
-			__INTERNAL__OPTIONS__PROFILE_TMP[${n}]="$profile"
+		[  "$1" != "${profile}" ] && \
+			__INTERNAL__OPTIONS__KEY_TMP[${z}]="$key"
+			__INTERNAL__OPTIONS__VALUE_TMP[${z}]="$value"
+			__INTERNAL__OPTIONS__PROFILE_TMP[${z}]="$profile"
+			let z=${z}+1
 	done
-	__INTERNAL__OPTIONS__KEY=$__INTERNAL__OPTIONS__KEY_TMP
-	__INTERNAL__OPTIONS__VALUE=$__INTERNAL__OPTIONS__VALUE_TMP
-	__INTERNAL__OPTIONS__PROFILE=$__INTERNAL__OPTIONS__PROFILE_TMP
+	
+	# Clear the original array vars and recreate them
+	unset __INTERNAL__OPTIONS__KEY
+	unset __INTERNAL__OPTIONS__VALUE
+	unset __INTERNAL__OPTIONS__PROFILE
 
+	# Populate arrays from tmp arrays
+	for (( n = 0 ; n < ${#__INTERNAL__OPTIONS__KEY_TMP[@]}; ++n )) ; do
+		__INTERNAL__OPTIONS__KEY[${n}]=${__INTERNAL__OPTIONS__KEY_TMP[${n}]}
+		__INTERNAL__OPTIONS__VALUE[${n}]=${__INTERNAL__OPTIONS__VALUE_TMP[${n}]}
+		__INTERNAL__OPTIONS__PROFILE[${n}]=${__INTERNAL__OPTIONS__PROFILE_TMP[${n}]}
+	done
+	
+	# Clear the tmp arrays
 	unset __INTERNAL__OPTIONS__KEY_TMP
 	unset __INTERNAL__OPTIONS__VALUE_TMP
 	unset __INTERNAL__OPTIONS__PROFILE_TMP
 }
+
 
 profile_list() {
 	local myOut n
@@ -69,6 +82,60 @@ profile_list() {
 			[ ! "${__INTERNAL__OPTIONS__PROFILE[${n}]}" == "" ] && \
 				myOut="${__INTERNAL__OPTIONS__PROFILE[${n}]} ${myOut}"
 		fi
+	done
+	echo "${myOut}"
+}
+
+profile_delete_item() {
+	local key value profile array_length=${#__INTERNAL__OPTIONS__KEY[@]} n __internal_profile z=0
+	[ "$2" = "" ] && __internal_profile="running" || __internal_profile="$2"
+	
+	declare -a __INTERNAL__OPTIONS__KEY_TMP
+	declare -a __INTERNAL__OPTIONS__VALUE_TMP
+	declare -a __INTERNAL__OPTIONS__PROFILE_TMP
+	
+	for (( n = 0 ; n < ${array_length}; ++n )) ; do
+		key=${__INTERNAL__OPTIONS__KEY[${n}]}
+		value=${__INTERNAL__OPTIONS__VALUE[${n}]}
+		profile=${__INTERNAL__OPTIONS__PROFILE[${n}]}
+			
+		if [ "$1" != "${key}" -a "${__internal_profile}" != "${profile}" ] 
+		then
+			__INTERNAL__OPTIONS__KEY_TMP[${z}]="$key"
+			__INTERNAL__OPTIONS__VALUE_TMP[${z}]="$value"
+			__INTERNAL__OPTIONS__PROFILE_TMP[${z}]="$profile"
+			let z=${z}+1
+		fi
+	
+	done
+	
+	# Clear the original array vars
+	unset __INTERNAL__OPTIONS__KEY
+	unset __INTERNAL__OPTIONS__VALUE
+	unset __INTERNAL__OPTIONS__PROFILE
+
+	# Populate arrays from tmp arrays
+	for (( n = 0 ; n < ${#__INTERNAL__OPTIONS__KEY_TMP[@]}; ++n )) ; do
+		__INTERNAL__OPTIONS__KEY[${n}]=${__INTERNAL__OPTIONS__KEY_TMP[${n}]}
+		__INTERNAL__OPTIONS__VALUE[${n}]=${__INTERNAL__OPTIONS__VALUE_TMP[${n}]}
+		__INTERNAL__OPTIONS__PROFILE[${n}]=${__INTERNAL__OPTIONS__PROFILE_TMP[${n}]}
+	done
+	
+	# Clear the tmp arrays
+	unset __INTERNAL__OPTIONS__KEY_TMP
+	unset __INTERNAL__OPTIONS__VALUE_TMP
+	unset __INTERNAL__OPTIONS__PROFILE_TMP
+}
+profile_list_items() {
+	local key value profile array_length=${#__INTERNAL__OPTIONS__KEY[@]} n __internal_profile myOut
+	[ "$1" = "" ] && __internal_profile="running" || __internal_profile="$1"
+	
+	for (( n = 0 ; n < ${array_length}; ++n )) ; do
+		key=${__INTERNAL__OPTIONS__KEY[${n}]}
+		value=${__INTERNAL__OPTIONS__VALUE[${n}]}
+		profile=${__INTERNAL__OPTIONS__PROFILE[${n}]}
+		
+		[ "${__internal_profile}" == "${profile}" ] && myOut="${key} ${myOut}"
 	done
 	echo "${myOut}"
 }
@@ -143,6 +210,25 @@ profile_append_key() {
 	__INTERNAL__OPTIONS__KEY[${#__INTERNAL__OPTIONS__KEY[@]}]="$1"
 	__INTERNAL__OPTIONS__VALUE[${#__INTERNAL__OPTIONS__VALUE[@]}]="$2"
 	__INTERNAL__OPTIONS__PROFILE[${#__INTERNAL__OPTIONS__PROFILE[@]}]="$__internal_profile"
+}
+
+profile_shrink_key() {
+	# <Key> <Value> <Profile (optional)>
+	local n
+	[ "$3" = "" ] && __internal_profile="running" || __internal_profile="$3"
+	
+	for (( n = 0 ; n < ${#__INTERNAL__OPTIONS__KEY[@]}; ++n )) ; do
+		key=${__INTERNAL__OPTIONS__KEY[${n}]}
+		value=${__INTERNAL__OPTIONS__VALUE[${n}]}
+		profile=${__INTERNAL__OPTIONS__PROFILE[${n}]}
+		
+		if [ "${1}" = "${key}" -a "${__internal_profile}" = "${profile}" ]
+		then
+			new_value="$(subtract_from_list "$2" "${value}")"
+			new_value=${new_value# }
+			__INTERNAL__OPTIONS__VALUE[${n}]="${new_value}"
+		fi
+	done
 }
 
 import_kernel_module_load_list() {
