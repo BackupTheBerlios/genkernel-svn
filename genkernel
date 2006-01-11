@@ -36,7 +36,8 @@ do
 	parse_cmdline $Option
 done
 
-profile_copy "modules-cmdline"
+# Need to see if the user has overridden this; Setup the user profile space has to happen before genkernel_determine_arch
+setup_userspace
 
 genkernel_determine_arch
 import_arch_profile 
@@ -59,20 +60,24 @@ profile_copy "system"
 # import the arch specific profile. Arch specific system overrides.
 profile_copy "arch"
 
+profile_copy "modules-cmdline"
 # Copy the user profile created with the setup_userspace function. Last profile to import
 # as this one overrides the rest of them.
-profile_copy "user"
-
+profile_list_contents "profile"
+profile_list_contents "user"
+profile_list_contents "arch"
+profile_list_contents
+profile_list_keys "running"
 
 echo test: $(profile_get_key test)
 
 # End Importing profiles into the running profile space
 
-#profile_list_items
+#profile_list_keys
 #profile_get_key "extra" "modules"
 #profile_shrink_key "extra" "foo" "modules"
 #profile_get_key "extra" "modules"
-#profile_list_items "modules"
+#profile_list_keys "modules"
 #profile_delete_item "evms" "modules"
 
 set_color 

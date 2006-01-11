@@ -4,38 +4,40 @@ declare -a __INTERNAL__OPTIONS__KEY # Key
 declare -a __INTERNAL__OPTIONS__VALUE # Data
 declare -a __INTERNAL__OPTIONS__PROFILE # Profile
 
+profile_list_contents() {
+	[ "$1" = "" ] && __destination_profile="running" || __destination_profile="$1"
+	local identifier values arg
+	for identifier in $(profile_list_keys ${__destination_profile}); do
+		echo "${__destination_profile}: ${identifier} \"$(profile_get_key "${identifier}" "${__destination_profile}")\""
+	done
+}
+
 profile_copy() {
 	# <Source Profile> <Destination Profile (optional)> 
 
 	[ "${1}" == "" ] && die "profile_copy <Source Profile> <Destination Profile (optional)>"
 	[ "$2" = "" ] && __destination_profile="running" || __destination_profile="$2"
-	local key value profile array_length n
-	array_length=${#__INTERNAL__OPTIONS__KEY[@]}
-	for (( n = 0 ; n < ${array_length}; ++n )) ; do
-		key=${__INTERNAL__OPTIONS__KEY[${n}]}
-		value=${__INTERNAL__OPTIONS__VALUE[${n}]}
-		profile=${__INTERNAL__OPTIONS__PROFILE[${n}]}
-		if [ "${1}" == "${profile}" ] 
-		then
-			for m in ${value} ; do
-				if [ "${m}" == "=" ]
-				then
-					#echo "${key} clear"
-					profile_delete_key "${key}" "${__destination_profile}"
-					#echo "${key} $(profile_get_key "${key}" "${__destination_profile}")"
-				elif [ "${m:0:1}" == "-" ]
-				then
-					#echo "${key} shrink"
-					profile_shrink_key "${key}" "${m#-}" "${__destination_profile}"
-					#echo "${key} $(profile_get_key "${key}" "${__destination_profile}")"
-				else
-					#echo "${key} append"
-					profile_append_key "${key}" "${m}" "${__destination_profile}"
-					#echo "${key} $(profile_get_key "${key}" "${__destination_profile}")"
-				fi
-			done
-		fi
+	local identifier values arg
+
+	for identifier in $(profile_list_keys $1); do
+		values=$(profile_get_key "${identifier}" "${1}")
+		for arg in $values; do
+			if [ "${arg}" == "=" ]
+			then
+				profile_delete_key "${identifier}" "${__destination_profile}"
+			elif [ "${arg:0:1}" == "-" ]
+			then
+				profile_shrink_key "${identifier}" "${arg#-}" "${__destination_profile}"
+			else
+				profile_set_key "${identifier}" "${arg}" "${__destination_profile}"
+			fi
+		done
+		#typeset -p __INTERNAL__OPTIONS__KEY # Key
+		#typeset -p __INTERNAL__OPTIONS__VALUE # Key
+		#typeset -p __INTERNAL__OPTIONS__PROFILE # Key
+		#echo "${__destination_profile}: ${identifier} \"$(profile_get_key "${identifier}" "${__destination_profile}")\""
 	done
+
 }
 
 profile_exists() {
@@ -98,7 +100,9 @@ profile_list() {
 		if ! has "${__INTERNAL__OPTIONS__PROFILE[${n}]}" "${myOut}"
 		then
 			[ ! "${__INTERNAL__OPTIONS__PROFILE[${n}]}" == "" ] && \
-				myOut="${__INTERNAL__OPTIONS__PROFILE[${n}]} ${myOut}"
+				myOut="${myOut} ${__INTERNAL__OPTIONS__PROFILE[${n}]}"
+				myOut="${myOut# }"
+
 		fi
 	done
 	echo "${myOut}"
@@ -116,13 +120,22 @@ profile_delete_key() {
 		key=${__INTERNAL__OPTIONS__KEY[${n}]}
 		value=${__INTERNAL__OPTIONS__VALUE[${n}]}
 		profile=${__INTERNAL__OPTIONS__PROFILE[${n}]}
-			
-		if [ "$1" != "${key}" -a "${__internal_profile}" != "${profile}" ] 
-		then
+		if [ "$1" != "${key}" ]
+		then	
+			# The keys dont match so these are good to keep
 			__INTERNAL__OPTIONS__KEY_TMP[${z}]="$key"
 			__INTERNAL__OPTIONS__VALUE_TMP[${z}]="$value"
 			__INTERNAL__OPTIONS__PROFILE_TMP[${z}]="$profile"
 			let z=${z}+1
+		else
+			if [ "${__internal_profile}" != "${profile}" ]
+			then
+				# The keys dont match and the profiles dont match so these are good to keep
+				__INTERNAL__OPTIONS__KEY_TMP[${z}]="$key"
+				__INTERNAL__OPTIONS__VALUE_TMP[${z}]="$value"
+				__INTERNAL__OPTIONS__PROFILE_TMP[${z}]="$profile"
+				let z=${z}+1
+			fi
 		fi
 	
 	done
@@ -148,12 +161,10 @@ profile_delete_key() {
 profile_list_keys() {
 	local key value profile array_length=${#__INTERNAL__OPTIONS__KEY[@]} n __internal_profile myOut
 	[ "$1" = "" ] && __internal_profile="running" || __internal_profile="$1"
-	
 	for (( n = 0 ; n < ${array_length}; ++n )) ; do
 		key=${__INTERNAL__OPTIONS__KEY[${n}]}
 		value=${__INTERNAL__OPTIONS__VALUE[${n}]}
 		profile=${__INTERNAL__OPTIONS__PROFILE[${n}]}
-		
 		[ "${__internal_profile}" == "${profile}" ] && myOut="${key} ${myOut}"
 	done
 	echo "${myOut}"
@@ -178,6 +189,19 @@ setup_arch_profile() {
     for i in $(profile_list); do
         [ "${i:0:${#PREFIX}}" = ${PREFIX} ] && profile_copy $i "arch" && profile_delete $i
     done
+}
+
+setup_userspace() {
+    # Create the userspace profile
+    PREFIX='profile'
+    profile_delete "profile"
+    for i in $(profile_list); do
+        [ "${i:0:${#PREFIX}}" = ${PREFIX} ] && profile_copy $i $PREFIX
+    done
+
+    profile_delete "user"
+    profile_copy "profile" "user"
+    profile_copy "cmdline" "user"
 }
 
 profile_get_key() {
@@ -220,23 +244,12 @@ profile_append_key() {
 	local n key value profile __internal_profile
 	[ "$3" = "" ] && __internal_profile="running" || __internal_profile="$3"
 
-	# Check key is not already set, if it is overwrite, else set it.
-	for (( n = 0 ; n < ${#__INTERNAL__OPTIONS__KEY[@]}; ++n )) ; do
-		key=${__INTERNAL__OPTIONS__KEY[${n}]}
-		value=${__INTERNAL__OPTIONS__VALUE[${n}]}
-		profile=${__INTERNAL__OPTIONS__PROFILE[${n}]}
+	orig_key="$(profile_get_key ${1} ${__internal_profile})"
 	
-		if [ "${1}" = "${key}" -a "${__internal_profile}" = "${profile}" ]
-		then
-				__INTERNAL__OPTIONS__VALUE[${n}]="${__INTERNAL__OPTIONS__VALUE[${n}]} ${2}"
-				return
-		fi
-	done
-
-	# Unmatched
-	__INTERNAL__OPTIONS__KEY[${#__INTERNAL__OPTIONS__KEY[@]}]="$1"
-	__INTERNAL__OPTIONS__VALUE[${#__INTERNAL__OPTIONS__VALUE[@]}]="$2"
-	__INTERNAL__OPTIONS__PROFILE[${#__INTERNAL__OPTIONS__PROFILE[@]}]="$__internal_profile"
+	new_key="${orig_key} ${2}"
+	new_key="${new_key# }"
+	
+	profile_set_key "${1}" "${new_key}" "${__internal_profile}"
 }
 
 profile_shrink_key() {
@@ -280,7 +293,6 @@ config_profile_read() {
 	# replace /'s with _'s to create a new profile name
 	profile="${PROFILE_PREFIX}_${1//\//_}"
 	
-
 	__INTERNAL_PROFILES_READ="${__INTERNAL_PROFILES_READ} ${1}"
 	while read i
 	do
@@ -302,7 +314,7 @@ config_profile_read() {
 			else
 				operator='+'
 			fi
-
+			
 			identifier="${i% ${operator}=*}"
 			data="${i#*${operator}= \"}" # Remove up to first quote inclusive
 			data="${data%\"}" # Remove end quote
@@ -316,23 +328,31 @@ config_profile_read() {
 			then
 				__INTERNAL__CONFIG_PARSING_DEPTREE="${__INTERNAL__CONFIG_PARSING_DEPTREE} ${data}"
 			else
-				## Fix: make set_config more verbose
-				set_config="${set_config} ${operator}${identifier}"
-
 				case "${operator}" in
 					':')
 						profile_append_key "${identifier}" "=" "${profile}"
+						for j in ${data}
+						do
+							#echo "appending ${j}"
+							profile_append_key "${identifier}" "${j}" "${profile}"
+						done
 					;;
 					'-')
 						for j in ${data}
 						do
+							#echo "appending -${j}"
 							profile_append_key "${identifier}" "-${j}" "${profile}"
 						done
 					;;
 					'+')
-						profile_append_key "${identifier}" "${data}" "${profile}"
+						for j in ${data}
+						do
+							#echo "appending ${j}"
+							profile_append_key "${identifier}" "${j}" "${profile}"
+						done
 					;;
 				esac
+				#echo "${identifier} \"$(profile_get_key "${identifier}" "${profile}")\""
 			fi
 
 		elif [[ "${i}" =~ '^import ' ]]
