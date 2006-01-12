@@ -26,29 +26,41 @@ trap trap_cleanup SIGHUP SIGQUIT SIGINT SIGTERM SIGKILL
 # Parse all command line options...
 Options=$@
 
+#profile_set_key debuglevel "-1 -3 1 3 5 = -1 3 1 1 3 7" "system"
+#profile_get_key debuglevel "system"
+#exit 255
+
 # Internal flag to check if config parsing succeeded
 __INTERNAL__CONFIG_PARSING_FAILED=false
-
 while [ $# -gt 0 ]
 do
 	Option=$1; shift
-	parse_cmdline $Option
+	parse_cmdline $Option 
 done
 
-# Need to see if the user has overridden this; Setup the user profile space has to happen before genkernel_determine_arch
-setup_userspace
+# Need to see if the user has overridden the arch; Setup the user profile space has to happen before genkernel_determine_arch
+# Merge the profiles first
+for i in $(profile_list); do
+	if [ "${i:0:8}" == "cmdline-" ]
+	then
+		profile_copy $i "user"
+	fi
+done
+# Override with the cmdline
+profile_copy cmdline "user"
 
 genkernel_determine_arch
-import_arch_profile 
-import_kernel_module_load_list
 
-#echo
-#echo "listing keys"
-#for (( n = 0 ; n < ${#__INTERNAL__OPTIONS__KEY[@]}; ++n )) ; do
-#	echo "$n ${__INTERNAL__OPTIONS__VALUE[$n]}"
-#done
-##echo "end listing keys"
-#echo
+# We now know the arch so update CACHE_DIR and CONFIG_DIR
+CACHE_DIR="$(arch_replace ${CACHE_DIR})"
+CONFIG_DIR="$(arch_replace ${CONFIG_DIR})"
+
+# Make the cache directory if it doesnt exist
+[ -e "${CACHE_DIR}" ] || mkdir -p "${CACHE_DIR}"
+
+# We know what arch we are building for lets setup the system
+setup_system_profile
+
 
 # Failed to parse the cmdline properly, die so we can investigate...
 logicTrue ${__INTERNAL__CONFIG_PARSING_FAILED} && die 'Fatal error processing arguments; exiting...'
@@ -56,32 +68,21 @@ logicTrue ${__INTERNAL__CONFIG_PARSING_FAILED} && die 'Fatal error processing ar
 # Start Importing profiles into the running profile space
 # Copy in the system wide defaults
 profile_copy "system"
-# import the arch specific profile. Arch specific system overrides.
-profile_copy "arch"
 
-profile_copy "modules-cmdline" "modules"
+# Copy the user cmdline stuff into the running profile
+profile_copy "user"
+
 # Copy the user profile created with the setup_userspace function. Last profile to import
 # as this one overrides the rest of them.
-profile_copy "user"
-profile_list_contents "profile"
-profile_list_contents "user"
-profile_list_contents "arch"
-profile_list_contents "modules"
-profile_list_keys "modules"
 
-profile_list_contents
-profile_list_keys "running"
-
-echo test: $(profile_get_key test)
-
+if [ "$(profile_get_key debuglevel)" -gt "3" ]
+then
+	profile_list
+	profile_list_contents
+	profile_list_keys "running"
+	echo
+fi
 # End Importing profiles into the running profile space
-
-#profile_list_keys
-#profile_get_key "extra" "modules"
-#profile_shrink_key "extra" "foo" "modules"
-#profile_get_key "extra" "modules"
-#profile_list_keys "modules"
-#profile_delete_item "evms" "modules"
 
 set_color 
 logicTrue $(profile_get_key help user) && show_help && echo && exit 0 # --help

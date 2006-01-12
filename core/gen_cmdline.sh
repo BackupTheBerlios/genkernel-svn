@@ -189,8 +189,7 @@ show_usage() {
 # Match $* against configuration registry and process...
 parse_cmdline() {
 	# Iterate over each registered config option and see if we have a match.
-	local myRequest myName myTakesData myHasInversion myDataDefault myMatched=false cmdline_profile="cmdline" data
-	local kernel_modules category i j showUsage
+	local myRequest myName myTakesData myHasInversion myDataDefault myMatched=false cmdline_profile="cmdline" i 
 	myRequest=$*
 	for (( i = 0 ; i < ${#__INTERNAL__OPTIONS__NAME[@]}; ++i )) ; do
 		myName=${__INTERNAL__OPTIONS__NAME[${i}]}
@@ -207,13 +206,14 @@ parse_cmdline() {
 				if [ "${myfunction}" != "" ]
 				then
 					# Function call defined in __register_config_option + data behind the = sign from myRequest"
-
 					"${myfunction}" "${myRequest#*\=}"
 				else
-					logicTrue ${myTakesData} && profile_set_key "${myName}" "${myRequest#*\=}" "${cmdline_profile}"
+					logicTrue ${myTakesData} && \
+					profile_set_key "${myName}" "=" "${cmdline_profile}" && \
+					profile_append_key "${myName}" "${myRequest#*\=}" "${cmdline_profile}"
 				
 					[[ "${myTakesData}" = 'true!m' ]] && \
-						profile_set_key "${myName}" "$(profile_get_key ${myName}) ${myRequest#*\=}" "${cmdline_profile}"
+						profile_set_key "${myName}" "$(profile_get_key ${myName} ${cmdline_profile}) ${myRequest#*\=}" "${cmdline_profile}"
 				fi
 				myMatched=true
 				break	
@@ -233,7 +233,9 @@ parse_cmdline() {
 		# Option that doesnt take data
 		if [ "${myRequest}" = "--${myName}" ]
 		then
-			profile_set_key "${myName}" 'true' "${cmdline_profile}"
+			# Tell the profile loader the clear the previous values
+			profile_set_key "${myName}" '=' "${cmdline_profile}"
+			profile_append_key "${myName}" 'true' "${cmdline_profile}"
 			myMatched=true
 			break
 		fi
@@ -241,7 +243,9 @@ parse_cmdline() {
 		# check for negative Option that doesnt take data
 		if logicTrue ${myHasInversion} && [ "${myRequest}" = "--no-${myName}" ]
 		then
-			profile_set_key "${myName}" 'false' "${cmdline_profile}"
+			# Tell the profile loader the clear the previous values
+			profile_set_key "${myName}" '=' "${cmdline_profile}"
+			profile_append_key "${myName}" 'false' "${cmdline_profile}"
 			myMatched=true
 			break
 		fi

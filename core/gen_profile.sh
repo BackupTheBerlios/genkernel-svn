@@ -4,45 +4,29 @@ declare -a __INTERNAL__OPTIONS__KEY # Key
 declare -a __INTERNAL__OPTIONS__VALUE # Data
 declare -a __INTERNAL__OPTIONS__PROFILE # Profile
 
+profile_copy() {
+	# <Source Profile> <Destination Profile (optional)> 
+
+	[ "${1}" == "" ] && die "profile_copy <Source Profile> <Destination Profile (optional)>"
+	[ "$2" = "" ] && __destination_profile="running" || __destination_profile="$2"
+	local identifier values 
+
+	for identifier in $(profile_list_keys $1); do
+		# Get raw unprocessed key entry
+		values=$(profile_get_key "${identifier}" "${1}" 'true' )
+		for i in ${values}
+		do
+			profile_append_key "${identifier}" "${i}" "${__destination_profile}"
+		done
+	done
+}
+
 profile_list_contents() {
 	[ "$1" = "" ] && __destination_profile="running" || __destination_profile="$1"
 	local identifier values arg
 	for identifier in $(profile_list_keys ${__destination_profile}); do
 		echo "${__destination_profile}: ${identifier} \"$(profile_get_key "${identifier}" "${__destination_profile}")\""
 	done
-}
-
-profile_copy() {
-	# <Source Profile> <Destination Profile (optional)> 
-
-	[ "${1}" == "" ] && die "profile_copy <Source Profile> <Destination Profile (optional)>"
-	[ "$2" = "" ] && __destination_profile="running" || __destination_profile="$2"
-	local identifier values arg
-
-	for identifier in $(profile_list_keys $1); do
-		values=$(profile_get_key "${identifier}" "${1}")
-		if has '=' "${values}"
-		then
-			# Nuke'm
-			profile_delete_key "${identifier}" "${__destination_profile}"
-		fi
-		for arg in $values; do
-			if [ "${arg}" == "=" ]
-			then
-				:
-			elif [ "${arg:0:1}" == "-" ]
-			then
-				profile_shrink_key "${identifier}" "${arg#-}" "${__destination_profile}"
-			else
-				profile_append_key "${identifier}" "${arg}" "${__destination_profile}"
-			fi
-		done
-		#typeset -p __INTERNAL__OPTIONS__KEY # Key
-		#typeset -p __INTERNAL__OPTIONS__VALUE # Key
-		#typeset -p __INTERNAL__OPTIONS__PROFILE # Key
-		#echo "${__destination_profile}: ${identifier} \"$(profile_get_key "${identifier}" "${__destination_profile}")\""
-	done
-
 }
 
 profile_exists() {
@@ -107,6 +91,7 @@ profile_list() {
 			[ ! "${__INTERNAL__OPTIONS__PROFILE[${n}]}" == "" ] && \
 				myOut="${myOut} ${__INTERNAL__OPTIONS__PROFILE[${n}]}"
 				myOut="${myOut# }"
+				myOut="${myOut% }"
 
 		fi
 	done
@@ -175,58 +160,73 @@ profile_list_keys() {
 	echo "${myOut}"
 }
 
-import_arch_profile() {
-	CACHE_DIR="$(arch_replace ${CACHE_DIR})"
-	CONFIG_DIR="$(arch_replace ${CONFIG_DIR})"
-	[ -e "${CACHE_DIR}" ] || mkdir -p "${CACHE_DIR}"
-	[ -e "${CONFIG_DIR}" ] || mkdir -p "${CONFIG_DIR}"
-
+setup_system_profile() {
+	# has to happen after the cmdline is processed.
 	# Read arch-specific config
 	ARCH_CONFIG="${CONFIG_DIR}/profile.gk"
-	[ -f "${ARCH_CONFIG}" ] && config_profile_read ${ARCH_CONFIG} "arch"
+	[ -f "${ARCH_CONFIG}" ] && config_profile_read ${ARCH_CONFIG} "system"
 	
-	# Copy the arch profile we just imported into the arch profile	
-	setup_arch_profile
+	# Read the generic kernel modules list first 
+	GENERIC_MODULES_LOAD="${CONFIG_GENERIC_DIR}/modules_load.gk"
+	[ -f "${GENERIC_MODULES_LOAD}" ] && config_profile_read ${GENERIC_MODULES_LOAD} "system"
+
+	# override with the arch specific kernel modules
+	MODULES_LOAD="${CONFIG_DIR}/modules_load.gk"
+	[ -f "${MODULES_LOAD}" ] && config_profile_read ${MODULES_LOAD} "system"
 }
 
-setup_arch_profile() {
-    PREFIX='arch'
-    for i in $(profile_list); do
-        [ "${i:0:${#PREFIX}}" = ${PREFIX} ] && profile_copy $i "arch" && profile_delete $i
-    done
-}
-
-setup_modules() {
-    PREFIX='modules'
-    for i in $(profile_list); do
-        [ "${i:0:${#PREFIX}}" = ${PREFIX} ] && profile_copy $i "modules"
-    done
-}
-
-setup_userspace() {
-    # Create the userspace profile
-    PREFIX='profile'
-    profile_delete "profile"
-    for i in $(profile_list); do
-        [ "${i:0:${#PREFIX}}" = ${PREFIX} ] && profile_copy $i $PREFIX
-    done
-
-    profile_delete "user"
-    profile_copy "profile" "user"
-    profile_copy "cmdline" "user"
-}
 
 profile_get_key() {
 	# <Key> <Profile (optional)> 
 	local n key value profile __internal_profile
 	[ "$2" = "" ] && __internal_profile="running" || __internal_profile="$2"
+	
 
 	for (( n = 0 ; n < ${#__INTERNAL__OPTIONS__KEY[@]}; ++n )) ; do
 		key=${__INTERNAL__OPTIONS__KEY[${n}]}
 		value=${__INTERNAL__OPTIONS__VALUE[${n}]}
 		profile=${__INTERNAL__OPTIONS__PROFILE[${n}]}
-		[ "$1" = "${key}" ] && [ "${__internal_profile}" = "${profile}" ] && echo "${value}" && return
+		
+		if [ "$1" = "${key}" -a "${__internal_profile}" = "${profile}" ]
+		then
+			# want raw key .. no further processing necessary
+			logicTrue ${3} && echo "${value}" && return
+			
+			# Start building return list
+			for i in ${value}; do
+				if [ "${i}" == "=" ]
+				then
+					positive_list=""
+					negative_list=""
+				elif [ "${i:0:1}" == "-" ]
+				then
+					if ! has "${i#-}" "${negative_list}"
+					then
+						negative_list="${negative_list} ${i#-}"
+					fi
+				else
+					if ! has "${i#-}" "${positive_list}"
+					then
+						positive_list="${positive_list} ${i}"
+					fi
+				fi
+				#echo "i: $i"
+				#echo "pl: ${positive_list}"
+				#echo "nl: ${negative_list}"
+			done
+			#echo "pl and nl list created"
+			for j in ${negative_list}; do
+				positive_list="$(subtract_from_list "$j" "${positive_list}")"
+			done
+			#echo "fl: ${positive_list}"
+			positive_list="${positive_list# }"
+			positive_list="${positive_list% }"
+			echo "${positive_list}"
+			return
+		fi
+
 	done
+		
 }
 
 profile_set_key() {
@@ -255,8 +255,9 @@ profile_append_key() {
 	# <Key> <Value> <Profile (optional)>
 	local n key orig_value new_value profile __internal_profile
 	[ "$3" = "" ] && __internal_profile="running" || __internal_profile="$3"
-
-	orig_value="$(profile_get_key ${1} ${__internal_profile})"
+	
+	# Get raw key
+	orig_value="$(profile_get_key ${1} ${__internal_profile} 'true')"
 	if ! has $2 ${orig_value}
 	then
 		new_value="${orig_value} ${2}"
@@ -285,31 +286,18 @@ profile_shrink_key() {
 	fi
 }
 
-import_kernel_module_load_list() {
-	# Read the generic modules list first 
-	GENERIC_MODULES_LOAD="${CONFIG_GENERIC_DIR}/modules_load.gk"
-	[ -f "${GENERIC_MODULES_LOAD}" ] && config_profile_read ${GENERIC_MODULES_LOAD} "modules"
-
-	# override with the arch specific one
-	MODULES_LOAD="${CONFIG_DIR}/modules_load"
-	[ -f "${MODULES_LOAD}" ] && config_profile_read ${MODULES_LOAD} "modules"
-
-	# Merge the modules profiles into one modules profile
-	setup_modules
-}	
-
-
 # <file>
 config_profile_read() {
 	[ -f "$1" ] || die "parse_profile: No such file $1!"
-	# If prefix is not specified default to profile
-	[ -z "$2" ] && PROFILE_PREFIX="profile" || PROFILE_PREFIX="${2}"
-
 	local identifier data set_config profile
 
-	# replace /'s with _'s to create a new profile name
-	profile="${PROFILE_PREFIX}_${1//\//_}"
-	
+	if [ -z "$2" ]
+	then
+		let number_cmdline_profiles=${number_cmdline_profiles}+1
+		profile="cmdline-${number_cmdline_profiles}"
+	else
+		profile="${2}"
+	fi
 	__INTERNAL_PROFILES_READ="${__INTERNAL_PROFILES_READ} ${1}"
 	while read i
 	do
@@ -335,12 +323,7 @@ config_profile_read() {
 			identifier="${i% ${operator}=*}"
 			data="${i#*${operator}= \"}" # Remove up to first quote inclusive
 			data="${data%\"}" # Remove end quote
-
-			#if [[ "${identifier:0:7}" = 'module_' ]]
-			#then
-			#	identifier="${identifier:7}"
-			#	# Append the data into the modules profile space.
-			#	kernel_modules_register_to_category "${identifier}" "${data}"
+			
 			case "${operator}" in
 				':')
 					profile_append_key "${identifier}" "=" "${profile}"
@@ -387,24 +370,73 @@ config_profile_read() {
 		else
 			echo "# Invalid input: $i"
 		fi
-	done < "$1"
+	done < $1
 
 	[ -n "${set_config}" ] && echo "# Profile $1 set config vars:${set_config}"
 }
 
 config_profile_dump() {
-	local n
-	for (( n = 0 ; n < ${#__INTERNAL__OPTIONS__KEY[@]}; ++n )) ; do
-		case "${__INTERNAL__OPTIONS__KEY[${n}]}" in
+	local j k separator data profile='user'
+	
+	for j in $(profile_list_keys "${profile}"); do
+		case $j in
 			profile|profile-dump)
 				:
 			;;
 			*)
-				[ "${__INTERNAL__OPTIONS__PROFILE[${n}]}" == 'user' ] && \
-					echo "${__INTERNAL__OPTIONS__KEY[${n}]} := \"${__INTERNAL__OPTIONS__VALUE[${n}]}\""
+				# Get the raw key data
+				data="$(profile_get_key $j "${profile}" 'true')"
+				# Append keys by default unless set is specified
+				separator="+="
+				
+				# reset lists to be blank
+				element_list=""
+				negative_list=""
+
+				# Start building output string from the raw key data
+				for k in ${data}; do
+					if [ "${k}" == "=" ]
+					then
+						# use set key notation as an = was found
+						element_list=""
+						separator=":="
+					else
+
+						element_list="${element_list} ${k}"
+					fi
+				done
+				
+				for l in ${element_list}; do
+					if [ "${l:0:1}" == "-" ]
+					then
+						negative_list="${negative_list} ${l#-}"
+						element_list="$(subtract_from_list "$l" "${element_list}")"
+					fi
+				done
+				
+				# Remove items that are in both the positive and negative list as they cancel out
+				for m in ${element_list}; do
+					for n in ${negative_list}; do
+						if [ "${m}" == "${n}" ]
+						then
+							element_list="$(subtract_from_list "$m" "${element_list}")"
+							negative_list="$(subtract_from_list "$m" "${negative_list}")"
+						fi
+					done
+				done
+				
+				element_list="${element_list# }"
+				element_list="${element_list% }"
+				negative_list="${negative_list# }"
+				negative_list="${negative_list% }"
+				
+				[ -n "${element_list}" ] && echo "$j ${separator} \"${element_list}\""
+				[ -n "${negative_list}" ] && echo "$j -= \"${negative_list}\""
+
 			;;
 		esac
 	done
+	
 	exit 0
 }
 
@@ -422,7 +454,7 @@ cmdline_modules_register(){
 
     for i in $kernel_modules
     do
-        profile_append_key "${category}" "${i}" "modules-cmdline"
+        profile_append_key "module-${category}" "${i}" "cmdline"
     done
 }
 
