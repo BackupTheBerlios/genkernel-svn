@@ -40,9 +40,19 @@ done
 for i in $(profile_list); do
 	if [ "${i:0:8}" == "cmdline-" ]
 	then
+
 		profile_copy $i "user"
+		
+		# Copy the modules into its own profiles
+		for j in $(profile_list_keys $i); do
+			if [ "${j:0:7}" == "module-" ]
+			then
+				profile_copy_key ${i} ${j} "modules-$i"
+			fi
+		done
 	fi
 done
+
 
 # Override with the cmdline
 profile_copy cmdline "user"
@@ -84,14 +94,8 @@ set_color
 clear_log
 genkernel_print_header
 
-# setup the modules profile and copy it into the running profile
-setup_modules_profile
-profile_copy "modules"
-profile_copy "modules-cmdline"
-
 if [ "$(profile_get_key debuglevel)" -gt "2" ]
 then
-	profile_list
 	for i in $(profile_list)
 	do
 		profile_list_contents $i

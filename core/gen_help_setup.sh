@@ -29,6 +29,8 @@ __register_config_option 'Kernel Settings' 'kernel-config' 'true' 'false' 'Kerne
 __register_config_option 'Kernel Settings' 'kernel-tree'   'true' 'false' 'Location of kernel sources.'
 __register_config_option 'Kernel Settings' 'kernel-modules'   'true!m' 'false' 'Add or subtract kernel modules' 'cmdline_modules_register'
 __register_config_option 'Kernel Settings' 'internal-initramfs' 'false' 'false' 'compile initramfs-internally'
+__register_config_option 'Kernel Settings' 'install-path' 'true' 'false' 'Destination of kernel and initramfs'
+__register_config_option 'Kernel Settings' 'install-mod-path' 'true' 'false' 'Destination of kernel modules'
 
 # kernel-tree default
 profile_set_key kernel-tree '/usr/src/linux'

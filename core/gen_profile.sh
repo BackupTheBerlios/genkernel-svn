@@ -54,18 +54,32 @@ profile_copy() {
 	for identifier in $(profile_list_keys $1); do
 		# Get raw unprocessed key entry
 		values=$(profile_get_key "${identifier}" "${1}" 'true' )
-		for i in ${values}
-		do
-			profile_append_key "${identifier}" "${i}" "${__destination_profile}"
-		done
+		profile_append_key "${identifier}" "${values}" "${__destination_profile}"
 	done
+}
+
+profile_copy_key() {
+	# <Source Profile> <key> <Destination Profile (optional)> 
+
+	[ "${1}" == "" ] && die "profile_copy <Source Profile> <Destination Profile (optional)>"
+	[ "${2}" == "" ] && die "profile_copy <Source Profile> <Destination Profile (optional)>"
+	[ "${3}" = "" ] && __destination_profile="running" || __destination_profile="${3}"
+	local identifier values 
+
+	values=$(profile_get_key "${2}" "${1}" 'true')
+	profile_append_key "${2}" "${values}" "${__destination_profile}"
 }
 
 profile_list_contents() {
 	[ "$1" = "" ] && __destination_profile="running" || __destination_profile="$1"
 	local identifier values arg
 	for identifier in $(profile_list_keys ${__destination_profile}); do
-		echo "${__destination_profile}[${identifier}]: $(profile_get_key "${identifier}" "${__destination_profile}")"
+		if [ "$(profile_get_key debuglevel)" -gt "3" ]
+		then
+			echo "${__destination_profile}[${identifier}]: $(profile_get_key "${identifier}" "${__destination_profile}" 'true' )"
+		else
+			echo "${__destination_profile}[${identifier}]: $(profile_get_key "${identifier}" "${__destination_profile}" )"
+		fi
 	done
 }
 
@@ -223,7 +237,6 @@ profile_set_key() {
 	# Requires profile index
 	local i n key value profile __internal_profile length
 	local equal_list="" positive_list="" negative_list=""
-	
 	[ "$3" = "" ] && __internal_profile="running" || __internal_profile="$3"
 
 	# Check key is not already set, if it is overwrite, else set it.
@@ -238,7 +251,6 @@ profile_set_key() {
 			__INTERNAL__OPTIONS__PROFILE[${n}]="$__internal_profile"
 			__INTERNAL__OPTIONS__VALUE[${n}]="${2}"
 			__INTERNAL__OPTIONS__DELETED[${n}]="0"
-			__INTERNAL__OPTIONS__OPTIMIZED[${n}]="false"
 			return
 		fi
 	done
@@ -267,7 +279,6 @@ profile_append_key() {
 	
 	new_value="${new_value% }"
 	new_value="${new_value# }"
-	
 	profile_set_key "${1}" "${new_value}" "${__internal_profile}"
 }
 

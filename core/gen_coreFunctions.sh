@@ -295,10 +295,19 @@ clear_tmpdir()
 subtract_from_list() {
 	local test=${1} item output
 	shift
-	for item in $@; do
-		[[ "${item}" != "${test}" ]] && output="${output} ${item}"
-	done
-	echo "${output}"
+
+	myArgs="$*"
+	myArgs=" ${myArgs} " # Pad with whitespace for removal
+	myArgs="${myArgs/ ${test} /}"
+	myArgs="${myArgs# }"
+	myArgs="${myArgs% }"
+	echo "${myArgs}"
+
+	#for item in $@; do
+	#	[[ "${item}" != "${test}" ]] && output="${output} ${item}"
+	#done
+	#echo "${output}"
+
 }
 
 # has test list
