@@ -76,7 +76,7 @@ setup_modules_profile
 profile_copy "modules"
 profile_copy "modules-cmdline"
 
-if [ "$(profile_get_key debuglevel)" -gt "3" ]
+if [ "$(profile_get_key debuglevel)" -gt "2" ]
 then
 	profile_list
 	for i in $(profile_list)

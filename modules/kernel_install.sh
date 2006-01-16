@@ -29,7 +29,7 @@ kernel_install::()
 		mkdir -p $(profile_get_key install-path) || die 'Failed to create install path!'
 	fi
 	
-	cd $(profile_get_key kbuild-output)
+	cd "$(profile_get_key kbuild-output)"
 
 	# install the kernel
 	print_info 1 '>> Installing kernel ...'
@@ -39,14 +39,12 @@ kernel_install::()
 	[ "$(profile_get_key debuglevel)" -gt "1" ] && CP_ARGS="-v"
 	if [ -n "$(profile_get_key install-path)" ]
 	then
-		cp ${CP_ARGS} "$(profile_get_key kernel_binary)" "$(profile_get_key install-path)"
+		cp ${CP_ARGS} "$(profile_get_key kernel-binary)" "$(profile_get_key install-path)"
 		cp ${CP_ARGS} "System.map" "$(profile_get_key install-path)"
 
 	else
 		# TODO need to get kname-arch-kv yet....
-		ls
-		echo "$(profile_get_key kernel_binary)"
-		cp ${CP_ARGS} "$(profile_get_key kernel_binary)" /boot
+		cp ${CP_ARGS} "$(profile_get_key kernel-binary)" /boot
 		cp ${CP_ARGS} "System.map" /boot
 	fi
 }

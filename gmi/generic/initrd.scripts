@@ -451,7 +451,7 @@ startVolumes() {
 
     if [ "${USE_LVM2_NORMAL}" -eq '1' ]
     then
-	if [ -e '/bin/vgscan' -a -e '/bin/vgchange' ]
+	if [ -e '/sbin/vgscan' -a -e '/sbin/vgchange' ]
 	then
 	    for dev in ${RAID_DEVICES}
 	    do
@@ -459,9 +459,9 @@ startVolumes() {
 	    done
 
 	    good_msg "Scanning for Volume Groups"
-	    /bin/vgscan --ignorelockingfailure --mknodes 2>/dev/null
+	    /sbin/vgscan --ignorelockingfailure --mknodes 2>/dev/null
 	    good_msg "Activating Volume Groups"
-	    /bin/vgchange -ay --ignorelockingfailure 2>/dev/null
+	    /sbin/vgchange -ay --ignorelockingfailure 2>/dev/null
 
 	    # Disable EVMS since lvm2 is activated and they dont work together.
 	    if [ "${USE_EVMS2_NORMAL}" -eq '1' ]
