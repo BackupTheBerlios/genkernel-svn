@@ -15,8 +15,8 @@ busybox::()
 		ln ${TEMP}/busybox-cpiogen/bin/busybox ${TEMP}/busybox-cpiogen/bin/$i ||
 			die "Busybox error: could not link ${i}!"
 	done
-
-	cd busybox-cpiogen
+	
+	cd busybox-cpiogen 2>&1 >/dev/null
 	genkernel_generate_cpio_files "busybox-${BUSYBOX_VER}" bin/*
 	initramfs_register_cpio "busybox-${BUSYBOX_VER}"
 }
