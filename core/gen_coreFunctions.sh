@@ -305,12 +305,19 @@ subtract_from_list() {
 # Return true if list contains test
 has() {
 	# From eselect
-
 	local test=${1} item
 	shift
-	for item in $@; do
-		[[ ${item} == ${test} ]] && return 0
-	done
+	local items=$@
+
+	[[ "$items" =~ "^$test$" ]] && return 0
+	[[ "$items" =~ "^$test .*" ]] && return 0
+	[[ "$items" =~ ".* $test .*" ]] && return 0
+	[[ "$items" =~ ".* $test$" ]] && return 0
+	#echo "has \"$test\" \"$items\""
+	#for item in $@; do
+	#	
+	#	[[ ${item} == ${test} ]] && return 0
+	#done
 	return 1
 }
 
@@ -372,9 +379,13 @@ configure_generic() {
 ## Genkernel functions
 
 genkernel_print_header() {
-	NORMAL=${GOOD} print_info 1 "Gentoo Linux Genkernel; Version ${GK_V}${NORMAL}"
-	print_info 1 "Running with options: ${Options}"
-	echo
+	# print the header if the profile-dump wasnt specified on the cmdline
+	if [ -z "$(profile_get_key profile-dump user)" ]
+	then
+		NORMAL=${GOOD} print_info 1 "Gentoo Linux Genkernel; Version ${GK_V}${NORMAL}"
+		print_info 1 "Running with options: ${Options}"
+		echo
+	fi
 }
 
 genkernel_determine_arch() {

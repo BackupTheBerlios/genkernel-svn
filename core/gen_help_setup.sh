@@ -73,7 +73,10 @@ __register_config_option 'Internals' 'cachedir' 'true' 'false' 'Override the def
 __register_config_option 'Internals' 'tempdir' 'true' 'false' "Location of Genkernel's temporary directory."
 __register_config_option 'Internals' 'postclear' 'false' 'false' 'Clear all temporary files and caches afterwards.'
 # Allow multiple entries for the profile
-__register_config_option 'Internals' 'profile' 'true!m' 'false' 'Use specified profile.' 'config_profile_read'
+
+#This works as multiple input but turning off due to possible user editing profile issues
+#__register_config_option 'Internals' 'profile' 'true!m' 'false' 'Use specified profile.' 'config_profile_read'
+__register_config_option 'Internals' 'profile' 'true' 'false' 'Use specified profile.' 'config_profile_read'
 __register_config_option 'Internals' 'profile-dump' 'false' 'false' 'Use specified profile.'
 __register_config_option 'Internals' 'mountboot' 'false' 'true' 'Mount /boot automatically.'
 __register_config_option 'Internals' 'usecolor' 'false' 'true' 'Color output.'

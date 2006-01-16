@@ -1,8 +1,48 @@
-#!/bin/bash
+#o!/bin/bash
 
 declare -a __INTERNAL__OPTIONS__KEY # Key
-declare -a __INTERNAL__OPTIONS__VALUE # Data
+declare -a __INTERNAL__OPTIONS__VALUE # = sign set
 declare -a __INTERNAL__OPTIONS__PROFILE # Profile
+declare -a __INTERNAL__OPTIONS__DELETED # Deleted flag
+declare -a __INTERNAL__PROFILES
+
+profile_create_index() {
+	local i j indexed
+	__INTERNAL__PROFILES=()
+	for (( i = 0 ; i < ${#__INTERNAL__OPTIONS__PROFILE[@]}; ++i )) ; do
+		if [ "${__INTERNAL__OPTIONS__DELETED[$i]}" == "0" ]
+		then
+			myMatched=false
+			for (( j = 0 ; j < ${#__INTERNAL__PROFILES[@]}; ++j )) ; do
+				if [ "${__INTERNAL__PROFILES[$j]%::::*}" = "${__INTERNAL__OPTIONS__PROFILE[$i]}" ]
+				then
+					myMatched=true
+					__INTERNAL__PROFILES[$j]="${__INTERNAL__PROFILES[$j]}_${i}"
+					break
+				fi
+			done
+
+			if [ "${myMatched}" = 'false' ]
+			then
+				# First element of this profile
+				__INTERNAL__PROFILES[${#__INTERNAL__PROFILES[@]}]="${__INTERNAL__OPTIONS__PROFILE[$i]}::::$i"
+			fi
+		fi
+	done
+}
+
+profile_get_array_positions() {
+	local i j
+	for i in ${__INTERNAL__PROFILES[@]}
+	do 
+		if [ "${i%::::*}"  = "${1}" ]
+		then
+			j=${i#*::::}
+			echo ${j//_/ }
+			return
+		fi
+	done
+}
 
 profile_copy() {
 	# <Source Profile> <Destination Profile (optional)> 
@@ -25,60 +65,24 @@ profile_list_contents() {
 	[ "$1" = "" ] && __destination_profile="running" || __destination_profile="$1"
 	local identifier values arg
 	for identifier in $(profile_list_keys ${__destination_profile}); do
-		echo "${__destination_profile}: ${identifier} \"$(profile_get_key "${identifier}" "${__destination_profile}")\""
+		echo "${__destination_profile}[${identifier}]: $(profile_get_key "${identifier}" "${__destination_profile}")"
 	done
 }
 
 profile_exists() {
-	local n profile array_length=${#__INTERNAL__OPTIONS__KEY[@]}
-	for (( n = 0 ; n < ${array_length}; ++n )) ; do
-		profile=${__INTERNAL__OPTIONS__PROFILE[${n}]}
-		# If it exists return success
-		[ "$1" = "${profile}" ] && return 0
-	done
-	
-	# It doesnt exist so return failure
-	return 1
+	[ -n "$(profile_get_array_positions $__internal_profile)" ] && return 0 || return 1
 }
 
 profile_delete() {
-	local key value profile array_length=${#__INTERNAL__OPTIONS__KEY[@]} n z=0
-	declare -a __INTERNAL__OPTIONS__KEY_TMP
-	declare -a __INTERNAL__OPTIONS__VALUE_TMP
-	declare -a __INTERNAL__OPTIONS__PROFILE_TMP
+	local n
 
-	# Find the items that dont match the profile and save them to a tmp array
-	for (( n = 0 ; n < ${array_length}; ++n )) ; do
-		key=${__INTERNAL__OPTIONS__KEY[${n}]}
-		value=${__INTERNAL__OPTIONS__VALUE[${n}]}
-		profile=${__INTERNAL__OPTIONS__PROFILE[${n}]}
-		
-		if [  "$1" != "${profile}" ]
-		then
-			__INTERNAL__OPTIONS__KEY_TMP[${z}]="$key" 
-			__INTERNAL__OPTIONS__VALUE_TMP[${z}]="$value"
-			__INTERNAL__OPTIONS__PROFILE_TMP[${z}]="$profile"
-			let z=${z}+1
-		fi
-
+	for n in $(profile_get_array_positions $__internal_profile) ; do
+		${__INTERNAL__OPTIONS__DELETED[${n}]}='1'
 	done
 	
-	# Clear the original array vars and recreate them
-	unset __INTERNAL__OPTIONS__KEY
-	unset __INTERNAL__OPTIONS__VALUE
-	unset __INTERNAL__OPTIONS__PROFILE
-
-	# Populate arrays from tmp arrays
-	for (( n = 0 ; n < ${#__INTERNAL__OPTIONS__KEY_TMP[@]}; ++n )) ; do
-		__INTERNAL__OPTIONS__KEY[${n}]=${__INTERNAL__OPTIONS__KEY_TMP[${n}]}
-		__INTERNAL__OPTIONS__VALUE[${n}]=${__INTERNAL__OPTIONS__VALUE_TMP[${n}]}
-		__INTERNAL__OPTIONS__PROFILE[${n}]=${__INTERNAL__OPTIONS__PROFILE_TMP[${n}]}
-	done
+	# recreate the index as we have deleted a profile
+	profile_create_index
 	
-	# Clear the tmp arrays
-	unset __INTERNAL__OPTIONS__KEY_TMP
-	unset __INTERNAL__OPTIONS__VALUE_TMP
-	unset __INTERNAL__OPTIONS__PROFILE_TMP
 }
 
 
@@ -99,63 +103,33 @@ profile_list() {
 }
 
 profile_delete_key() {
-	local key value profile array_length=${#__INTERNAL__OPTIONS__KEY[@]} n __internal_profile z=0
+	local key deleted array_length=${#__INTERNAL__OPTIONS__KEY[@]} n __internal_profile z=0
+	# faster to not use the cache as this would have to loop through the array anyway
 	[ "$2" = "" ] && __internal_profile="running" || __internal_profile="$2"
 	
-	declare -a __INTERNAL__OPTIONS__KEY_TMP
-	declare -a __INTERNAL__OPTIONS__VALUE_TMP
-	declare -a __INTERNAL__OPTIONS__PROFILE_TMP
-	
-	for (( n = 0 ; n < ${array_length}; ++n )) ; do
+	for n in $(profile_get_array_positions $__internal_profile); do
 		key=${__INTERNAL__OPTIONS__KEY[${n}]}
-		value=${__INTERNAL__OPTIONS__VALUE[${n}]}
-		profile=${__INTERNAL__OPTIONS__PROFILE[${n}]}
-		if [ "$1" != "${key}" ]
-		then	
-			# The keys dont match so these are good to keep
-			__INTERNAL__OPTIONS__KEY_TMP[${z}]="$key"
-			__INTERNAL__OPTIONS__VALUE_TMP[${z}]="$value"
-			__INTERNAL__OPTIONS__PROFILE_TMP[${z}]="$profile"
-			let z=${z}+1
-		else
-			if [ "${__internal_profile}" != "${profile}" ]
-			then
-				# The keys dont match and the profiles dont match so these are good to keep
-				__INTERNAL__OPTIONS__KEY_TMP[${z}]="$key"
-				__INTERNAL__OPTIONS__VALUE_TMP[${z}]="$value"
-				__INTERNAL__OPTIONS__PROFILE_TMP[${z}]="$profile"
-				let z=${z}+1
-			fi
-		fi
-	
-	done
-	
-	# Clear the original array vars
-	unset __INTERNAL__OPTIONS__KEY
-	unset __INTERNAL__OPTIONS__VALUE
-	unset __INTERNAL__OPTIONS__PROFILE
+		deleted=${__INTERNAL__OPTIONS__DELETED[${n}]}
 
-	# Populate arrays from tmp arrays
-	for (( n = 0 ; n < ${#__INTERNAL__OPTIONS__KEY_TMP[@]}; ++n )) ; do
-		__INTERNAL__OPTIONS__KEY[${n}]=${__INTERNAL__OPTIONS__KEY_TMP[${n}]}
-		__INTERNAL__OPTIONS__VALUE[${n}]=${__INTERNAL__OPTIONS__VALUE_TMP[${n}]}
-		__INTERNAL__OPTIONS__PROFILE[${n}]=${__INTERNAL__OPTIONS__PROFILE_TMP[${n}]}
+		if [ "$1" = "${key}" ]
+		then	
+			__INTERNAL__OPTIONS__DELETED[${n}]="1"
+		fi
 	done
 	
-	# Clear the tmp arrays
-	unset __INTERNAL__OPTIONS__KEY_TMP
-	unset __INTERNAL__OPTIONS__VALUE_TMP
-	unset __INTERNAL__OPTIONS__PROFILE_TMP
+	# deleted element need to update the index
+	profile_create_index
 }
 
+
 profile_list_keys() {
-	local key value profile array_length=${#__INTERNAL__OPTIONS__KEY[@]} n __internal_profile myOut
+	
+	local key value profile n __internal_profile myOut
+	# Requires profile index
 	[ "$1" = "" ] && __internal_profile="running" || __internal_profile="$1"
-	for (( n = 0 ; n < ${array_length}; ++n )) ; do
+	for n in $(profile_get_array_positions $__internal_profile); do
 		key=${__INTERNAL__OPTIONS__KEY[${n}]}
-		value=${__INTERNAL__OPTIONS__VALUE[${n}]}
-		profile=${__INTERNAL__OPTIONS__PROFILE[${n}]}
-		[ "${__internal_profile}" == "${profile}" ] && myOut="${key} ${myOut}"
+		myOut="${key} ${myOut}"
 	done
 	echo "${myOut}"
 }
@@ -165,107 +139,134 @@ setup_system_profile() {
 	# Read arch-specific config
 	ARCH_CONFIG="${CONFIG_DIR}/profile.gk"
 	[ -f "${ARCH_CONFIG}" ] && config_profile_read ${ARCH_CONFIG} "system"
-	
+}
+
+setup_modules_profile() {
 	# Read the generic kernel modules list first 
 	GENERIC_MODULES_LOAD="${CONFIG_GENERIC_DIR}/modules_load.gk"
-	[ -f "${GENERIC_MODULES_LOAD}" ] && config_profile_read ${GENERIC_MODULES_LOAD} "system"
+	[ -f "${GENERIC_MODULES_LOAD}" ] && config_profile_read ${GENERIC_MODULES_LOAD} "modules"
 
 	# override with the arch specific kernel modules
 	MODULES_LOAD="${CONFIG_DIR}/modules_load.gk"
-	[ -f "${MODULES_LOAD}" ] && config_profile_read ${MODULES_LOAD} "system"
+	[ -f "${MODULES_LOAD}" ] && config_profile_read ${MODULES_LOAD} "modules"
 }
 
 
 profile_get_key() {
 	# <Key> <Profile (optional)> 
+	# Requires profile index
+	
 	local n key value profile __internal_profile
 	[ "$2" = "" ] && __internal_profile="running" || __internal_profile="$2"
 	
 
-	for (( n = 0 ; n < ${#__INTERNAL__OPTIONS__KEY[@]}; ++n )) ; do
+	for n in $(profile_get_array_positions $__internal_profile) ; do
 		key=${__INTERNAL__OPTIONS__KEY[${n}]}
-		value=${__INTERNAL__OPTIONS__VALUE[${n}]}
 		profile=${__INTERNAL__OPTIONS__PROFILE[${n}]}
-		
-		if [ "$1" = "${key}" -a "${__internal_profile}" = "${profile}" ]
+
+		if [ "$1" = "${key}" ]
 		then
 			# want raw key .. no further processing necessary
-			logicTrue ${3} && echo "${value}" && return
-			
-			# Start building return list
-			for i in ${value}; do
+			logicTrue ${3} && echo "${__INTERNAL__OPTIONS__VALUE[${n}]}" && return
+
+			value=${__INTERNAL__OPTIONS__VALUE[${n}]}
+			for i in ${value}
+			do
 				if [ "${i}" == "=" ]
 				then
-					positive_list=""
-					negative_list=""
+					equal_found="true"	
+					positive_list=()
+					negative_list=()
 				elif [ "${i:0:1}" == "-" ]
 				then
-					if ! has "${i#-}" "${negative_list}"
+					if has "${i#-}"  "${positive_list}"
 					then
-						negative_list="${negative_list} ${i#-}"
-					fi
-				else
-					if ! has "${i#-}" "${positive_list}"
+						positive_list=$(subtract_from_list "${i#-}"  "${positive_list}")
+					else
+						if ! has "-${i}" "${negative_list}"
+						then
+							negative_list="${negative_list} ${i}"
+						fi
+					fi	
+				else 	
+					if has "-${i}" "${negative_list}"
 					then
-						positive_list="${positive_list} ${i}"
+						negative_list=$(subtract_from_list "-${i}"  "${negative_list}")
+					else
+						if ! has "${i}" "${positive_list}"
+						then
+							positive_list="${positive_list} ${i}"
+						fi
 					fi
 				fi
-				#echo "i: $i"
-				#echo "pl: ${positive_list}"
-				#echo "nl: ${negative_list}"
 			done
-			#echo "pl and nl list created"
-			for j in ${negative_list}; do
-				positive_list="$(subtract_from_list "$j" "${positive_list}")"
-			done
-			#echo "fl: ${positive_list}"
-			positive_list="${positive_list# }"
+			
 			positive_list="${positive_list% }"
-			echo "${positive_list}"
+			positive_list="${positive_list# }"
+			
+			if [ "${equal_found}" == "true" ]
+			then
+				__INTERNAL__OPTIONS__VALUE[${n}]="= ${positive_list} ${negative_list}"
+			else
+				__INTERNAL__OPTIONS__VALUE[${n}]="${positive_list} ${negative_list}"
+			fi
+			
+			echo ${positive_list}
 			return
-		fi
 
+		fi
 	done
-		
 }
 
 profile_set_key() {
 	# <Key> <Value> <Profile (optional)>
-	local n key value profile __internal_profile
+	# Requires profile index
+	local i n key value profile __internal_profile length
+	local equal_list="" positive_list="" negative_list=""
+	
 	[ "$3" = "" ] && __internal_profile="running" || __internal_profile="$3"
 
 	# Check key is not already set, if it is overwrite, else set it.
-	for (( n = 0 ; n < ${#__INTERNAL__OPTIONS__KEY[@]}; ++n )) ; do
+	for n in $(profile_get_array_positions $__internal_profile) ; do
 		key=${__INTERNAL__OPTIONS__KEY[${n}]}
 		value=${__INTERNAL__OPTIONS__VALUE[${n}]}
 		profile=${__INTERNAL__OPTIONS__PROFILE[${n}]}
 	
-		[ "${1}" = "${key}" ] && [ "${__internal_profile}" = "${profile}" ] && \
-				__INTERNAL__OPTIONS__VALUE[${n}]="${2}" && \
-				return
+		if [ "${1}" = "${key}" ]
+		then
+			__INTERNAL__OPTIONS__KEY[${n}]="$1"
+			__INTERNAL__OPTIONS__PROFILE[${n}]="$__internal_profile"
+			__INTERNAL__OPTIONS__VALUE[${n}]="${2}"
+			__INTERNAL__OPTIONS__DELETED[${n}]="0"
+			__INTERNAL__OPTIONS__OPTIMIZED[${n}]="false"
+			return
+		fi
 	done
 
 	# Unmatched
-	__INTERNAL__OPTIONS__KEY[${#__INTERNAL__OPTIONS__KEY[@]}]="$1"
-	__INTERNAL__OPTIONS__VALUE[${#__INTERNAL__OPTIONS__VALUE[@]}]="$2"
-	__INTERNAL__OPTIONS__PROFILE[${#__INTERNAL__OPTIONS__PROFILE[@]}]="$__internal_profile"
+	length=${#__INTERNAL__OPTIONS__KEY[@]}
+	__INTERNAL__OPTIONS__KEY[${length}]="$1"
+	__INTERNAL__OPTIONS__VALUE[${length}]="${2}"
+	__INTERNAL__OPTIONS__PROFILE[${length}]="$__internal_profile"
+	__INTERNAL__OPTIONS__DELETED[${length}]="0"
+	__INTERNAL__OPTIONS__OPTIMIZED[${n}]="false"
+	
+	# Added a new element need to update the index
+	profile_create_index
 }
 
 profile_append_key() {
+	# Direct access to the arrays will be faster in the end
 	# <Key> <Value> <Profile (optional)>
 	local n key orig_value new_value profile __internal_profile
 	[ "$3" = "" ] && __internal_profile="running" || __internal_profile="$3"
 	
 	# Get raw key
 	orig_value="$(profile_get_key ${1} ${__internal_profile} 'true')"
-	if ! has $2 ${orig_value}
-	then
-		new_value="${orig_value} ${2}"
-		new_value="${new_value# }"
-	else
-		new_value="${orig_value}"
-	fi
-
+	new_value="${orig_value} ${2}"
+	
+	new_value="${new_value% }"
+	new_value="${new_value# }"
 	
 	profile_set_key "${1}" "${new_value}" "${__internal_profile}"
 }
@@ -285,6 +286,8 @@ profile_shrink_key() {
 		profile_delete_key "${1}" "${__internal_profile}"
 	fi
 }
+
+
 
 # <file>
 config_profile_read() {
@@ -326,26 +329,17 @@ config_profile_read() {
 			
 			case "${operator}" in
 				':')
-					profile_append_key "${identifier}" "=" "${profile}"
-					for j in ${data}
-					do
-						#echo "appending ${j}"
-						profile_append_key "${identifier}" "${j}" "${profile}"
-					done
+					profile_set_key "${identifier}" "= ${data}" "${profile}"
 				;;
 				'-')
 					for j in ${data}
 					do
-						#echo "appending -${j}"
-						profile_append_key "${identifier}" "-${j}" "${profile}"
+						newdata="-${j} ${newdata}"
 					done
+					profile_append_key "${identifier}" "${newdata}" "${profile}"
 				;;
 				'+')
-					for j in ${data}
-					do
-						#echo "appending ${j}"
-						profile_append_key "${identifier}" "${j}" "${profile}"
-					done
+					profile_append_key "${identifier}" "${data}" "${profile}"
 				;;
 			esac
 
@@ -440,6 +434,8 @@ config_profile_dump() {
 	exit 0
 }
 
+
+
 cmdline_modules_register(){
     local i data
     data=$1
@@ -454,7 +450,27 @@ cmdline_modules_register(){
 
     for i in $kernel_modules
     do
+        profile_append_key "module-${category}" "${i}" "modules-cmdline"
         profile_append_key "module-${category}" "${i}" "cmdline"
     done
 }
+
+#profile_set_key "foo" "="
+#profile_append_key "foo" "sd_mod sg sr_mod aic79xx aic7xxx aic7xxx_old BusLogic"
+#profile_append_key "foo" "ncr53c8xx NCR53c406a initio advansys aha1740 aha1542 aha152x"
+#profile_append_key "foo" "dtc fdomain gdth pas16 pci2220i pci2000 psi240i"
+#profile_append_key "foo" "qlogicfas qlogicfc qlogicisp seagate t128 u14-34f"
+#profile_append_key "foo" "ultrastor wd7000 NCR53c406a sym53c8xx dmx3191d"
+#profile_append_key "foo" "imm in2000 ips qla1280  sim710 sym53c416 dc395x atp870u"
+#profile_append_key "foo" "ieee1394 ohci1394 sbp2"
+#profile_append_key "foo" "ataraid pdcraid hptraid"
+#profile_append_key "foo" "pcmcia_core yenta_socket i82365 ds ide-cs"
+#profile_append_key "foo" "ehci-hcd uhci usb-ohci hid usb-storage uhci-hcd ohci-hcd usbhid sl811-hcd"
+#profile_append_key "foo" "dm-mod dm-snapshot dm-mirror dm-bbr"
+#profile_append_key "foo" "dm-mod dm-mirror"
+#profile_append_key "foo" "sata_promise sata_sil sata_svw sata_via sata_nv sata_sx4 sata_sis sata_uli sata_vitesse sata_qstor ahci ata_piix"
+
+#profile_append_key "foo" "-sd_mod sg -sr_mod -aic79xx -aic7xxx -aic7xxx_old -BusLogic"
+#profile_append_key "foo" "-sd_mod1 sg -sr_mod1 sr_mod1 -dm-mirror -dm-mod"
+#profile_get_key "foo"
 

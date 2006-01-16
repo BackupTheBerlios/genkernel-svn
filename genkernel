@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash 
 # Genkernel v4
 
 PATH='/bin:/usr/bin:/sbin:/usr/sbin'
@@ -26,9 +26,6 @@ trap trap_cleanup SIGHUP SIGQUIT SIGINT SIGTERM SIGKILL
 # Parse all command line options...
 Options=$@
 
-#profile_set_key debuglevel "-1 -3 1 3 5 = -1 3 1 1 3 7" "system"
-#profile_get_key debuglevel "system"
-#exit 255
 
 # Internal flag to check if config parsing succeeded
 __INTERNAL__CONFIG_PARSING_FAILED=false
@@ -46,6 +43,7 @@ for i in $(profile_list); do
 		profile_copy $i "user"
 	fi
 done
+
 # Override with the cmdline
 profile_copy cmdline "user"
 
@@ -58,33 +56,36 @@ CONFIG_DIR="$(arch_replace ${CONFIG_DIR})"
 # Make the cache directory if it doesnt exist
 [ -e "${CACHE_DIR}" ] || mkdir -p "${CACHE_DIR}"
 
-# We know what arch we are building for lets setup the system
-setup_system_profile
-
-
 # Failed to parse the cmdline properly, die so we can investigate...
 logicTrue ${__INTERNAL__CONFIG_PARSING_FAILED} && die 'Fatal error processing arguments; exiting...'
 
-# Start Importing profiles into the running profile space
-# Copy in the system wide defaults
+# setup the systems profile and copy it into the running profile
+setup_system_profile
 profile_copy "system"
 
-# Copy the user cmdline stuff into the running profile
+# Copy the user profile created with the setup_userspace function. Last profile to import
+# as this one overrides the rest of them. This contains the cmdline and imported profiles
 profile_copy "user"
 
-# Copy the user profile created with the setup_userspace function. Last profile to import
-# as this one overrides the rest of them.
+set_color 
+clear_log
+genkernel_print_header
+
+# setup the modules profile and copy it into the running profile
+setup_modules_profile
+profile_copy "modules"
+profile_copy "modules-cmdline"
 
 if [ "$(profile_get_key debuglevel)" -gt "3" ]
 then
 	profile_list
-	profile_list_contents
-	profile_list_keys "running"
+	for i in $(profile_list)
+	do
+		profile_list_contents $i
+	done
 	echo
 fi
-# End Importing profiles into the running profile space
 
-set_color 
 logicTrue $(profile_get_key help user) && show_help && echo && exit 0 # --help
 
 # Set DEBUGFILE if log-override is defined
@@ -109,12 +110,9 @@ then
 	exit 1
 fi
 
-clear_log
 
-genkernel_print_header
 genkernel_lookup_packages
 genkernel_lookup_kernel
-
 
 # Process depends
 print_info 1 '>> Processing dependency tree...'
