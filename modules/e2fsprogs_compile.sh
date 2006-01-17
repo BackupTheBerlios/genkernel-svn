@@ -13,11 +13,20 @@ e2fsprogs_compile::() {
 	[ -d "${E2FSPROGS_DIR}" ] || die "e2fsprogs directory ${E2FSPROGS_DIR} invalid"
 	cd "${E2FSPROGS_DIR}"
 
+	# turn on/off the cross compiler
+	if [ -n "$(profile_get_key cross-compile)" ]
+	then
+		ARGS="${ARGS} CC=$(profile_get_key cross-compile)gcc"
+	else
+		[ -n "$(profile_get_key utils-cross-compile)" ] && \
+			ARGS="${ARGS} CC=$(profile_get_key utils-cross-compile)gcc"
+	fi
+
 	print_info 1 'e2fsprogs: >> Configuring...'
-	configure_generic  --with-ldopts=-static
+	configure_generic  --with-ldopts=-static ${ARGS}
 
 	print_info 1 'e2fsprogs: >> Compiling...'
-	compile_generic # Run make
+	compile_generic ${ARGS} # Run make
 
 	print_info 1 'blkid: >> Copying to cache...'
 	[ -f "${TEMP}/${E2FSPROGS_DIR}/misc/blkid" ] || die 'Blkid executable does not exist!'

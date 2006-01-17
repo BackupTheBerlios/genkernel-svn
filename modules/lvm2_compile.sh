@@ -11,6 +11,19 @@ lvm2_compile::() {
 	cd "${LVM2_DIR}"
 	print_info 1 'LVM2: >> Configuring...'
 
+	# turn on/off the cross compiler
+	if [ -n "$(profile_get_key cross-compile)" ]
+	then
+		CC="$(profile_get_key cross-compile)gcc"
+	elif [ -n "$(profile_get_key utils-cross-compile)" ]
+	then
+		CC="$(profile_get_key utils-cross-compile)gcc"
+	else
+		CC="gcc"
+	fi
+
+
+	CC="${CC}" \
 	LDFLAGS="-L${DEVICE_MAPPER}/lib" \
 	CFLAGS="-I${DEVICE_MAPPER}/include" \
 	CPPFLAGS="-I${DEVICE_MAPPER}/include" \
@@ -18,6 +31,8 @@ lvm2_compile::() {
 
 	mkdir -p "${TEMP}/LVM2"
 	print_info 1 'LVM2: >> Compiling...'
+	
+	CC="${CC}" \
 	LDFLAGS="-L${DEVICE_MAPPER}/lib" \
 	CFLAGS="-I${DEVICE_MAPPER}/include" \
 	CPPFLAGS="-I${DEVICE_MAPPER}/include" \

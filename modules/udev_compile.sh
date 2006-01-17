@@ -27,16 +27,32 @@ udev_compile::() {
 			echo "CFLAGS += -I${KERNEL_DIR}/arch/${ARCH}/include" >> Makefile
 		fi
 	fi
-
-	if [ "${ARCH}" = 'um' ]
+	
+	# turn on/off the cross compiler
+	if [ -n "$(profile_get_key cross-compile)" ]
 	then
-		compile_generic EXTRAS="${extras}" ARCH=um USE_KLIBC=true KLCC=${KLCC} USE_LOG=false DEBUG=false udevdir=/dev all
-	elif [ "${ARCH}" = 'sparc64' ]
+		CROSS="$(profile_get_key cross-compile)"
+	else
+		[ -n "$(profile_get_key utils-cross-compile)" ] && \
+			CROSS="$(profile_get_key utils-cross-compile)"
+	fi
+	
+	if [ -n "${CROSS}" ]
 	then
-		compile_generic EXTRAS="${extras}" ARCH=sparc64 CROSS=sparc64-unknown-linux-gnu- USE_KLIBC=true KLCC=${KLCC} USE_LOG=false DEBUG=false udevdir=/dev all
+		compile_generic EXTRAS="${extras}" CROSS=${CROSS} USE_KLIBC=true KLCC=${KLCC} USE_LOG=false DEBUG=false udevdir=/dev all
 	else
 		compile_generic EXTRAS="${extras}" USE_KLIBC=true KLCC=${KLCC} USE_LOG=false DEBUG=false udevdir=/dev all
 	fi
+
+	#if [ "${ARCH}" = 'um' ]
+	#then
+	#	compile_generic EXTRAS="${extras}" ARCH=um USE_KLIBC=true KLCC=${KLCC} USE_LOG=false DEBUG=false udevdir=/dev all
+	#elif [ "${ARCH}" = 'sparc64' ]
+	#then
+	#	compile_generic EXTRAS="${extras}" ARCH=sparc64 CROSS=sparc64-unknown-linux-gnu- USE_KLIBC=true KLCC=${KLCC} USE_LOG=false DEBUG=false udevdir=/dev all
+	#else
+	#	compile_generic EXTRAS="${extras}" USE_KLIBC=true KLCC=${KLCC} USE_LOG=false DEBUG=false udevdir=/dev all
+	#fi
 
 	print_info 1 '      >> Installing...'
 	install -d "${TEMP}/udev/etc/udev" "${TEMP}/udev/sbin" "${TEMP}/udev/etc/udev/scripts" "${TEMP}/udev/etc/udev/rules.d" "${TEMP}/udev/etc/udev/permissions.d" "${TEMP}/udev/etc/udev/extras" "${TEMP}/udev/etc" "${TEMP}/udev/sbin" "${TEMP}/udev/usr/" "${TEMP}/udev/usr/bin" "${TEMP}/udev/usr/sbin"||

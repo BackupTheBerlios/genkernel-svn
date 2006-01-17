@@ -7,20 +7,7 @@
 require kernel_config
 klibc_compile::() {
 	local KLIBC_DIR="klibc-${KLIBC_VER}" KLIBC_SRCTAR="${SRCPKG_DIR}/klibc-1.1.1.tar.gz"
-
-	#### This should be done in the kernel config code area
-
-	## PPC fixup for 2.6.14
-	## Headers are moving around .. need to make them available
-	#if [ "${VER}" -eq '2' -a "${PAT}" -eq '6' -a "${SUB}" -ge '14' ]
-	#then
-	#    if [ "${ARCH}" = 'ppc' -o "${ARCH}" = 'ppc64' ]
-	#    then
-	#		cd ${KERNEL_DIR}
-	#	echo 'Applying hack to workaround 2.6.14+ PPC header breakages...'
-	#		compile_generic kernel 'include/asm'
-	#    fi
-	#fi
+	local ARGS
 
 	cd "${TEMP}"
 	rm -rf "${KLIBC_DIR}" klibc-build-${KLIBC_VER}
@@ -48,7 +35,7 @@ klibc_compile::() {
 		if [ "$(profile_get_key arch-override)" == "um" -o "$(profile_get_key arch-override)" == "xen0" \
 		     -o "$(profile_get_key arch-override)" == "xenU" ]
 		then
-			echo "KRNLOBJ = ${TEMP}/$(profile_get_key arch-override)-i386" >> MCONFIG
+			echo "KRNLOBJ = ${TEMP}/genkernel-kernel-$(profile_get_key arch-override)-i386" >> MCONFIG
 		else
 			echo "KRNLOBJ = $(profile_get_key kbuild-output)" >> MCONFIG
 		fi
@@ -63,35 +50,36 @@ klibc_compile::() {
 		fi
 	fi
 
-	if [ "${ARCH}" = 'um' -o "${ARCH}" = 'xen0' -o "${ARCH}" = 'xenU' ]
+	# turn on/off the cross compiler
+	if [ -n "$(profile_get_key cross-compile)" ]
 	then
-		compile_generic "ARCH=i386"
-	elif [ "${ARCH}" = 'sparc64' ]
-	then
-		compile_generic "ARCH=sparc64 CROSS=sparc64-unknown-linux-gnu-"
-	elif [ "${ARCH}" = 'x86' ]
-	then
-		compile_generic "ARCH=i386"
-	## FIXME: Cross-compile
+		sed -i MCONFIG -e "s|CROSS   = |CROSS = $(profile_get_key cross-compile)|g"
+		# Workaround for makefile that doesnt set CROSS consistently
+		sed -i Makefile -e "s|\$(CROSS)klibc.config|klibc.config|g"
+		sed -i Makefile -e "s|\$(KCROSS)klcc|klcc|g"
+		sed -i Makefile -e "s|\$(CROSS)klcc|klcc|g"
 	else
-		compile_generic 
+		if [ -n "$(profile_get_key utils-cross-compile)" ] 
+		then
+			sed -i MCONFIG -e "s|CROSS   = |CROSS = $(profile_get_key utils-cross-compile)|g" 
+			# Workaround for makefile that doesnt set CROSS consistently
+			sed -i Makefile -e "s|\$(CROSS)klibc.config|klibc.config|g"
+			sed -i Makefile -e "s|\$(KCROSS)klcc|klcc|g"
+			sed -i Makefile -e "s|\$(CROSS)klcc|klcc|g"
+		fi
+	fi
+
+	if [ "${ARCH}" = 'um' -o "${ARCH}" = 'xen0' -o "${ARCH}" = 'xenU' -o "${ARCH}" = 'x86' ]
+	then
+		compile_generic ARCH=i386 
+	else
+		compile_generic
 	fi
 
 	compile_generic install
 
-#### This should be done in the kernel config code area
-
-#	# PPC fixup for 2.6.14
-#	if [ "${VER}" -eq '2' -a "${PAT}" -eq '6' -a "${SUB}" -ge '14' ]
-#	then
-#	    if [ "${ARCH}" = 'ppc' -o "${ARCH}" = 'ppc64' ]
-#	    then
-#		cd ${KERNEL_DIR}
-#		compile_generic 'archclean'
-#	    fi
-#	fi
-
 	cd ${TEMP}
 	genkernel_generate_package "klibc-${KLIBC_VER}" klibc-build-${KLIBC_VER}
 	rm -rf "${KLIBC_DIR}" klibc-build-${KLIBC_VER}
+
 }

@@ -165,3 +165,24 @@ unpack()
 	print_info 1 "unpack: Processing $1..."
 	tar ${tarFlags}xpf "$1" || die "Failed to unpack $1!"
 }
+
+config_set_string() {
+	sed -i ${1} -e "s|#\? \?CONFIG_${2} is.*|CONFIG_${2}=\"${3}\"|g"
+	sed -i ${1} -e "s|CONFIG_${2}=.*|CONFIG_${2}=\"${2}\"|g"
+}   
+
+config_set_builtin() {
+	sed -i ${1} -e "s/CONFIG_${2}=m/CONFIG_${2}=y/g"
+	sed -i ${1} -e "s/#\? \?CONFIG_${2} is.*/CONFIG_${2}=y/g"
+}
+
+config_set_module() {
+	sed -i ${1} -e "s/CONFIG_${2}=y/CONFIG_${2}=m/g"
+	sed -i ${1} -e "s/#\? \?CONFIG_${2} is.*/CONFIG_${2}=m/g"
+}
+
+config_unset() {
+	sed -i ${1} -e "s/CONFIG_${2}=y/# CONFIG_${2} is not set/g"
+	sed -i ${1} -e "s/CONFIG_${2}=m/# CONFIG_${2} is not set/g"
+}
+

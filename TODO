@@ -10,5 +10,9 @@ Modules to merge in:
   -> genzimage
   -> MIPS embedded image
 * grub [gen_bootloader.sh]
-* e2fsprogs needs cpio code
 * epatch function
+
+* reorganize menu
+* initramfs allow skipping of any cpio
+
+* setup all module

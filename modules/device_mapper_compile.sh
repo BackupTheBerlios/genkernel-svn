@@ -9,12 +9,24 @@ device_mapper_compile::()
 	[ ! -d "${DEVICE_MAPPER_DIR}" ] && die "device-mapper directory ${DEVICE_MAPPER_DIR} invalid"
 
 	cd "${DEVICE_MAPPER_DIR}"
-	configure_generic  --prefix=${TEMP}/device-mapper --enable-static_link
+
+	# turn on/off the cross compiler
+	if [ -n "$(profile_get_key cross-compile)" ]
+	then
+		ARGS="${ARGS} CC=$(profile_get_key cross-compile)gcc"
+    else
+		[ -n "$(profile_get_key utils-cross-compile)" ] && \
+			ARGS="${ARGS} CC=$(profile_get_key utils-cross-compile)gcc"
+	fi
+
+	configure_generic  --prefix=${TEMP}/device-mapper --enable-static_link ${ARGS}
 	
 	print_info 1 'device-mapper: >> Compiling...'
-	compile_generic # Compile
 	
-	compile_generic install
+	compile_generic ${ARGS} # Compile
+	compile_generic ${ARGS} install
+
+	
 
 	cd "${TEMP}"
 	rm -rf "${TEMP}/device-mapper/man" || die 'Could not remove manual pages!'

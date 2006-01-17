@@ -2,12 +2,9 @@ require @kernel_src_tree:null:fail
 kernel_config::()
 {
 	PRINT_PREFIX="config: "
-	# Override the default arch being built
-	[ -n "$(profile_get_key arch-override)" ] && ARGS="${ARGS} ARCH=$(profile_get_key arch-override)"
-
-	# Turn off KBUILD_OUTPUT if kbuild_output is the same as the kernel tree or die if arch=um or xen0 or xenU
-	KBUILD_OUTPUT="$(profile_get_key kbuild-output)"
 	
+	setup_kernel_args
+
 	if kbuild_enabled
 	then
 		ARGS="${ARGS} KBUILD_OUTPUT=${KBUILD_OUTPUT}"
@@ -31,23 +28,6 @@ kernel_config::()
 		check_asm_link_ok ${ARCH} || die "Bad asm link.  The output directory has already been configured for a different arch"
 	fi
 	
-	# Set the destination path for the kernel
-	if [ -n "$(profile_get_key install-path)" ]
-	then
-		ARGS="${ARGS} INSTALL_PATH=$(profile_get_key install-path)"
-		mkdir -p $(profile_get_key install-path) || die 'Failed to create install path!'
-	fi
-	
-	# Set the destination path for the modules
-	if [ -n "$(profile_get_key install-mod-path)" ]
-	then
-		ARGS="${ARGS} INSTALL_MOD_PATH=$(profile_get_key install-mod-path)"
-		mkdir -p $(profile_get_key install-mod-path) || die 'Failed to create module install path!'
-	fi
-
-	# Kernel cross compiling support
-	[ -n "$(profile_get_key kernel-cross-compile)" ] && ARGS="${ARGS} CROSS_COMPILE=$(profile_get_key kernel-cross-compile)"
-
 	cd $(profile_get_key kernel-tree)
 	determine_config_file
 
@@ -170,9 +150,9 @@ kernel_config::()
 
 	# if modules capable compile_generic ${ARGS} modules_prepare
 	# Set or unset any config option
-	#config_unset "AUDIT"
-	#config_set_module "AUDIT"
-	#config_set_builtin "AUDIT"
+	#kernel_config_unset "AUDIT"
+	#kernel_config_set_module "AUDIT"
+	#kernel_config_set_builtin "AUDIT"
 	
 	# Kernel configuration may have changed our output names ..
 	unset KV_FULL

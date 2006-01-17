@@ -43,6 +43,8 @@ __register_config_option 'Kernel Settings' 'module-prefix' 'true' 'false' 'Prefi
 # __register_config_option 'Low-Level' 'kernel-cc' 'true' 'false' 'Compiler to use for kernel.'
 # __register_config_option 'Low-Level' 'kernel-ld' 'true' 'false' 'Linker to use for kernel.'
 __register_config_option 'Low-Level' 'kernel-cross-compile' 'true' 'false' 'CROSS_COMPILE kernel variable.'
+__register_config_option 'Low-Level' 'utils-cross-compile' 'true' 'false' 'CROSS_COMPILE kernel variable.'
+__register_config_option 'Low-Level' 'cross-compile' 'true' 'false' 'CROSS_COMPILE variable. (Overrides kernel-cross-compile and utils-cross-compile)'
 # __register_config_option 'Low-Level' 'kernel-make' 'true' 'false' 'Make to use for kernel.'
 
 ## Low Level Utils

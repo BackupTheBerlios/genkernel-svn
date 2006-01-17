@@ -76,6 +76,11 @@ get_extconfig_var() {
 	echo "${myOut//\"/}"
 }
 
+kernel_is() {
+	#[operator] [version2]
+	linux_kv_cmp "${KV_MAJOR}.${KV_MINOR}.${KV_PATCH}" $1 $2
+}
+
 linux_kv_cmp() {
 	# [version1] [operator] [version2]
 
@@ -168,21 +173,21 @@ check_asm_link_ok() {
 	fi
 }
 
-config_set_string() {
+kernel_config_set_string() {
 	sed -i ${KBUILD_OUTPUT}/.config -e "s|#\? \?CONFIG_${1} is.*|CONFIG_${1}=\"${2}\"|g"
 	sed -i ${KBUILD_OUTPUT}/.config -e "s|CONFIG_${1}=.*|CONFIG_${1}=\"${2}\"|g"
 }
-config_set_builtin() {
+kernel_config_set_builtin() {
 	sed -i ${KBUILD_OUTPUT}/.config -e "s/CONFIG_${1}=m/CONFIG_${1}=y/g"
 	sed -i ${KBUILD_OUTPUT}/.config -e "s/#\? \?CONFIG_${1} is.*/CONFIG_${1}=y/g"
 }
 
-config_set_module() {
+kernel_config_set_module() {
 	sed -i ${KBUILD_OUTPUT}/.config -e "s/CONFIG_${1}=y/CONFIG_${1}=m/g"
 	sed -i ${KBUILD_OUTPUT}/.config -e "s/#\? \?CONFIG_${1} is.*/CONFIG_${1}=m/g"
 }
 
-config_unset() {
+kernel_config_unset() {
 	sed -i ${KBUILD_OUTPUT}/.config -e "s/CONFIG_${1}=y/# CONFIG_${1} is not set/g"
 	sed -i ${KBUILD_OUTPUT}/.config -e "s/CONFIG_${1}=m/# CONFIG_${1} is not set/g"
 }
@@ -228,3 +233,49 @@ kbuild_enabled() {
 		return 1
 	fi
 }
+
+setup_kernel_args() {
+	# Override the default arch being built
+	[ -n "$(profile_get_key arch-override)" ] && ARGS="${ARGS} ARCH=$(profile_get_key arch-override)"
+
+	# Turn off KBUILD_OUTPUT if kbuild_output is the same as the kernel tree or die if arch=um or xen0 or xenU
+	if [ ! "$(profile_get_key kbuild-output)" == "$(profile_get_key kernel-tree)" ]
+	then
+		if [ -n "$(profile_get_key kbuild-output)" ]
+		then
+			ARGS="${ARGS} KBUILD_OUTPUT=$(profile_get_key kbuild-output)"
+			mkdir -p $(profile_get_key kbuild-output)
+		fi
+	elif [ "$(profile_get_key kbuild-output)" == "$(profile_get_key kernel-tree)" ]
+	then
+		if [    "$(profile_get_key arch-override)" == "um" -o "$(profile_get_key arch-override)" == "xen0" \
+			-o "$(profile_get_key arch-override)" == "xenU" ]
+		then
+			die "Compiling for ARCH=$(profile_get_key arch-override) requires kbuild_output to differ from the kernel-tree"
+		fi
+	fi
+
+	# Kernel cross compiling support
+	if [ -n "$(profile_get_key cross-compile)" ]
+	then
+		ARGS="${ARGS} CROSS_COMPILE=$(profile_get_key cross-compile)"
+	else
+		[ -n "$(profile_get_key kernel-cross-compile)" ] && ARGS="${ARGS} CROSS_COMPILE=$(profile_get_key kernel-cross-compile)"
+	fi
+
+
+	# Set the destination path for the kernel
+	if [ -n "$(profile_get_key install-path)" ]
+	then
+		ARGS="${ARGS} INSTALL_PATH=$(profile_get_key install-path)"
+		mkdir -p $(profile_get_key install-path) || die 'Failed to create install path!'
+	fi
+
+	# Set the destination path for the modules
+	if [ -n "$(profile_get_key install-mod-path)" ]
+	then
+		ARGS="${ARGS} INSTALL_MOD_PATH=$(profile_get_key install-mod-path)"
+		mkdir -p $(profile_get_key install-mod-path) || die 'Failed to create module install path!'
+	fi
+}
+

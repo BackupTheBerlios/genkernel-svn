@@ -17,11 +17,27 @@ busybox_compile::()
 
 	cd "${BUSYBOX_DIR}"
 	cp "${BUSYBOX_CONFIG}" .config
-	sed -i -e 's/#\? \?CONFIG_FEATURE_INSTALLER[ =].*/CONFIG_FEATURE_INSTALLER=y/g' .config
+	# TODO Add busybox config changing support
+	
+	config_set_builtin ".config" "CONFIG_FEATURE_INSTALLER"
+
+	# turn on/off the cross compiler
+	if [ -n "$(profile_get_key cross-compile)" ]
+	then
+		config_set_builtin ".config" "USING_CROSS_COMPILER"
+		config_set_string ".config" "CROSS_COMPILER_PREFIX" "$(profile_get_key cross-compile)"
+    elif [ -n "$(profile_get_key utils-cross-compile)" ]
+		config_set_builtin ".config" "USING_CROSS_COMPILER"
+		config_set_string ".config" "CROSS_COMPILER_PREFIX" "$(profile_get_key utils-cross-compile)"
+	else
+		config_unset ".config" "USING_CROSS_COMPILER"
+		config_unset ".config" "CROSS_COMPILER_PREFIX"
+	fi
 
 	print_info 1 'busybox: >> Configuring...'
-	# TODO Add busybox config changing support
 	yes '' 2>/dev/null | compile_generic oldconfig
+
+	
 	print_info 1 'busybox: >> Compiling...'
 	compile_generic all
 
