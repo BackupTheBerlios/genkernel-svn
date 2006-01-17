@@ -29,7 +29,7 @@ kernel_compile::()
 	[ -n "$(profile_get_key kernel-cross-compile)" ] && ARGS="${ARGS} CROSS_COMPILE=$(profile_get_key kernel-cross-compile)"
 
 	cd $(profile_get_key kbuild-output)
-	config_set_string "INITRAMFS_SOURCE" "${TEMP}/initramfs-internal/"
+	config_set_string "INITRAMFS_SOURCE" "${TEMP}/initramfs-internal ${TEMP}/initramfs-internal.devices"
 	# make the kernel
 	# FIXME: Needs to use KERNEL_MAKE_DIRECTIVE
 	print_info 1 '>> Compiling kernel ...'

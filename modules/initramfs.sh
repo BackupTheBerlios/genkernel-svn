@@ -38,6 +38,12 @@ initramfs::() {
 				die "Invalid CPIO file in registry: ${i} -- file does not exist."
 			fi
 			genkernel_extract_cpio $i "${TEMP}/initramfs-internal"
+			cat <<- EOF > ${TEMP}/initramfs-internal.devices
+			nod /dev/console 0600 0 0 c 5 1
+			nod /dev/null 0600 0 0 c 1 3
+			nod /dev/tty1 0600 0 0 c 4 1
+			EOF
+
 		done
 	else
 		print_info 1 'Merging:'

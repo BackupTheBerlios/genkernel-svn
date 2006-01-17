@@ -30,9 +30,13 @@ gmi::()
 		# mknod -m 660 console c 5 1
 		# mknod -m 660 null c 1 3
 		# mknod -m 600 tty1 c 4 1
-	# Copy the ready-made CPIO over instead...
-	cp "${GMI_DIR}/gmi-core-devices.cpio.gz" "${TEMP}" || die "Failed to copy over core device CPIO!"
-	initramfs_register_cpio gmi-core-devices
+	
+	# If not an internal-initramfs then copy the ready-made CPIO over instead...
+	if ! logicTrue $(profile_get_key internal-initramfs)
+	then
+		cp "${GMI_DIR}/gmi-core-devices.cpio.gz" "${TEMP}" || die "Failed to copy over core device CPIO!"
+		initramfs_register_cpio gmi-core-devices
+	fi
 
 	local LINUXRC=$(profile_get_key linuxrc)
 	if [ -f "${LINUXRC}" ]
