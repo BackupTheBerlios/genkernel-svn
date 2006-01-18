@@ -10,25 +10,30 @@ profile_set_key usecolor true 'system'
 
 ## Kernel Config
 __register_config_option 'Kernel Configuration'	'menuconfig'	 'false' 'true'	 'Run menuconfig after oldconfig.'
-__register_config_option 'Kernel Configuration'	'no-save-config' 'false' 'false' "Don't save the configuration to /etc/kernels."
+profile_set_key 'menuconfig' false 'system'
+
+__register_config_option 'Kernel Configuration'	'save-config' 'false' 'true' "save the configuration to /etc/kernels."
+profile_set_key 'save-config' false 'system'
 __register_config_option 'Kernel Configuration'	'oldconfig'	 'false:true' 'false' 'Run oldconfig.'
 __register_config_option 'Kernel Configuration'	'config'	 'false' 'false' 'Run config after oldconfig.'
 __register_config_option 'Kernel Configuration'	'gconfig'	 'false' 'false' 'Run gconfig after oldconfig.'
 __register_config_option 'Kernel Configuration'	'xconfig'	 'false' 'false' 'Run xconfig after oldconfig.'
+__register_config_option 'Kernel Configuration' 'mrproper'		'false' 'true'	'Run "make mrproper" before compilation.'
+__register_config_option 'Kernel Configuration' 'clean'		'false'	'true'	'Run "make clean" before compilation.'
 
-## Kernel Compile
-__register_config_option 'Kernel Compile' 'clean'		'false'	'true'	'Run "make clean" before compilation.'
-__register_config_option 'Kernel Compile' 'install'		'false' 'true'	'Install the kernel to /boot after building; this does not change bootloader settings.'
-__register_config_option 'Kernel Compile' 'mrproper'		'false' 'true'	'Run "make mrproper" before compilation.'
-__register_config_option 'Kernel Compile' 'oldconfig'		'false' 'false' 'Implies "--no-clean" and runs a "make oldconfig".'
-__register_config_option 'Kernel Compile' 'gensplash'		'true:true' 'false' 'Install gensplash support into bzImage optionally using the specified theme.'
+
 
 ## Kernel Settings
 __register_config_option 'Kernel Settings' 'kernel-config' 'true' 'false' 'Kernel configuration file to use for compilation.'
 
 __register_config_option 'Kernel Settings' 'kernel-tree'   'true' 'false' 'Location of kernel sources.'
 __register_config_option 'Kernel Settings' 'kernel-modules'   'true!m' 'false' 'Add or subtract kernel modules' 'cmdline_modules_register'
-__register_config_option 'Kernel Settings' 'internal-initramfs' 'false' 'false' 'compile initramfs-internally'
+__register_config_option 'Kernel Settings' 'internal-initramfs' 'false' 'true' 'compile initramfs-internally'
+profile_set_key internal-initramfs false 'system'
+
+__register_config_option 'Kernel Settings' 'initramfs' 'false' 'false' 'compile initramfs-internally'
+profile_set_key initramfs true 'system'
+
 __register_config_option 'Kernel Settings' 'install-path' 'true' 'false' 'Destination of kernel and initramfs'
 __register_config_option 'Kernel Settings' 'install-mod-path' 'true' 'false' 'Destination of kernel modules'
 
@@ -89,7 +94,10 @@ profile_set_key usecolor true 'system'
 
 ## Output Settings
 __register_config_option 'Output Settings' 'kerncache' 'true' 'false' "File to output a .tar.bz2'd kernel, the contents of /lib/modules/ and the kernel config; this is done before callbacks."
+
 __register_config_option 'Output Settings' 'kernel-name' 'true' 'false' 'Tag the kernel and initrd with a name; if not defined the option defaults to "genkernel".'
+profile_set_key kernel-name genkernel 'system'
+
 __register_config_option 'Output Settings' 'initramfs-overlay' 'true' 'false' 'Directory structure to include in the initramfs.'
 __register_config_option 'Output Settings' 'external-cpio' 'true!m' 'false' 'Include an external cpio file.'
 #__register_config_option 'Output Settings' 'minkernpackage' 'true' 'false' "File to output a .tar.bz2'd kernel and initrd: No modules outside of the initrd will be included..."
@@ -100,3 +108,12 @@ __register_config_option 'Output Settings' 'log-override' 'true' 'false' '' # Hi
 
 ## Miscellaneous
 __register_config_option 'Miscellaneous' 'help' 'false' 'false' '' # Hidden.
+
+__register_config_option 'ALL' 'initramfs' 'false' 'true' 'build the initramfs'
+profile_set_key initramfs true 'system'
+
+__register_config_option 'ALL' 'setgrub' 'false' 'true' 'Setup the grub.conf file'
+profile_set_key setgrub false 'system'
+
+__register_config_option 'Installation Options' 'install'		'false' 'true'	'Install the kernel to /boot after building; this does not change bootloader settings.'
+profile_set_key install true 'system'

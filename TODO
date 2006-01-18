@@ -1,8 +1,11 @@
 Things to fix:
 
-* Cross-compiling... check CROSS=, CROSS_COMPILE and other friends
-  get set in the right places.
+#* Cross-compiling... check CROSS=, CROSS_COMPILE and other friends
+#  get set in the right places.
 * Debuglevel
+
+* busybox config file
+
 
 Modules to merge in:
 
