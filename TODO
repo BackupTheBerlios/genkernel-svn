@@ -1,21 +1,21 @@
 Things to fix:
 
-#* Cross-compiling... check CROSS=, CROSS_COMPILE and other friends
-#  get set in the right places.
 * Debuglevel
 
 * busybox config file
+ 
+* skip modules if no modules in .config
 
+* always install modules?
 
-Modules to merge in:
+* initramfs installed checks simplification... create new function?
 
-* kernel {subtargets done, dependencies need cleaning up or checking}
-  -> genzimage
-  -> MIPS embedded image
-* grub [gen_bootloader.sh]
 * epatch function
 
+* exports for callbacks
+
 * reorganize menu
+
 * initramfs allow skipping of any cpio
 
 * setup all module
