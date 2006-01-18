@@ -1,21 +1,12 @@
 Things to fix:
 
-* Debuglevel
-
 * busybox config file
- 
 * skip modules if no modules in .config
-
 * always install modules?
-
 * initramfs installed checks simplification... create new function?
-
 * epatch function
-
 * exports for callbacks
-
 * reorganize menu
-
 * initramfs allow skipping of any cpio
-
 * setup all module
+* fix genkernel --help if /var/tmp/... isn't writable and tempdir isn't specified

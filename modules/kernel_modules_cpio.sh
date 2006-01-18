@@ -1,69 +1,67 @@
 require kernel_modules_install
 kernel_modules_cpio::()
 {
+	MOD_EXT=".ko"
+	INSTALL_MOD_PATH="$(profile_get_key install-mod-path)"
+	print_info 2 "initramfs: >> Searching for modules..."
+	if [ "$(profile_get_key install-mod-path)" != '' ]
+	then
+		cd "$(profile_get_key install-mod-path)"
+	else
+		cd /
+	fi
 
-		MOD_EXT=".ko"
-		INSTALL_MOD_PATH="$(profile_get_key install-mod-path)"
-		print_info 2 "initramfs: >> Searching for modules..."
-		if [ "$(profile_get_key install-mod-path)" != '' ]
+	if [ -d "${TEMP}/initramfs-modules-${KV_FULL}-temp" ]
+	then
+		rm -r "${TEMP}/initramfs-modules-${KV_FULL}-temp/"
+	fi
+	mkdir -p "${TEMP}/initramfs-modules-${KV_FULL}-temp/lib/modules/${KV_FULL}"
+
+	for i in `gen_dep_list`
+	do
+		mymod=`find ./lib/modules/${KV_FULL} -name "${i}${MOD_EXT}" 2>/dev/null| head -n 1 `
+		
+		if [ -z "${mymod}" ]
 		then
-			cd "$(profile_get_key install-mod-path)"
-		else
-			cd /
+			print_warning 2 "Warning :: ${i}${MOD_EXT} not found; skipping..."
+			continue;
 		fi
+		print_info 2 "initramfs: >> Copying ${i}${MOD_EXT}..."
+		cp -ax --parents "${mymod}" "${TEMP}/initramfs-modules-${KV_FULL}-temp"
+	done
 
-		if [ -d "${TEMP}/initramfs-modules-${KV_FULL}-temp" ]
-		then
-			rm -r "${TEMP}/initramfs-modules-${KV_FULL}-temp/"
-		fi
-		mkdir -p "${TEMP}/initramfs-modules-${KV_FULL}-temp/lib/modules/${KV_FULL}"
-
-		for i in `gen_dep_list`
-		do
-			mymod=`find ./lib/modules/${KV_FULL} -name "${i}${MOD_EXT}" 2>/dev/null| head -n 1 `
-			
-			if [ -z "${mymod}" ]
-			then
-				print_warning 2 "Warning :: ${i}${MOD_EXT} not found; skipping..."
-				continue;
-			fi
-			print_info 2 "initramfs: >> Copying ${i}${MOD_EXT}..."
-			cp -ax --parents "${mymod}" "${TEMP}/initramfs-modules-${KV_FULL}-temp"
-		done
+	if [ -f "$(profile_get_key install-mod-path)"/lib/modules/${KV_FULL}/modules.dep ]
+	then
+		print_info 2 "Copying modules.dep into the initramfs"
+		cp -ax --parents "${INSTALL_MOD_PATH}/lib/modules/${KV_FULL}/modules.dep" "${TEMP}/initramfs-modules-${KV_FULL}-temp/"
+	fi
 	
-		if [ -f "$(profile_get_key install-mod-path)"/lib/modules/${KV_FULL}/modules.dep ]
-		then
-			print_info 2 "Copying modules.dep into the initramfs"
-			cp -ax --parents "${INSTALL_MOD_PATH}/lib/modules/${KV_FULL}/modules.dep" "${TEMP}/initramfs-modules-${KV_FULL}-temp/"
+	mkdir -p "${TEMP}/initramfs-modules-${KV_FULL}-temp/etc/modules/"
+	
+	# setup the modules profile
+	setup_modules_profile
+	for i in $(profile_list); do
+		if [ "${i:0:16}" == "modules-cmdline-" ]
+			then
+				profile_copy $i "modules"
 		fi
-		
-		mkdir -p "${TEMP}/initramfs-modules-${KV_FULL}-temp/etc/modules/"
-		
-		# setup the modules profile
-		setup_modules_profile
-		for i in $(profile_list); do
-			if [ "${i:0:16}" == "modules-cmdline-" ]
-				then
-					profile_copy $i "modules"
-			fi
-		done
-		profile_copy "modules-cmdline" "modules"
-		
-		
-		[ "$(profile_get_key debuglevel)" -gt "4" ] && print_info 1 "modules to be tested at bootup"
-		for i in $(profile_list_keys "modules")
-		do	
-			[ "$(profile_get_key debuglevel)" -gt "4" ] && print_info 1 "${i#module-}: $(profile_get_key $i "modules")"
-			[ -f "${TEMP}/initramfs-modules-${KV_FULL}-temp/etc/modules/${i#module-}" ] \
-					&& rm "${TEMP}/initramfs-modules-${KV_FULL}-temp/etc/modules/${i#module-}"
-			echo $(profile_get_key $i "modules") \
-				> "${TEMP}/initramfs-modules-${KV_FULL}-temp/etc/modules/${i#module-}"
-		done
+	done
+	profile_copy "modules-cmdline" "modules"
 
-		# Generate CPIO
-		cd "${TEMP}/initramfs-modules-${KV_FULL}-temp/"
-		genkernel_generate_cpio_path kernel-modules .
-		initramfs_register_cpio kernel-modules
+	[ "$(profile_get_key debuglevel)" -gt "4" ] && print_info 1 "modules to be tested at bootup"
+	for i in $(profile_list_keys "modules")
+	do	
+		[ "$(profile_get_key debuglevel)" -gt "4" ] && print_info 1 "${i#module-}: $(profile_get_key $i "modules")"
+		[ -f "${TEMP}/initramfs-modules-${KV_FULL}-temp/etc/modules/${i#module-}" ] \
+				&& rm "${TEMP}/initramfs-modules-${KV_FULL}-temp/etc/modules/${i#module-}"
+		echo $(profile_get_key $i "modules") \
+			> "${TEMP}/initramfs-modules-${KV_FULL}-temp/etc/modules/${i#module-}"
+	done
+
+	# Generate CPIO
+	cd "${TEMP}/initramfs-modules-${KV_FULL}-temp/"
+	genkernel_generate_cpio_path kernel-modules .
+	initramfs_register_cpio kernel-modules
 }
 
 gen_dep_list() {
@@ -80,7 +78,6 @@ gen_dep_list() {
 	then
 		cat ${TEMP}/moddeps | sort | uniq
 	fi
-
 }
 
 gen_deps () {
@@ -125,9 +122,9 @@ strip_mod_paths()
 modules_dep_list() {
 	MOD_EXT=".ko"
 	if [ -f ${INSTALL_MOD_PATH}/lib/modules/${KV_FULL}/modules.dep ]
-    then
-        cat ${INSTALL_MOD_PATH}/lib/modules/${KV_FULL}/modules.dep | grep ${1}${MOD_EXT}\: 2>/dev/null | cut -d\:  -f2
-    fi
+	then
+		cat ${INSTALL_MOD_PATH}/lib/modules/${KV_FULL}/modules.dep | grep ${1}${MOD_EXT}\: 2>/dev/null | cut -d\:  -f2
+	fi
 }
 
 

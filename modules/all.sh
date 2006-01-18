@@ -1,4 +1,3 @@
-
 require kernel
 require initramfs
 

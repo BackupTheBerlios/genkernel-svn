@@ -5,12 +5,10 @@ kernel_install::()
 	local ARGS CP_ARGS
 
 	setup_kernel_args
-
 	cd "$(profile_get_key kbuild-output)"
 
-    if logicTrue $(profile_get_key install)
-    then
-		# install the kernel
+	if logicTrue $(profile_get_key install)
+	then
 		print_info 1 '>> Installing kernel ...'
 		# TODO Read the directive that states where the files are being created and use that instead .. 
 		#compile_generic ${ARGS} install || die "Kernel failed to install with the default install directive .. TODO fix me still"
@@ -29,7 +27,7 @@ kernel_install::()
 			cp ${CP_ARGS} "$(profile_get_key kernel-binary)" "/boot/kernel-${KNAME}-${ARCH}-${KV_FULL}"
 			cp ${CP_ARGS} "System.map" "/boot/System.map-${KNAME}-${ARCH}-${KV_FULL}"
 		fi
-    else
-        print_info 1 "Skipping installation of the kernel: --no-install enabled"
+	else
+		print_info 1 "Skipping installation of the kernel: --no-install enabled"
 	fi
 }

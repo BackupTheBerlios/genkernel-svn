@@ -1,12 +1,9 @@
 require kernel_config
-
 logicTrue $(profile_get_key internal-initramfs) && require initramfs_create
 
 kernel_compile::()
 {
-
 	setup_kernel_args
-
 	cd $(profile_get_key kbuild-output)
 
 	# Turn set the initramfs_source string if building an internal initramfs
@@ -17,8 +14,7 @@ kernel_compile::()
 		kernel_config_unset
 	fi
 
-	# make the kernel
-	# FIXME: Needs to use KERNEL_MAKE_DIRECTIVE
+	# Compile the kernel image
 	print_info 1 '>> Compiling kernel ...'
 	compile_generic ${ARGS} ${KERNEL_MAKE_DIRECTIVE}
 }
