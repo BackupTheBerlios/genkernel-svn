@@ -10,3 +10,5 @@ Things to fix:
 * initramfs allow skipping of any cpio
 * setup all module
 * fix genkernel --help if /var/tmp/... isn't writable and tempdir isn't specified
+* < Chacabaou> plasmaroo: Well... you _could_ kinda improve genkernel to prevent dumbasses 
+               like me from doing such shit like setting up a LVM without activation LVM in the kernel.
