@@ -36,16 +36,23 @@ get_KV() {
 
 	# Local version
 	local myLookup myList
-	[[ -e "${KERNEL_DIR}/localversion" ]] && myList='localversion'
-
-	[[ -n "$(ls ${KERNEL_DIR}/localversion*[^~] 2>/dev/null)" ]] && myList="${myList} $(ls ${KERNEL_DIR}/localversion*[^~])"
-	[[ -n "$(ls ${KBUILD_OUTPUT}/localversion*[^~] 2>/dev/null)" ]] && myList="${myList} $(ls ${KBUILD_OUTPUT}/localversion*[^~])"
-	
-	for i in "${myList}"
-	do
-	[ "${i}" == '' ] && continue
-		KV_LOCAL="${KV_LOCAL}$(<${i})"
-	done
+	#[[ -e "${KERNEL_DIR}/localversion" ]] && myList='localversion'
+#
+#	[[ -n "$(ls ${KERNEL_DIR}/localversion*[^~] 2>/dev/null)" ]] && myList="${myList} $(ls ${KERNEL_DIR}/localversion*[^~])"
+#	[[ -n "$(ls ${KBUILD_OUTPUT}/localversion*[^~] 2>/dev/null)" ]] && myList="${myList} $(ls ${KBUILD_OUTPUT}/localversion*[^~])"
+#	
+#	for i in "${myList}"
+#	do
+#		if [ "${i}" == '' ]
+#		then
+#			continue
+#		else
+#			echo \"$i\"
+#			var=$(cat $i)
+#			echo $var
+#			#KV_LOCAL="${KV_LOCAL}${var}"
+#		fi
+#	done
 
 	if [ -f ${KBUILD_OUTPUT}/.config ]
 	then

@@ -8,4 +8,12 @@ then
 	logicTrue $(profile_get_key setgrub) && require grub
 fi
 
-all::() { true; }
+all::() { 
+messages_register 'Do NOT report kernel bugs as genkernel bugs unless your bug'
+messages_register 'is about the default genkernel configuration...'
+messages_register ''
+messages_register 'Make sure you have the latest genkernel before reporting bugs.'
+
+
+messages_register_read
+}

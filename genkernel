@@ -20,6 +20,7 @@ source ${CORE_DIR}/gen_profile.sh || die "Failed to source gen_profile.sh"
 source ${CORE_DIR}/gen_help_setup.sh || die "Failed to source gen_help_setup.sh"
 source ${CORE_DIR}/gen_initialize.sh || die "Failed to source gen_initialize.sh"
 source ${CORE_DIR}/gen_initramfs.sh || die "Failed to source gen_initramfs.sh"
+source ${CORE_DIR}/gen_messages.sh || die "Failed to source gen_messages.sh"
 
 trap trap_cleanup SIGHUP SIGQUIT SIGINT SIGTERM SIGKILL
 
