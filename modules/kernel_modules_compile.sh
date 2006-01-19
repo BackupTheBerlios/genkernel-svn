@@ -1,11 +1,17 @@
 require kernel_config
 kernel_modules_compile::()
 {
-	setup_kernel_args
+	if kernel_config_is_not_set "MODULES"
+	then
+		print_info 1 ">> Modules not enabled in .config .. skipping modules compile"
+	else
 
-	cd $(profile_get_key kernel-tree)
+		setup_kernel_args
 
-	# make the modules	
-	print_info 1 '>> Compiling kernel modules ...'
-	compile_generic ${ARGS} modules
+		cd $(profile_get_key kernel-tree)
+
+		# make the modules	
+		print_info 1 '>> Compiling kernel modules ...'
+		compile_generic ${ARGS} modules
+	fi
 }

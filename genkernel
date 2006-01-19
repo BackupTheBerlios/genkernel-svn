@@ -83,13 +83,15 @@ profile_copy "user"
 # Set TEMP if tempdir is defined
 [ -n "$(profile_get_key tempdir)" ] && TEMP="$(profile_get_key tempdir)"
 
+set_color 
+logicTrue $(profile_get_key help user) && show_help && echo && exit 0 # --help
+
 # Generate TEMP dir
 if [ ! -d "${TEMP}" ]
 then
 	mkdir -p "${TEMP}" || die "Failed to create temporary directory!"
 fi
 
-set_color 
 clear_log
 genkernel_print_header
 
@@ -100,14 +102,6 @@ then
 		profile_list_contents $i
 	done
 	echo
-fi
-
-logicTrue $(profile_get_key help user) && show_help && echo && exit 0 # --help
-
-# Generate TEMP dir
-if [ ! -d "${TEMP}" ]
-then
-	mkdir -p "${TEMP}" || die "Failed to create temporary directory!"
 fi
 
 [ -n "$(profile_get_key profile-dump)" ] && config_profile_dump

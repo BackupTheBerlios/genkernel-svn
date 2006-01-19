@@ -27,7 +27,7 @@ if(state == "1")
 		my_kernel = $0 "\n";
 
 		# Change the kernel string to the new info from the passed variables
-		sub(/kernel-[[:alnum:][:punct:]]+/, "kernel-" KNAME "-" ARCH "-" KV, my_kernel);
+		sub(/kernel-[[:alnum:][:punct:]]+/, "kernel-" KV, my_kernel);
 	
 	} else {
 		if(match($0, /^[[:space:]]*initrd /))
@@ -41,7 +41,7 @@ if(state == "1")
 			my_initrd = $0 "\n";
 			
 			# Change the initrd string to the new info
-			sub(/initr(d|amfs)-[[:alnum:][:punct:]]+/, "init" TYPE "-" KNAME "-" ARCH "-" KV, my_initrd);
+			sub(/initr(d|amfs)-[[:alnum:][:punct:]]+/, "init" TYPE "-" KV, my_initrd);
 
 		} else {
 			if($0 == "\n")
@@ -113,7 +113,7 @@ if(state == "1")
 		if (INITRAMFS_PRESENT == 0)
 		{
 			if (have_i != "1")
-				 my_initrd="initrd /init" TYPE "-" KNAME "-" ARCH "-" KV "\n"
+				 my_initrd="initrd /init" TYPE "-" KV "\n"
 
 			# If we have initrd_comments and an initrd was found print them
 			if(initrd_comments && have_i == "1")

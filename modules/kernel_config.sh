@@ -2,7 +2,6 @@ require @kernel_src_tree:null:fail
 kernel_config::()
 {
 	PRINT_PREFIX="config: "
-	
 	setup_kernel_args
 
 	if kbuild_enabled
@@ -30,7 +29,7 @@ kernel_config::()
 	
 	cd $(profile_get_key kernel-tree)
 	determine_config_file
-
+	
 	# Make a backup of the config if we are going to clean
 	logicTrue $(profile_get_key clean) && cp $(profile_get_key kbuild-output)/.config \
 		$(profile_get_key kbuild-output)/.config.bak > /dev/null 2>&1
@@ -146,6 +145,31 @@ kernel_config::()
 	then
 		print_info 1 '>> Applying hack to workaround 2.6.14+ PPC header breakages...'
 		compile_generic ${ARGS} 'include/asm'
+	fi
+
+
+	# Turn on things that have to be on below ... 	
+
+    # Turn set the initramfs_source string if building an internal initramfs
+    if logicTrue $(internal_initramfs)
+    then
+		if kernel_config_is_not_set "INITRAMFS_SOURCE"
+		then
+			kernel_config_set_string "INITRAMFS_SOURCE" "${TEMP}/initramfs-internal ${TEMP}/initramfs-internal.devices"
+			UPDATED_KERNEL=true
+		fi
+    else
+		if kernel_config_is_set "INITRAMFS_SOURCE"
+		then
+			kernel_config_unset "INITRAMFS_SOURCE"
+			UPDATED_KERNEL=true
+		yes '' 2>/dev/null | compile_generic ${ARGS} oldconfig
+		fi
+    fi
+
+	if [ "${UPDATE_KERNEL}" == 'true' ]
+	then
+		yes '' 2>/dev/null | compile_generic ${ARGS} oldconfig
 	fi
 
 	# if modules capable compile_generic ${ARGS} modules_prepare

@@ -1,119 +1,104 @@
 #!/bin/bash
 #  GROUP -> OPTION -> DATA (Boolean):[DEFAULT] -> Allow no'X' (Boolean) -> DESCRIPTION -> Optional (handler function)
+
 ## Debug
 __register_config_option 'Debug' 'debuglevel' 'true' 'false' 'Debug verbosity level'
-# Now set the debuglevel system default
 profile_set_key debuglevel '1' 'system'
 
 __register_config_option 'Debug' 'debugfile'  'true' 'false' 'Output file for debug info'
-profile_set_key usecolor true 'system'
-
-## Kernel Config
-__register_config_option 'Kernel Configuration'	'menuconfig'	 'false' 'true'	 'Run menuconfig after oldconfig.'
-profile_set_key 'menuconfig' false 'system'
-
-__register_config_option 'Kernel Configuration'	'save-config' 'false' 'true' "save the configuration to /etc/kernels."
-profile_set_key 'save-config' false 'system'
-__register_config_option 'Kernel Configuration'	'oldconfig'	 'false:true' 'false' 'Run oldconfig.'
-__register_config_option 'Kernel Configuration'	'config'	 'false' 'false' 'Run config after oldconfig.'
-__register_config_option 'Kernel Configuration'	'gconfig'	 'false' 'false' 'Run gconfig after oldconfig.'
-__register_config_option 'Kernel Configuration'	'xconfig'	 'false' 'false' 'Run xconfig after oldconfig.'
-__register_config_option 'Kernel Configuration' 'mrproper'		'false' 'true'	'Run "make mrproper" before compilation.'
-__register_config_option 'Kernel Configuration' 'clean'		'false'	'true'	'Run "make clean" before compilation.'
-
-
-
-## Kernel Settings
-__register_config_option 'Kernel Settings' 'kernel-config' 'true' 'false' 'Kernel configuration file to use for compilation.'
-
-__register_config_option 'Kernel Settings' 'kernel-tree'   'true' 'false' 'Location of kernel sources.'
-__register_config_option 'Kernel Settings' 'kernel-modules'   'true!m' 'false' 'Add or subtract kernel modules' 'cmdline_modules_register'
-__register_config_option 'Kernel Settings' 'internal-initramfs' 'false' 'true' 'compile initramfs-internally'
-profile_set_key internal-initramfs false 'system'
-
-__register_config_option 'Kernel Settings' 'initramfs' 'false' 'false' 'compile initramfs-internally'
-profile_set_key initramfs true 'system'
-
-__register_config_option 'Kernel Settings' 'install-path' 'true' 'false' 'Destination of kernel and initramfs'
-__register_config_option 'Kernel Settings' 'install-mod-path' 'true' 'false' 'Destination of kernel modules'
-
-# kernel-tree default
-profile_set_key kernel-tree '/usr/src/linux'
-
-__register_config_option 'Kernel Settings' 'kbuild-output'   'true' 'false' 'Location of kernel sources.'
-__register_config_option 'Kernel Settings' 'module-prefix' 'true' 'false' 'Prefix to kernel module destination, modules will be installed in <prefix>/lib/modules.'
-
-## Low Level Kernel
-# __register_config_option 'Low-Level' 'kernel-as' 'true' 'false' 'Assembler to use for kernel.'
-# __register_config_option 'Low-Level' 'kernel-cc' 'true' 'false' 'Compiler to use for kernel.'
-# __register_config_option 'Low-Level' 'kernel-ld' 'true' 'false' 'Linker to use for kernel.'
-__register_config_option 'Low-Level' 'kernel-cross-compile' 'true' 'false' 'CROSS_COMPILE kernel variable.'
-__register_config_option 'Low-Level' 'utils-cross-compile' 'true' 'false' 'CROSS_COMPILE kernel variable.'
-__register_config_option 'Low-Level' 'cross-compile' 'true' 'false' 'CROSS_COMPILE variable. (Overrides kernel-cross-compile and utils-cross-compile)'
-# __register_config_option 'Low-Level' 'kernel-make' 'true' 'false' 'Make to use for kernel.'
-
-## Low Level Utils
-# __register_config_option 'Low-Level' 'utils-as' 'true' 'false' 'Assembler to use for utilities.'
-# __register_config_option 'Low-Level' 'utils-cc' 'true' 'false' 'Compiler to use for utilities.'
-# __register_config_option 'Low-Level' 'utils-ld' 'true' 'false' 'Linker to use for utilities.'
-# __register_config_option 'Low-Level' 'utils-make' 'true' 'false' 'Make to use for kernel.'
-
-## Low Level Misc
-__register_config_option 'Low-Level' 'makeopts' 'true' 'false' 'Global make options.'
-
-## Init
-__register_config_option 'Initialization' 'bootloader=grub' 'false' 'false' 'Add new kernel to GRUB configuration.'
-__register_config_option 'Initialization' 'do-keymap-auto' 'false' 'false' 'Force keymap selection at boot.'
-__register_config_option 'Initialization' 'evms2' 'false' 'false' 'Include EVMS2 support.'
-__register_config_option 'Initialization' 'lvm2' 'false' 'false' 'Include LVM2 support.'
-__register_config_option 'Initialization' 'e2fsprogs' 'false' 'false' 'Include e2fsprogs blkid support.'
-__register_config_option 'Initialization' 'disklabel' 'false' 'false' 'Include disk label and uuid support in your initramfs.'
-__register_config_option 'Initialization' 'linuxrc' 'true' 'false' 'Use a user specified linuxrc.'
-__register_config_option 'Initialization' 'gensplash-res' 'true' 'false' 'Gensplash resolutions to include; this is passed to splash_geninitramfs in the "-r" flag.'
-
-## Catalyst Init Internals
-__register_config_option 'Initialization' 'bladecenter' 'false' 'false' '' # Used by catalyst internally, hide option; 'Enables extra pauses for IBM Bladecenter CD boots.'
-__register_config_option 'Initialization' 'unionfs' 'false' 'false' '' # Description empty, hide option
 
 ## Internals
 __register_config_option 'Internals' 'arch-override' 'true' 'false' 'Force to arch instead of autodetecting.'
 __register_config_option 'Internals' 'callback'	'true' 'false' 'Run the specified arguments after the kernel and modules have been compiled.'
 __register_config_option 'Internals' 'cachedir' 'true' 'false' 'Override the default cache location.'
 __register_config_option 'Internals' 'tempdir' 'true' 'false' "Location of Genkernel's temporary directory."
-__register_config_option 'Internals' 'postclear' 'false' 'false' 'Clear all temporary files and caches afterwards.'
-# Allow multiple entries for the profile
+__register_config_option 'Internals' 'log-override' 'true' 'false' '' # Hide
+__register_config_option 'Internals' 'postclear' 'false' 'true' 'Clear all temporary files and caches afterwards.'
 
-#This works as multiple input but turning off due to possible user editing profile issues
-#__register_config_option 'Internals' 'profile' 'true!m' 'false' 'Use specified profile.' 'config_profile_read'
-__register_config_option 'Internals' 'profile' 'true' 'false' 'Use specified profile.' 'config_profile_read'
-__register_config_option 'Internals' 'profile-dump' 'false' 'false' 'Use specified profile.'
-__register_config_option 'Internals' 'mountboot' 'false' 'true' 'Mount /boot automatically.'
-__register_config_option 'Internals' 'usecolor' 'false' 'true' 'Color output.'
-# usecolor default
+__register_config_option 'Internals' 'makeopts' 'true' 'false' 'Global make options.'
+__register_config_option 'Internals' 'usecolor' 'false' 'true' 'Use colored output.'
 profile_set_key usecolor true 'system'
 
-## Output Settings
-__register_config_option 'Output Settings' 'kerncache' 'true' 'false' "File to output a .tar.bz2'd kernel, the contents of /lib/modules/ and the kernel config; this is done before callbacks."
+__register_config_option 'Internals' 'profile' 'true!m' 'false' 'Use specified profile(s).' 'config_profile_read'
+__register_config_option 'Internals' 'profile-dump' 'false' 'false' 'Dump the current profile to the cmdline.'
+__register_config_option 'Internals' 'help' 'false' 'false' '' # Hidden.
 
-__register_config_option 'Output Settings' 'kernel-name' 'true' 'false' 'Tag the kernel and initrd with a name; if not defined the option defaults to "genkernel".'
+## Cross Compilation
+__register_config_option 'Cross compile' 'kernel-cross-compile' 'true' 'false' 'Kernel cross compiler settings.'
+__register_config_option 'Cross compile' 'utils-cross-compile' 'true' 'false' 'Utilities cross compiler settings.'
+__register_config_option 'Cross compile' 'cross-compile' 'true' 'false' 'Cross compiler settings (Overrides kernel-cross-compile and utils-cross-compile)'
+
+## Kernel Config
+__register_config_option 'Kernel Configuration' 'kernel-config' 'true' 'false' 'Kernel configuration file to use for compilation.'
+__register_config_option 'Kernel Configuration'	'menuconfig'	 'false' 'true'	 'Run menuconfig after oldconfig.'
+profile_set_key 'menuconfig' false 'system'
+
+__register_config_option 'Kernel Configuration'	'save-config' 'false' 'true' "save the configuration to /etc/kernels."
+profile_set_key 'save-config' false 'system'
+
+__register_config_option 'Kernel Configuration'	'oldconfig'	 'false' 'true' 'Run oldconfig.'
+profile_set_key 'oldconfig' true 'system'
+
+__register_config_option 'Kernel Configuration'	'config'	 'false' 'true' 'Run config after oldconfig.'
+__register_config_option 'Kernel Configuration'	'gconfig'	 'false' 'true' 'Run gconfig after oldconfig.'
+__register_config_option 'Kernel Configuration'	'xconfig'	 'false' 'true' 'Run xconfig after oldconfig.'
+__register_config_option 'Kernel Configuration' 'mrproper'		'false' 'true'	'Run "make mrproper" before compilation.'
+__register_config_option 'Kernel Configuration' 'clean'		'false'	'true'	'Run "make clean" before compilation.'
+__register_config_option 'Kernel Configuration' 'internal-initramfs' 'false' 'true' 'compile initramfs-internally'
+profile_set_key internal-initramfs false 'system'
+__register_config_option 'Kernel Configuration' 'kernel-tree'   'true' 'false' 'Location of kernel sources.'
+profile_set_key kernel-tree '/usr/src/linux'
+__register_config_option 'Kernel Configuration' 'kbuild-output'   'true' 'false' 'Location of kernel sources.'
+__register_config_option 'Kernel Configuration' 'kernel-name' 'true' 'false' 'Tag the kernel and initramfs with a name; if not defined the option defaults to "genkernel".'
 profile_set_key kernel-name genkernel 'system'
 
-__register_config_option 'Output Settings' 'initramfs-overlay' 'true' 'false' 'Directory structure to include in the initramfs.'
-__register_config_option 'Output Settings' 'external-cpio' 'true!m' 'false' 'Include an external cpio file.'
-#__register_config_option 'Output Settings' 'minkernpackage' 'true' 'false' "File to output a .tar.bz2'd kernel and initrd: No modules outside of the initrd will be included..."
-#__register_config_option 'Output Settings' 'modulespackage' 'true' 'false' "File to output a .tar.bz2'd modules after the callbacks have run."
-__register_config_option 'Output Settings' 'no-initrdmodules'	'false' 'false' 'Do not install any modules into the initramfs.'
-#__register_config_option 'Output Settings' 'no-kernel-sources' 'false' 'false' 'If there is a valid kerncache no checks will be made against a kernel source tree.'
-__register_config_option 'Output Settings' 'log-override' 'true' 'false' '' # Hide
+## Initramfs options
+__register_config_option 'Initramfs' 'gmi' 'false' 'true' 'gmi TODO TODO BETTER DESCRIPTION'
+profile_set_key gmi true
 
-## Miscellaneous
-__register_config_option 'Miscellaneous' 'help' 'false' 'false' '' # Hidden.
+__register_config_option 'Initramfs' 'busybox' 'false' 'true' 'add busybox to the initramfs'
+profile_set_key busybox true
 
-__register_config_option 'ALL' 'initramfs' 'false' 'true' 'build the initramfs'
+__register_config_option 'Initramfs' 'udev' 'false' 'true' 'add udev to the initramfs'
+profile_set_key udev true
+
+__register_config_option 'Initramfs' 'evms2' 'false' 'false' 'Include EVMS2 support.'
+__register_config_option 'Initramfs' 'lvm2' 'false' 'false' 'Include LVM2 support.'
+__register_config_option 'Initramfs' 'e2fsprogs' 'false' 'false' 'Include e2fsprogs blkid support.'
+__register_config_option 'Initramfs' 'disklabel' 'false' 'false' 'Include disk label and uuid support in your initramfs.'
+
+__register_config_option 'Initramfs' 'kernel-modules'   'true!m' 'false' 'Add or subtract kernel modules from the initramfs. --kernel-module="GROUP:module -module"' 'cmdline_modules_register'
+__register_config_option 'Initramfs' 'kernel-modules-cpio' 'false' 'true' 'add kernel modules to the initramfs'
+profile_set_key kernel_modules_cpio true
+
+__register_config_option 'Initramfs' 'initramfs-overlay' 'true' 'false' 'Directory structure to include in the initramfs.'
+__register_config_option 'Initramfs' 'external-cpio' 'true!m' 'false' 'Include an external cpio file.'
+__register_config_option 'Initramfs' 'linuxrc' 'true' 'false' 'Use a user specified linuxrc.'
+
+__register_config_option 'Initramfs' 'keymap-auto' 'false' 'true' 'Force keymap selection at boot.'
+__register_config_option 'Initramfs' 'gensplash-res' 'true' 'false' 'Gensplash resolutions to include; this is passed to splash_geninitramfs in the "-r" flag.'
+## Catalyst Init Internals
+__register_config_option 'Initramfs' 'bladecenter' 'false' 'false' '' # Used by catalyst internally, hide option; 'Enables extra pauses for IBM Bladecenter CD boots.'
+__register_config_option 'Initramfs' 'unionfs' 'false' 'false' '' # Description empty, hide option
+
+
+## ALL options
+__register_config_option 'ALL' 'initramfs' 'false' 'true' 'build a initramfs'
 profile_set_key initramfs true 'system'
 
-__register_config_option 'ALL' 'setgrub' 'false' 'true' 'Setup the grub.conf file'
+__register_config_option 'ALL' 'install'		'false' 'true'	'Install the kernel to /boot after building; this does not change bootloader settings.'
+profile_set_key install true 'system'
+
+## Installation options
+__register_config_option 'Install' 'install-initramfs-path' 'true' 'false' 'Destination of initramfs'
+__register_config_option 'Install' 'install-path' 'true' 'false' 'Destination of kernel and initramfs'
+__register_config_option 'Install' 'install-mod-path' 'true' 'false' 'Destination of kernel modules'
+
+__register_config_option 'Install' 'setgrub' 'false' 'true' 'Setup the grub.conf file'
 profile_set_key setgrub false 'system'
 
-__register_config_option 'Installation Options' 'install'		'false' 'true'	'Install the kernel to /boot after building; this does not change bootloader settings.'
-profile_set_key install true 'system'
+__register_config_option 'Install' 'links' 'false' 'true' 'Create symbolic links to the generated kernel and/or initramfs'
+profile_set_key links false 'system'
+
+__register_config_option 'Install' 'mountboot' 'false' 'true' 'Mount /boot automatically.'
+profile_set_key mountboot true 'system'

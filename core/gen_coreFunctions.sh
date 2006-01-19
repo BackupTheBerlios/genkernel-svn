@@ -428,3 +428,39 @@ print_list()
 		echo ${x}
 	done
 }
+
+external_initramfs() {
+	
+	# If we are building an internal initramfs then it is not external
+	if logicTrue $(internal_initramfs)
+	then
+		echo "false"
+	elif logicTrue $(profile_get_key initramfs)
+	then
+		echo "true"
+	else	
+		echo "false"
+	fi
+}
+
+internal_initramfs() {
+	if logicTrue $(profile_get_key internal-initramfs) && logicTrue $(profile_get_key initramfs)
+	then
+		echo "true"
+	else
+		echo "false"
+	fi
+}
+
+initramfs() {
+	
+	if logicTrue $(internal_initramfs) 
+	then
+		echo "true" 
+	elif logicTrue $(external_initramfs) 
+	then
+		echo "true" 
+	else
+		echo "false"
+	fi
+}

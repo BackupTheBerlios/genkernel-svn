@@ -14,8 +14,8 @@ initramfs_install::() {
 	
 		if [ -n "$(profile_get_key initramfs-output)" ]
 		then
-			print_info 1 ">> Installing initramfs to $(profile_get_key initramfs-output)/initramfs-${KNAME}-${ARCH}-${KV_FULL}"
-			cp ${ARGS} "${TEMP}/initramfs-output.cpio.gz" "$(profile_get_key initramfs-output)/initramfs-${KNAME}-${ARCH}-${KV_FULL}"
+			print_info 1 ">> Installing initramfs to $(profile_get_key install-initramfs-path)/initramfs-${KNAME}-${ARCH}-${KV_FULL}"
+			cp ${ARGS} "${TEMP}/initramfs-output.cpio.gz" "$(profile_get_key install-initramfs-path)/initramfs-${KNAME}-${ARCH}-${KV_FULL}"
 		else
 			print_info 1 ">> Installing initramfs to /boot/initramfs-${KNAME}-${ARCH}-${KV_FULL}"
 			cp ${ARGS} "${TEMP}/initramfs-output.cpio.gz" "/boot/initramfs-${KNAME}-${ARCH}-${KV_FULL}"

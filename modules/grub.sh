@@ -4,13 +4,9 @@ grub::() {
 	local GRUB_CONF GRUB_BOOTFS GRUB_ROOTFS ARGS INITRAMFS_PRESENT KNAME
 
 	KNAME="$(profile_get_key kernel-name)"
-	if logicTrue $(profile_get_key internal-initramfs) 
+	
+	if logicTrue $(external_initramfs) 
 	then
-		INITRAMFS_PRESENT=1
-	elif logicTrue $(profile_get_key initramfs)
-	then
-		INITRAMFS_PRESENT=0
-	else
 		INITRAMFS_PRESENT=1
 	fi
 
@@ -66,14 +62,14 @@ EOF
 			
 			if [ "${INITRAMFS_PRESENT}" == "0" ]
 			then
-				echo -e "\tkernel /kernel-${KNAME}-${ARCH}-${KV_FULL} root=/dev/ram0 init=/linuxrc real_root=$GRUB_ROOTFS" $(profile_get_key grub-options)>> $GRUB_CONF
+				echo -e "\tkernel /kernel-${KV_FULL} root=/dev/ram0 init=/linuxrc real_root=$GRUB_ROOTFS" $(profile_get_key grub-options)>> $GRUB_CONF
 			else
-				echo -e "\tkernel /kernel-${KNAME}-${ARCH}-${KV_FULL} root=$GRUB_ROOTFS" $(profile_get_key grub-options)>> $GRUB_CONF
+				echo -e "\tkernel /kernel-${KV_FULL} root=$GRUB_ROOTFS" $(profile_get_key grub-options)>> $GRUB_CONF
 			fi
 			
 			if [ "${INITRAMFS_PRESENT}" == "0" ]
 			then
-				echo -e "\tinitrd /initramfs-${KNAME}-${ARCH}-${KV_FULL}" >> $GRUB_CONF
+				echo -e "\tinitrd /initramfs-${KV_FULL}" >> $GRUB_CONF
 			fi
 
 			echo >> $GRUB_CONF
@@ -86,8 +82,6 @@ EOF
 		# ... Clone the first boot definition and change the version.
 		cp $GRUB_CONF $GRUB_CONF.bak
 		
-		ARGS="KNAME=${KNAME}"
-		ARGS="${ARGS} ARCH=${ARCH}"
 		ARGS="${ARGS} KV=${KV_FULL}"
 		ARGS="${ARGS} TYPE=ramfs"
 

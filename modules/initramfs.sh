@@ -1,3 +1,5 @@
+
+
 if logicTrue $(profile_get_key install)
 then
 	require initramfs_install

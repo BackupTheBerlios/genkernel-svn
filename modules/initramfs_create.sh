@@ -1,12 +1,10 @@
-require gmi busybox udev kernel_modules_cpio
 
-# Turn on evms if enabled on the command line
+logicTrue $(profile_get_key gmi) && require gmi
+logicTrue $(profile_get_key busybox) && require busybox 
+logicTrue $(profile_get_key udev) && require udev
+logicTrue $(profile_get_key kernel-modules) && require kernel_modules_cpio
 logicTrue $(profile_get_key evms2) && require evms_host_compiled
-
-# Turn on lvm2 if enabled on the command line
 logicTrue $(profile_get_key lvm2) && require lvm2
-
-# Turn on e2fsprogs if enabled on the command line (BLKID)
 logicTrue $(profile_get_key e2fsprogs) && require e2fsprogs
 
 # Get kernel modules

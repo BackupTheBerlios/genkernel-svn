@@ -2,8 +2,10 @@ require kernel_compile
 
 kernel_install::()
 {
-	local ARGS CP_ARGS
+	local ARGS CP_ARGS KNAME
 
+	KNAME="$(profile_get_key kernel-name)"
+	
 	setup_kernel_args
 	cd "$(profile_get_key kbuild-output)"
 

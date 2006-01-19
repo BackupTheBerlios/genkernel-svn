@@ -3,12 +3,15 @@ require kernel_config
 callback::()
 {
 	local CMD_CALLBACK="$(profile_get_key callback)"
+	
+	export KBUILD_OUTPUT
+	export KERNEL_DIR
 
 	if [ -n "${CMD_CALLBACK}" ]
 	then
 		print_info 1 "" 1 0
 		print_info 1 "Preparing to run callback: \"${CMD_CALLBACK}\"" 0
-
+		echo
 		CALLBACK_ESCAPE=0
 		CALLBACK_COUNT=0
 
