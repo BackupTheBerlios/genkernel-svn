@@ -121,8 +121,8 @@ show_help() {
 		
 		if [ "${myTakesData}" == 'true!m' ]
 		then
-			myFPrint="${myFPrint}=<...> (multiple) "
-			myPrint="${myPrint}=<...> (multiple) "
+			myFPrint="${myFPrint}=<...> (+) "
+			myPrint="${myPrint}=<...> (+) "
 		fi
 
 		# Work out tab lengths:

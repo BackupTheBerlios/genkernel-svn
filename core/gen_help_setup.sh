@@ -44,7 +44,7 @@ __register_config_option 'Kernel Configuration'	'gconfig'	 'false' 'true' 'Run g
 __register_config_option 'Kernel Configuration'	'xconfig'	 'false' 'true' 'Run xconfig after oldconfig.'
 __register_config_option 'Kernel Configuration' 'mrproper'		'false' 'true'	'Run "make mrproper" before compilation.'
 __register_config_option 'Kernel Configuration' 'clean'		'false'	'true'	'Run "make clean" before compilation.'
-__register_config_option 'Kernel Configuration' 'internal-initramfs' 'false' 'true' 'compile initramfs-internally'
+__register_config_option 'Kernel Configuration' 'internal-initramfs' 'false' 'true' 'Compile initramfs-internally'
 profile_set_key internal-initramfs false 'system'
 __register_config_option 'Kernel Configuration' 'kernel-tree'   'true' 'false' 'Location of kernel sources.'
 profile_set_key kernel-tree '/usr/src/linux'
@@ -53,13 +53,13 @@ __register_config_option 'Kernel Configuration' 'kernel-name' 'true' 'false' 'Ta
 profile_set_key kernel-name genkernel 'system'
 
 ## Initramfs options
-__register_config_option 'Initramfs' 'gmi' 'false' 'true' 'gmi TODO TODO BETTER DESCRIPTION'
+__register_config_option 'Initramfs' 'gmi' 'false' 'true' "Disable genkernel's initramfs scripts"
 profile_set_key gmi true
 
-__register_config_option 'Initramfs' 'busybox' 'false' 'true' 'add busybox to the initramfs'
+__register_config_option 'Initramfs' 'busybox' 'false' 'true' 'Add busybox to the initramfs'
 profile_set_key busybox true
 
-__register_config_option 'Initramfs' 'udev' 'false' 'true' 'add udev to the initramfs'
+__register_config_option 'Initramfs' 'udev' 'false' 'true' 'Add udev to the initramfs'
 profile_set_key udev true
 
 __register_config_option 'Initramfs' 'evms2' 'false' 'false' 'Include EVMS2 support.'
@@ -68,7 +68,7 @@ __register_config_option 'Initramfs' 'e2fsprogs' 'false' 'false' 'Include e2fspr
 __register_config_option 'Initramfs' 'disklabel' 'false' 'false' 'Include disk label and uuid support in your initramfs.'
 
 __register_config_option 'Initramfs' 'kernel-modules'   'true!m' 'false' 'Add or subtract kernel modules from the initramfs. --kernel-module="GROUP:module -module"' 'cmdline_modules_register'
-__register_config_option 'Initramfs' 'kernel-modules-cpio' 'false' 'true' 'add kernel modules to the initramfs'
+__register_config_option 'Initramfs' 'kernel-modules-cpio' 'false' 'true' 'Add kernel modules to the initramfs'
 profile_set_key kernel_modules_cpio true
 
 __register_config_option 'Initramfs' 'initramfs-overlay' 'true' 'false' 'Directory structure to include in the initramfs.'
@@ -81,12 +81,10 @@ __register_config_option 'Initramfs' 'gensplash-res' 'true' 'false' 'Gensplash r
 __register_config_option 'Initramfs' 'bladecenter' 'false' 'false' '' # Used by catalyst internally, hide option; 'Enables extra pauses for IBM Bladecenter CD boots.'
 __register_config_option 'Initramfs' 'unionfs' 'false' 'false' '' # Description empty, hide option
 
-
 ## ALL options
-__register_config_option 'ALL' 'initramfs' 'false' 'true' 'build a initramfs'
+__register_config_option '"all" target' 'initramfs' 'false' 'true' 'Build a initramfs'
 profile_set_key initramfs true 'system'
-
-__register_config_option 'ALL' 'install'		'false' 'true'	'Install the kernel to /boot after building; this does not change bootloader settings.'
+__register_config_option '"all" target' 'install' 'false' 'true' 'Install the kernel to /boot after building; this does not change bootloader settings'
 profile_set_key install true 'system'
 
 ## Installation options
