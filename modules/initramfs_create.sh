@@ -28,6 +28,11 @@ initramfs_create::() {
 		# Build a single uncompressed cpio file
 		print_info 1 'Preparing internal initramfs directory space'
 		mkdir "${TEMP}/initramfs-internal"
+		messages_register '    root=/dev/ram0 real_root=/dev/$ROOT'
+		messages_register ''
+		messages_register '    Where $ROOT is the device node for your root partition as the'
+		messages_register '    one specified in /etc/fstab'
+
 		
 		for i in $(initramfs_register_cpio_read)
 		do
