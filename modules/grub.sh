@@ -17,6 +17,9 @@ grub::() {
 		GRUB_CONF='/boot/grub/grub.conf'
 	fi
 
+	# Create grub configuration directory and file if it doesn't exist.
+    [ ! -e `basename $GRUB_CONF` ] && mkdir -p `basename $GRUB_CONF`
+	
 	print_info 1 ">> Adding kernel to $GRUB_CONF..."
 	
 	if [ -n "$(profile_get_key grub-bootfs)" ]
@@ -40,9 +43,6 @@ EOF
 	local GRUB_BOOT_DISK=$(awk '{if ($2 == "'$GRUB_BOOT_DISK1'") {gsub(/(\(|\))/, "", $1); print $1;}}' ${TEMP}/grub.map)
 
 	local GRUB_BOOT_PARTITION=$(echo $GRUB_BOOTFS | sed -e 's#/dev/.\+\([[:digit:]]?*\)#\1#')
-
-	# Create grub configuration directory and file if it doesn't exist.
-    [ ! -e `basename $GRUB_CONF` ] && mkdir -p `basename $GRUB_CONF`
 
 	if [ ! -e $GRUB_CONF ]
 	then

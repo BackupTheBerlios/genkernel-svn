@@ -12,8 +12,19 @@ get_KV() {
 		KBUILD_OUTPUT="$(profile_get_key kbuild-output)"
 	else
 		KBUILD_OUTPUT=${KERNEL_DIR}
-		profile_set_key kbuild-output ${KBUILD_OUTPUT}
 	fi
+
+	if [ ! -w ${KBUILD_OUTPUT} ]
+	then
+		print_info 1 "${KBUILD_OUTPUT} not writeable attempting to use ${TEMP}/kbuild_output"
+		KBUILD_OUTPUT="${TEMP}/kbuild_output"
+			if [ ! -w ${KBUILD_OUTPUT} ]
+			then
+				die "Could not find a place to compile the kernel.  Set kbuild-output to a writeable directory or run as root"
+			fi
+	fi
+		
+	profile_set_key kbuild-output ${KBUILD_OUTPUT}
     
 	if [ -f "$(profile_get_key kbuild-output)/localversion-genkernel" ]
     then
@@ -22,7 +33,7 @@ get_KV() {
     
 	if [ "${version_string}" != "-${KNAME}-${ARCH}" ]
 	then
-		echo "-${KNAME}-${ARCH}" > "$(profile_get_key kbuild-output)/localversion-genkernel"
+		echo "-${KNAME}-${ARCH}" > "$(profile_get_key kbuild-output)/localversion-genkernel" || die "No permissions to write to $(profile_get_key kbuild-output)/localversion-genkernel"
 	fi
 	
 	# Configure the kernel
