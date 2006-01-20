@@ -60,8 +60,6 @@ initramfs_create::() {
 
 			# Can't use < file; bash seems to barf on binary data...
 			cat "$i" >> "${TEMP}/initramfs-output.cpio.gz"
-
-			cp "${TEMP}/initramfs-output.cpio.gz" /boot/initramfs-output.cpio.gz
 		done
 	fi
 }
