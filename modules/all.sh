@@ -16,4 +16,7 @@ messages_register 'Make sure you have the latest genkernel before reporting bugs
 
 
 messages_register_read
+
+cfg_register_read
+
 }
