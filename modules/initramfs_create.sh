@@ -27,6 +27,12 @@ initramfs_create::() {
 	then
 		# Build a single uncompressed cpio file
 		print_info 1 'Preparing internal initramfs directory space'
+		
+		if [ -d "${TEMP}/initramfs-internal" ]
+		then
+			rm -r "${TEMP}/initramfs-internal" 
+		fi
+
 		mkdir "${TEMP}/initramfs-internal"
 		messages_register '    root=/dev/ram0 real_root=/dev/$ROOT'
 		messages_register ''

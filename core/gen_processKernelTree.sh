@@ -255,7 +255,9 @@ kernel_config_is_set() {
 kernel_config_is_not_set() {
 	local RET_STR
 	RET_STR=$(grep CONFIG_$1 ${KBUILD_OUTPUT}/.config)
-	[ "${RET_STR}" == "# CONFIG_$1 is not set" ] && return 0 || return 1
+	[ "${RET_STR}" == "# CONFIG_$1 is not set" ] && return 0 
+	[ "${RET_STR}" == "" ] && return 0 
+	return 1
 }
 
 determine_config_file() {
