@@ -18,9 +18,10 @@ get_KV() {
 	then
 		print_info 1 "${KBUILD_OUTPUT} not writeable attempting to use ${TEMP}/kbuild_output"
 		KBUILD_OUTPUT="${TEMP}/kbuild_output"
-			if [ ! -w ${KBUILD_OUTPUT} ]
+			if [ ! -w ${TEMP} ]
 			then
 				die "Could not find a place to compile the kernel.  Set kbuild-output to a writeable directory or run as root"
+				mkdir -p ${KBUILD_OUTPUT} || die "Could not find a place to compile the kernel.  Set kbuild-output to a writeable directory or run as root"
 			fi
 	fi
 		
