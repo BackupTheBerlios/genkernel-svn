@@ -12,6 +12,7 @@ get_KV() {
 		KBUILD_OUTPUT="$(profile_get_key kbuild-output)"
 	else
 		KBUILD_OUTPUT=${KERNEL_DIR}
+		profile_set_key kbuild-output ${KBUILD_OUTPUT}
 	fi
     
 	if [ -f "$(profile_get_key kbuild-output)/localversion-genkernel" ]
@@ -77,9 +78,6 @@ get_KV() {
 	fi
 
 	KV_FULL="${KV_MAJOR}.${KV_MINOR}.${KV_PATCH}${KV_EXTRA}${KV_LOCAL}"
-
-	# Fixme; process CLI specified stuff
-	profile_set_key kbuild-output ${KBUILD_OUTPUT}
 }
 
 genkernel_lookup_kernel() {
