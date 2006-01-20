@@ -8,7 +8,7 @@ initramfs_install::() {
 	then
 		print_info 1 "Skipping installation of the initramfs: --initramfs-internal enabled"
 	else
-		if logicTrue $(profile_get_ket install)	
+		if logicTrue $(profile_get_key install)	
 		then
 			[ "$(profile_get_key debuglevel)" -gt "1" ] && ARGS="-v"
 	
