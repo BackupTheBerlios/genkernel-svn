@@ -140,7 +140,7 @@ setup_cache_dir
 # Genkernel module...
 genkernel::()
 {
-	print_info 1 '>> Dependencies processed successfully!'
+	true
 }
 
 # If we have a callback set require the callback module
@@ -149,22 +149,14 @@ genkernel::()
 
 for i in $(buildDepTreeSolution)
 do
-	print_info 1 ">> Executing module $i..."
+	# Don't print the message for the genkernel module as that's where we end
+	# our execution. Otherwise, print the module name.
+	[ "$i" != 'genkernel' ] && print_info 1 ">> Executing module $i..."
 	$i:: || die "$i module call failed!"
 done
 
 # End of execution for now
 exit 255
-
-
-
-
-
-
-
-
-
-
 
 # Read arch-specific config
 source ${ARCH_CONFIG} || die "Could not read ${ARCH_CONFIG}"
