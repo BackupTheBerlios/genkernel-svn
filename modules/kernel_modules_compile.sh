@@ -12,6 +12,6 @@ kernel_modules_compile::()
 
 		# make the modules	
 		print_info 1 '>> Compiling kernel modules ...'
-		compile_generic ${ARGS} modules
+		compile_generic ${KERNEL_ARGS} modules
 	fi
 }

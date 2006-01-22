@@ -4,18 +4,6 @@ kernel_config::()
 	PRINT_PREFIX="config: "
 	setup_kernel_args
 
-	if kbuild_enabled
-	then
-		ARGS="${ARGS} KBUILD_OUTPUT=${KBUILD_OUTPUT}"
-		mkdir -p $(profile_get_key kbuild-output)
-	else
-		if [ "${ARCH}" == "um" -o "${ARCH}" == "xen0" \
-			-o "${ARCH}" == "xenU" ]
-		then
-			die "Compiling for ARCH=${ARCH} requires kbuild_output to differ from the kernel-tree"
-		fi
-	fi
-
 	# Check that the asm-${ARCH} link is valid
 	if [ "${ARCH}" == "xen0" -o "${ARCH}" == "xenU" ]
 	then
@@ -43,7 +31,7 @@ kernel_config::()
 	
 	logicTrue $(profile_get_key mrproper) && \
 		print_info 1 '${PRINT_PREFIX}>> Running mrproper...' && \
-			compile_generic ${ARGS} mrproper
+			compile_generic ${KERNEL_ARGS} mrproper
 	
 	# Setup fake i386 kbuild_output for arch=um or xen0 or xenU 
 	# Some proggies need a i386 configured kernel tree
@@ -69,14 +57,14 @@ kernel_config::()
 	if logicTrue $(profile_get_key oldconfig) || logicTrue $(profile_get_key clean)
 	then
 		print_info 1 "${PRINT_PREFIX}>> Running oldconfig..."
-		yes '' 2>/dev/null | compile_generic ${ARGS} oldconfig
+		yes '' 2>/dev/null | compile_generic ${KERNEL_ARGS} oldconfig
 		[ "$?" ] || die 'Error: oldconfig failed!'
 	fi
 	
 	if logicTrue $(profile_get_key clean)
 	then
 		print_info 1 'kernel configure: >> Running clean...' 
-		compile_generic ${ARGS} clean
+		compile_generic ${KERNEL_ARGS} clean
 	else
 		print_info 1 "${PRINT_PREFIX}--no-clean is enabled; leaving the .config alone."	
 
@@ -86,55 +74,55 @@ kernel_config::()
 	if logicTrue $(profile_get_key defconfig)
 	then
 		print_info 1 "${PRINT_PREFIX}>> Running defconfig..."
-		compile_generic ${ARGS} defconfig
+		compile_generic ${KERNEL_ARGS} defconfig
 		[ "$?" ] || die 'Error: defconfig failed!'
 	fi
 
 	if logicTrue $(profile_get_key menuconfig)
 	then 
 		print_info 1 "${PRINT_PREFIX}>> Running menuconfig..."
-		compile_generic runtask ${ARGS} menuconfig
+		compile_generic runtask ${KERNEL_ARGS} menuconfig
 		[ "$?" ] || die 'Error: menuconfig failed!'
 	fi
 
 	if logicTrue $(profile_get_key config)
 	then 
 		print_info 1 "${PRINT_PREFIX}>> Running config..."
-		compile_generic runtask ${ARGS} config
+		compile_generic runtask ${KERNEL_ARGS} config
 		[ "$?" ] || die 'Error: config failed!'
 	fi
 	
 	if logicTrue $(profile_get_key xconfig)
 	then 
 		print_info 1 "${PRINT_PREFIX}>> Running xconfig..."
-		compile_generic ${ARGS} xconfig
+		compile_generic ${KERNEL_ARGS} xconfig
 		[ "$?" ] || die 'Error: xconfig failed!'
 	fi
 	if logicTrue $(profile_get_key gconfig)
 	then
 		print_info 1 "${PRINT_PREFIX}>> Running gconfig..."
-		compile_generic ${ARGS} gconfig
+		compile_generic ${KERNEL_ARGS} gconfig
 		[ "$?" ] || die 'Error: gconfig failed!'
 	fi
 	
 	if logicTrue $(profile_get_key allmodconfig)
 	then
 		print_info 1 "${PRINT_PREFIX}>> Running allmodconfig..."
-		compile_generic ${ARGS} allmodconfig
+		compile_generic ${KERNEL_ARGS} allmodconfig
 		[ "$?" ] || die 'Error: allmodconfig failed!'
 	fi
 	
 	if logicTrue $(profile_get_key allyesconfig)
 	then
 		print_info 1 "${PRINT_PREFIX}>> Running allyesconfig..."
-		compile_generic ${ARGS} allyesconfig
+		compile_generic ${KERNEL_ARGS} allyesconfig
 		[ "$?" ] || die 'Error: allyesconfig failed!'
 	fi
 	
 	if logicTrue $(profile_get_key allnoconfig)
 	then
 		print_info 1 "${PRINT_PREFIX}>> Running allnoconfig..."
-		compile_generic ${ARGS} allnoconfig
+		compile_generic ${KERNEL_ARGS} allnoconfig
 		[ "$?" ] || die 'Error: allnoconfig failed!'
 	fi
 	
@@ -144,7 +132,7 @@ kernel_config::()
 	if [ "$(profile_get_key arch)" = 'ppc' -o "$(profile_get_key arch)" = 'ppc64' ]
 	then
 		print_info 1 '>> Applying hack to workaround 2.6.14+ PPC header breakages...'
-		compile_generic ${ARGS} 'include/asm'
+		compile_generic ${KERNEL_ARGS} 'include/asm'
 	fi
 
 
@@ -163,16 +151,16 @@ kernel_config::()
 		then
 			kernel_config_unset "INITRAMFS_SOURCE"
 			UPDATED_KERNEL=true
-		yes '' 2>/dev/null | compile_generic ${ARGS} oldconfig
+		yes '' 2>/dev/null | compile_generic ${KERNEL_ARGS} oldconfig
 		fi
     fi
 
 	if [ "${UPDATE_KERNEL}" == 'true' ]
 	then
-		yes '' 2>/dev/null | compile_generic ${ARGS} oldconfig
+		yes '' 2>/dev/null | compile_generic ${KERNEL_ARGS} oldconfig
 	fi
 
-	# if modules capable compile_generic ${ARGS} modules_prepare
+	# if modules capable compile_generic ${KERNEL_ARGS} modules_prepare
 	# Set or unset any config option
 	#kernel_config_unset "AUDIT"
 	#kernel_config_set_module "AUDIT"

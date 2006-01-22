@@ -1,35 +1,43 @@
 require kernel_compile
 
+
+# Set the destination path for the kernel
+if [ -z "$(profile_get_key install-path)" ]
+then
+	profile_set_key install-path "/boot"
+fi
+
+if [ -w $(dirname $(profile_get_key install-path)) ]
+then
+	mkdir -p $(profile_get_key install-path) || \
+		die "Could not make $(profile_get_key install-path).  Set $(profile_get_key install-path) to a writeable directory or run as root"
+else
+	print_info 1 ">> Kernel install path: ${BOLD}$(profile_get_key install-path) ${NORMAL}is not writeable attempting to use ${TEMP}/genkernel-output"
+	if [ ! -w ${TEMP} ]
+	then
+		die "Could not write to ${TEMP}/genkernel-output.  Set install-path to a writeable directory or run as root"
+	else
+		mkdir -p ${TEMP}/genkernel-output || die "Could not make ${TEMP}/genkernel-output.  Set install-path to a writeable directory or run as root"
+		profile_set_key install-path "${TEMP}/genkernel-output"
+	fi
+fi
+
+KERNEL_ARGS="${KERNEL_ARGS} INSTALL_PATH=$(profile_get_key install-path)"
+
 kernel_install::()
 {
-	local ARGS CP_ARGS KNAME
+	local CP_ARGS KNAME
 
 	KNAME="$(profile_get_key kernel-name)"
 	
 	setup_kernel_args
 	cd "$(profile_get_key kbuild-output)"
 
-	if logicTrue $(profile_get_key install)
-	then
-		print_info 1 '>> Installing kernel ...'
-		# TODO Read the directive that states where the files are being created and use that instead .. 
-		#compile_generic ${ARGS} install || die "Kernel failed to install with the default install directive .. TODO fix me still"
+	print_info 1 '>> Installing kernel ...'
 
-		[ "$(profile_get_key debuglevel)" -gt "1" ] && CP_ARGS="-v"
-		if [ -n "$(profile_get_key install-path)" ]
-		then
-			[ "$(profile_get_key debuglevel)" -gt "1" ] &&\
-				print_info 1 ">> Installing kernel to $(profile_get_key install-path)/kernel-${KNAME}-${ARCH}-${KV_FULL}"
-			cp ${CP_ARGS} "$(profile_get_key kernel-binary)" "$(profile_get_key install-path)/kernel-${KNAME}-${ARCH}-${KV_FULL}"
-			cp ${CP_ARGS} "System.map" "$(profile_get_key install-path)/System.map-${KNAME}-${ARCH}-${KV_FULL}"
-
-		else
-			# TODO need to get kname-arch-kv yet....
-			[ "$(profile_get_key debuglevel)" -gt "1" ] && print_info 1 ">> Installing kernel to /boot/kernel-${KNAME}-${ARCH}-${KV_FULL}"
-			cp ${CP_ARGS} "$(profile_get_key kernel-binary)" "/boot/kernel-${KNAME}-${ARCH}-${KV_FULL}"
-			cp ${CP_ARGS} "System.map" "/boot/System.map-${KNAME}-${ARCH}-${KV_FULL}"
-		fi
-	else
-		print_info 1 "Skipping installation of the kernel: --no-install enabled"
-	fi
+	[ "$(profile_get_key debuglevel)" -gt "1" ] && CP_ARGS="-v"
+	[ "$(profile_get_key debuglevel)" -gt "1" ] &&\
+		print_info 1 ">> Installing kernel to $(profile_get_key install-path)/kernel-${KV_FULL}"
+	cp ${CP_ARGS} "$(profile_get_key kernel-binary)" "$(profile_get_key install-path)/kernel-${KV_FULL}"
+	cp ${CP_ARGS} "System.map" "$(profile_get_key install-path)/System.map-${KV_FULL}"
 }

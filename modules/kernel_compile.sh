@@ -8,7 +8,7 @@ kernel_compile::()
 
 	# Compile the kernel image
 	print_info 1 '>> Compiling kernel ...'
-	compile_generic ${ARGS} ${KERNEL_MAKE_DIRECTIVE}
+	compile_generic ${KERNEL_ARGS} ${KERNEL_MAKE_DIRECTIVE}
 
 	# Save messages for final display
 	messages_register ''

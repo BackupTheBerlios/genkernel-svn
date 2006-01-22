@@ -162,36 +162,6 @@ linux_kv_to_code() {
 	fi
 }
 
-linux_chkconfig_present() {
-	# From linux-info eclass
-	local RESULT
-	RESULT="$(get_extconfig_var CONFIG_${1} ${KBUILD_OUTPUT}/.config)"
-	[ "${RESULT}" = "m" -o "${RESULT}" = "y" ] && return 0 || return 1
-}
-
-linux_chkconfig_module() {
-	# From linux-info eclass
-	local RESULT
-	RESULT="$(get_extconfig_var CONFIG_${1} ${KBUILD_OUTPUT}/.config)"
-	[ "${RESULT}" = "m" ] && return 0 || return 1
-}
-
-linux_chkconfig_builtin() {
-	# From linux-info eclass
-	local RESULT
-	RESULT="$(get_extconfig_var CONFIG_${1} ${KBUILD_OUTPUT}/.config)"
-	[ "${RESULT}" = "y" ] && return 0 || return 1
-}
-
-linux_chkconfig_string() {
-	# From linux-info eclass
-	get_extconfig_var "CONFIG_${1}" "${KBUILD_OUTPUT}/.config"
-}
-
-check_modules_supported() {
-	[ linux_chkconfig_builtin "MODULES" ] && return 0 || return 1
-}
-
 check_asm_link_ok() {
 	workingdir=${PWD}
 	if [ -e "${KBUILD_OUTPUT}/include/asm" ]
@@ -217,17 +187,32 @@ check_asm_link_ok() {
 }
 
 kernel_config_set_string() {
+	#TODO need to check for null entry entirely
 	sed -i ${KBUILD_OUTPUT}/.config -e "s|#\? \?CONFIG_${1} is.*|CONFIG_${1}=\"${2}\"|g"
 	sed -i ${KBUILD_OUTPUT}/.config -e "s|CONFIG_${1}=.*|CONFIG_${1}=\"${2}\"|g"
+	if ! kernel_config_is_set ${1}
+	then
+		echo "CONFIG_${1}=\"${2}\"" >> ${KBUILD_OUTPUT}/.config
+	fi
 }
 kernel_config_set_builtin() {
+	#TODO need to check for null entry entirely
 	sed -i ${KBUILD_OUTPUT}/.config -e "s/CONFIG_${1}=m/CONFIG_${1}=y/g"
 	sed -i ${KBUILD_OUTPUT}/.config -e "s/#\? \?CONFIG_${1} is.*/CONFIG_${1}=y/g"
+	if ! kernel_config_is_set ${1}
+	then
+		echo "CONFIG_${1}=y" >> ${KBUILD_OUTPUT}/.config
+	fi
 }
 
 kernel_config_set_module() {
+	#TODO need to check for null entry entirely
 	sed -i ${KBUILD_OUTPUT}/.config -e "s/CONFIG_${1}=y/CONFIG_${1}=m/g"
 	sed -i ${KBUILD_OUTPUT}/.config -e "s/#\? \?CONFIG_${1} is.*/CONFIG_${1}=m/g"
+	if ! kernel_config_is_set ${1}
+	then
+		echo "CONFIG_${1}=m" >> ${KBUILD_OUTPUT}/.config
+	fi
 }
 
 kernel_config_unset() {
@@ -305,48 +290,51 @@ setup_kernel_args() {
 	local KNAME
 	
 	# Override the default arch being built
-	[ -n "$(profile_get_key arch-override)" ] && ARGS="${ARGS} ARCH=$(profile_get_key arch-override)"
+	[ -n "$(profile_get_key arch-override)" ] && KERNEL_ARGS="${KERNEL_ARGS} ARCH=$(profile_get_key arch-override)"
 
-	# Turn off KBUILD_OUTPUT if kbuild_output is the same as the kernel tree or die if arch=um or xen0 or xenU
-	if [ ! "$(profile_get_key kbuild-output)" == "$(profile_get_key kernel-tree)" ]
+   	# Setup kbuild output 
+	if [ -n "$(profile_get_key kbuild-output)" ]
+    then
+        KBUILD_OUTPUT="$(profile_get_key kbuild-output)"
+    else
+        KBUILD_OUTPUT="$(profile_get_key kernel-tree)"
+    fi
+
+    if [ ! -w ${KBUILD_OUTPUT} ]
+    then
+        print_info 1 "${KBUILD_OUTPUT} not writeable attempting to use ${TEMP}/kbuild_output"
+        KBUILD_OUTPUT="${TEMP}/kbuild_output"
+            if [ ! -w ${TEMP} ]
+            then
+                die "Could not write to ${KBUILD_OUTPUT}.  Set kbuild-output to a writeable directory or run as root"
+            else
+                mkdir -p ${KBUILD_OUTPUT} || die "Could not make ${KBUILD_OUTPUT}.  Set kbuild-output to a writeable directory or run as root"
+            fi
+    fi
+
+    profile_set_key kbuild-output ${KBUILD_OUTPUT}
+	if [ "$(profile_get_key kbuild-output)" == "$(profile_get_key kernel-tree)"	]
 	then
-		if [ -n "$(profile_get_key kbuild-output)" ]
-		then
-			ARGS="${ARGS} KBUILD_OUTPUT=$(profile_get_key kbuild-output)"
-			mkdir -p $(profile_get_key kbuild-output)
-		fi
-	elif [ "$(profile_get_key kbuild-output)" == "$(profile_get_key kernel-tree)" ]
-	then
-		if [    "$(profile_get_key arch-override)" == "um" -o "$(profile_get_key arch-override)" == "xen0" \
+		if [ "$(profile_get_key arch-override)" == "um" \
+			-o "$(profile_get_key arch-override)" == "xen0" \
 			-o "$(profile_get_key arch-override)" == "xenU" ]
 		then
 			die "Compiling for ARCH=$(profile_get_key arch-override) requires kbuild_output to differ from the kernel-tree"
 		fi
 	fi
 
+	KERNEL_ARGS="${KERNEL_ARGS} KBUILD_OUTPUT=$(profile_get_key kbuild-output)"
+
+
+
 	# Kernel cross compiling support
 	if [ -n "$(profile_get_key cross-compile)" ]
 	then
-		ARGS="${ARGS} CROSS_COMPILE=$(profile_get_key cross-compile)"
+		KERNEL_ARGS="${KERNEL_ARGS} CROSS_COMPILE=$(profile_get_key cross-compile)"
 	else
-		[ -n "$(profile_get_key kernel-cross-compile)" ] && ARGS="${ARGS} CROSS_COMPILE=$(profile_get_key kernel-cross-compile)"
+		[ -n "$(profile_get_key kernel-cross-compile)" ] && KERNEL_ARGS="${KERNEL_ARGS} CROSS_COMPILE=$(profile_get_key kernel-cross-compile)"
 	fi
 
-
-	# Set the destination path for the kernel
-	if [ -n "$(profile_get_key install-path)" ]
-	then
-		ARGS="${ARGS} INSTALL_PATH=$(profile_get_key install-path)"
-		mkdir -p $(profile_get_key install-path) || die 'Failed to create install path!'
-	fi
-
-	# Set the destination path for the modules
-	if [ -n "$(profile_get_key install-mod-path)" ]
-	then
-		ARGS="${ARGS} INSTALL_MOD_PATH=$(profile_get_key install-mod-path)"
-		mkdir -p $(profile_get_key install-mod-path) || die 'Failed to create module install path!'
-	fi
-	
 	# Override the localversion via the cmdline... 
 	# all localversion vars are ignored
 	# KNAME="$(profile_get_key kernel-name)"
