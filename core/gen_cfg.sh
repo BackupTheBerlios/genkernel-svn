@@ -12,6 +12,7 @@ cfg_register_read() {
 		then
 			if [ "${header_printed}" != "1" ]
 			then
+				echo
 				print_warning 1 "YOU HAVE THE FOLLOWING KERNEL CONFIG OPTIONS ${BOLD}DISABLED"
 				header_printed=1
 			fi
@@ -24,6 +25,11 @@ cfg_register_read() {
 			fi
 		fi
 	done
+			
+	if [ "${header_printed}" == "1" ]
+	then
+		echo
+	fi
 }
 
 cfg_register_lookup() {
