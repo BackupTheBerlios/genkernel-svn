@@ -5,16 +5,17 @@ declare -a __CONFIG__REG__D # Data
 declare -a __CONFIG__REG__M # Missing Message
 
 cfg_register_read() {
+	local header_printed=0
 	
-	if [ ${#__CONFIG__REG__D[@]} > 0 ]
-	then
-		print_warning 1 "YOU HAVE THE FOLLOWING KERNEL CONFIG OPTIONS ${BOLD}DISABLED"
-		echo
-	fi
-
 	for (( n = 0 ; n < ${#__CONFIG__REG__D[@]}; ++n )) ; do
 		if kernel_config_is_not_set ${__CONFIG__REG__D[${n}]}
 		then
+			if [ "${header_printed}" != "1" ]
+			then
+				print_warning 1 "YOU HAVE THE FOLLOWING KERNEL CONFIG OPTIONS ${BOLD}DISABLED"
+				header_printed=1
+			fi
+				
 			if [ "${__CONFIG__REG__M[${n}]}" != "" ]
 			then
 				print_warning 1 "CONFIG_${__CONFIG__REG__D[${n}]}: ${__CONFIG__REG__M[${n}]} "
