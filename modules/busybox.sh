@@ -44,17 +44,16 @@ busybox::check_package_status()
 	
 	[ -e ${TEMP}/busybox-temp ] && rm -r ${TEMP}/busybox-temp
 	mkdir -p ${TEMP}/busybox-temp
+	
 	cd ${TEMP}/busybox-temp
 	genkernel_extract_package "busybox-${BUSYBOX_VER}"
 	
-	local MD5_CACHED_BUSY_CONFIG=$(md5sum busybox.config)
+	[ -f busybox.config ] && local MD5_CACHED_BUSY_CONFIG=$(md5sum busybox.config)
 	local MD5_NEW_BUSY_CONFIG=$(md5sum ${BUSYBOX_CONFIG})
 	
-	[ -e ${TEMP}/busybox-temp ] && rm -r ${TEMP}/busybox-temp
 	
 	if [ "${MD5_CACHED_BUSY_CONFIG/ */}" != "${MD5_NEW_BUSY_CONFIG/ */}" ]
 	then
-		echo Debug: busybox recompile forced...
 		__INTERNAL__PKG__CALLBACK__STATUS=true
 	fi
 }
