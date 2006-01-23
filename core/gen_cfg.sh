@@ -50,9 +50,11 @@ cfg_register_enable() {
 					kernel_set_config_module ${__CONFIG__REG__D[${n}]}
 				fi
 			elif [ "${__CONFIG__REG__V[${n}]}" == "y" ]
+			then
 				print_info 1 "Turning on ${__CONFIG__REG__D[${n}]} as a builtin"
 				kernel_config_set_builtin "${__CONFIG__REG__D[${n}]}"
 			elif [ "${__CONFIG__REG__V[${n}]}" == "n" ]
+			then
 				print_info 1 "Turning off ${__CONFIG__REG__D[${n}]}"
 				kernel_config_unset "${__CONFIG__REG__D[${n}]}"
 			else

@@ -79,9 +79,6 @@ profile_copy "system"
 # as this one overrides the rest of them. This contains the cmdline and imported profiles
 profile_copy "user"
 
-# Set DEBUGFILE if log-override is defined
-[ -n "$(profile_get_key log-override)" ] && DEBUGFILE="$(profile_get_key log-override)"
-
 # Set TEMP if tempdir is defined
 [ -n "$(profile_get_key tempdir)" ] && TEMP="$(profile_get_key tempdir)"
 
