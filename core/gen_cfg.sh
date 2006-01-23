@@ -2,6 +2,7 @@
 
 declare -a __CONFIG__REG__S # Source
 declare -a __CONFIG__REG__D # Data
+declare -a __CONFIG__REG__V # Default Value
 declare -a __CONFIG__REG__M # Missing Message
 
 cfg_register_read() {
@@ -32,6 +33,36 @@ cfg_register_read() {
 	fi
 }
 
+cfg_register_enable() {
+	for (( n = 0 ; n < ${#__CONFIG__REG__D[@]}; ++n )) ; do
+		if kernel_config_is_not_set ${__CONFIG__REG__D[${n}]}
+		then
+			UPDATED_KERNEL=true
+			
+			if [ "${__CONFIG__REG__V[${n}]}" == "m" ]
+			then
+				if kernel_config_is_not_set "MODULES"
+				then
+					print_info 1 "Turning on ${__CONFIG__REG__D[${n}]} as a builtin"
+					kernel_config_set_builtin "${__CONFIG__REG__D[${n}]}"
+				else
+					print_info 1 "Turning on ${__CONFIG__REG__D[${n}]} as a module"
+					kernel_set_config_module ${__CONFIG__REG__D[${n}]}
+				fi
+			elif [ "${__CONFIG__REG__V[${n}]}" == "y" ]
+				print_info 1 "Turning on ${__CONFIG__REG__D[${n}]} as a builtin"
+				kernel_config_set_builtin "${__CONFIG__REG__D[${n}]}"
+			elif [ "${__CONFIG__REG__V[${n}]}" == "n" ]
+				print_info 1 "Turning off ${__CONFIG__REG__D[${n}]}"
+				kernel_config_unset "${__CONFIG__REG__D[${n}]}"
+			else
+				print_info 1 "Setting ${__CONFIG__REG__D[${n}]} to ${__CONFIG__REG__V[${n}]}"
+				kernel_config_set_string "${__CONFIG__REG__D[${n}]}" "${__CONFIG__REG__V[${n}]}"
+			fi
+		fi
+	done
+}
+
 cfg_register_lookup() {
 	local data
 
@@ -51,6 +82,12 @@ cfg_register() {
 		__CONFIG__REG__S[${#__CONFIG__REG__S[@]}]="${myCaller}"
 		__CONFIG__REG__D[${#__CONFIG__REG__D[@]}]="${1}"
 		__CONFIG__REG__M[${#__CONFIG__REG__M[@]}]="${2}"
+		if [ "${3}" == "" ]
+		then
+			__CONFIG__REG__V[${#__CONFIG__REG__V[@]}]="y"
+		else
+			__CONFIG__REG__V[${#__CONFIG__REG__V[@]}]="${3}"
+		fi
 	fi
 }
 

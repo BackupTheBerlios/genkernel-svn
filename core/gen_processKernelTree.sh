@@ -219,7 +219,7 @@ kernel_config_unset() {
 	sed -i ${KBUILD_OUTPUT}/.config -e "s/CONFIG_${1}=.*/# CONFIG_${1} is not set/g"
 }
 
-kernel_config_is_internal() {
+kernel_config_is_builtin() {
 	local RET_STR
 	RET_STR=$(grep CONFIG_$1=y ${KBUILD_OUTPUT}/.config)
 	[ "${RET_STR}" == "CONFIG_$1=y" ] && return 0 || return 1

@@ -155,6 +155,9 @@ kernel_config::()
 		fi
     fi
 
+	# Sets UPDATE_KERNEL to true if any config options are not defined
+	logicTrue $(profile_get_key force-config) && cfg_register_enable
+
 	if [ "${UPDATE_KERNEL}" == 'true' ]
 	then
 		yes '' 2>/dev/null | compile_generic ${KERNEL_ARGS} oldconfig

@@ -9,6 +9,9 @@ unset __INTERNAL__DEPS__REQ_N __INTERNAL__DEPS__REQ_D __INTERNAL__DEPS__PRV_S __
 __INTERNAL__MODULES_LOADING=''
 __INTERNAL__MODULES_LOADED=''
 
+kernel_cmdline_unregister
+
+
 declare -a __INTERNAL__DEPS__REQ_N # Name
 declare -a __INTERNAL__DEPS__REQ_D # Data
 declare -a __INTERNAL__DEPS__PRV_S # Source

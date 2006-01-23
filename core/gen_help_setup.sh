@@ -51,6 +51,8 @@ profile_set_key kernel-tree '/usr/src/linux'
 __register_config_option 'Kernel Configuration' 'kbuild-output'   'true' 'false' 'Location of kernel sources.'
 __register_config_option 'Kernel Configuration' 'kernel-name' 'true' 'false' 'Tag the kernel and initramfs with a name; if not defined the option defaults to "genkernel".'
 profile_set_key kernel-name genkernel 'system'
+__register_config_option 'Kernel Configuration' 'force-config' 'false' 'true' 'Turn on any config options genkernel deems mandatory.'
+profile_set_key force-config false 'system'
 
 ## Initramfs options
 __register_config_option 'Initramfs' 'gmi' 'false' 'true' "Disable genkernel's initramfs scripts"
@@ -62,10 +64,10 @@ profile_set_key busybox true
 __register_config_option 'Initramfs' 'udev' 'false' 'true' 'Add udev to the initramfs'
 profile_set_key udev true
 
-__register_config_option 'Initramfs' 'evms2' 'false' 'false' 'Include EVMS2 support.'
-__register_config_option 'Initramfs' 'lvm2' 'false' 'false' 'Include LVM2 support.'
-__register_config_option 'Initramfs' 'e2fsprogs' 'false' 'false' 'Include e2fsprogs blkid support.'
-__register_config_option 'Initramfs' 'disklabel' 'false' 'false' 'Include disk label and uuid support in your initramfs.'
+__register_config_option 'Initramfs' 'evms2' 'false' 'true' 'Include EVMS2 support.'
+__register_config_option 'Initramfs' 'lvm2' 'false' 'true' 'Include LVM2 support.'
+__register_config_option 'Initramfs' 'e2fsprogs' 'false' 'true' 'Include e2fsprogs blkid support.'
+__register_config_option 'Initramfs' 'disklabel' 'false' 'true' 'Include disk label and uuid support in your initramfs.'
 
 __register_config_option 'Initramfs' 'kernel-modules'   'true!m' 'false' 'Add or subtract kernel modules from the initramfs. --kernel-module="GROUP:module -module"' 'cmdline_modules_register'
 __register_config_option 'Initramfs' 'kernel-modules-cpio' 'false' 'true' 'Add kernel modules to the initramfs'
@@ -76,10 +78,12 @@ __register_config_option 'Initramfs' 'external-cpio' 'true!m' 'false' 'Include a
 __register_config_option 'Initramfs' 'linuxrc' 'true' 'false' 'Use a user specified linuxrc.'
 
 __register_config_option 'Initramfs' 'keymap-auto' 'false' 'true' 'Force keymap selection at boot.'
+__register_config_option 'Initramfs' 'gensplash' 'false' 'true' 'Include gensplash support.'
 __register_config_option 'Initramfs' 'gensplash-res' 'true' 'false' 'Gensplash resolutions to include; this is passed to splash_geninitramfs in the "-r" flag.'
+__register_config_option 'Initramfs' 'gensplash-theme' 'true' 'false' 'Gensplash theme to include.'
 ## Catalyst Init Internals
-__register_config_option 'Initramfs' 'bladecenter' 'false' 'false' '' # Used by catalyst internally, hide option; 'Enables extra pauses for IBM Bladecenter CD boots.'
-__register_config_option 'Initramfs' 'unionfs' 'false' 'false' '' # Description empty, hide option
+__register_config_option 'Initramfs' 'bladecenter' 'false' 'true' '' # Used by catalyst internally, hide option; 'Enables extra pauses for IBM Bladecenter CD boots.'
+__register_config_option 'Initramfs' 'unionfs' 'false' 'true' '' # Description empty, hide option
 
 ## ALL options
 __register_config_option '"all" target' 'initramfs' 'false' 'true' 'Build a initramfs'

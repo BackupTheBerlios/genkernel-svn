@@ -466,22 +466,3 @@ cmdline_modules_register(){
     done
 }
 
-#profile_set_key "foo" "="
-#profile_append_key "foo" "sd_mod sg sr_mod aic79xx aic7xxx aic7xxx_old BusLogic"
-#profile_append_key "foo" "ncr53c8xx NCR53c406a initio advansys aha1740 aha1542 aha152x"
-#profile_append_key "foo" "dtc fdomain gdth pas16 pci2220i pci2000 psi240i"
-#profile_append_key "foo" "qlogicfas qlogicfc qlogicisp seagate t128 u14-34f"
-#profile_append_key "foo" "ultrastor wd7000 NCR53c406a sym53c8xx dmx3191d"
-#profile_append_key "foo" "imm in2000 ips qla1280  sim710 sym53c416 dc395x atp870u"
-#profile_append_key "foo" "ieee1394 ohci1394 sbp2"
-#profile_append_key "foo" "ataraid pdcraid hptraid"
-#profile_append_key "foo" "pcmcia_core yenta_socket i82365 ds ide-cs"
-#profile_append_key "foo" "ehci-hcd uhci usb-ohci hid usb-storage uhci-hcd ohci-hcd usbhid sl811-hcd"
-#profile_append_key "foo" "dm-mod dm-snapshot dm-mirror dm-bbr"
-#profile_append_key "foo" "dm-mod dm-mirror"
-#profile_append_key "foo" "sata_promise sata_sil sata_svw sata_via sata_nv sata_sx4 sata_sis sata_uli sata_vitesse sata_qstor ahci ata_piix"
-
-#profile_append_key "foo" "-sd_mod sg -sr_mod -aic79xx -aic7xxx -aic7xxx_old -BusLogic"
-#profile_append_key "foo" "-sd_mod1 sg -sr_mod1 sr_mod1 -dm-mirror -dm-mod"
-#profile_get_key "foo"
-

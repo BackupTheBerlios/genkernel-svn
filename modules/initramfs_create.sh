@@ -6,6 +6,7 @@ logicTrue $(profile_get_key kernel-modules) && require kernel_modules_cpio
 logicTrue $(profile_get_key evms2) && require evms_host_compiled
 logicTrue $(profile_get_key lvm2) && require lvm2
 logicTrue $(profile_get_key e2fsprogs) && require e2fsprogs
+logicTrue $(profile_get_key gensplash) && require gensplash
 
 # Get kernel modules
 # Register a new cpio of the kernel modules
@@ -34,11 +35,6 @@ initramfs_create::() {
 		fi
 
 		mkdir "${TEMP}/initramfs-internal"
-		messages_register '    root=/dev/ram0 real_root=/dev/$ROOT'
-		messages_register ''
-		messages_register '    Where $ROOT is the device node for your root partition as the'
-		messages_register '    one specified in /etc/fstab'
-
 		
 		for i in $(initramfs_register_cpio_read)
 		do

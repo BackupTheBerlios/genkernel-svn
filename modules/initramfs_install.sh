@@ -35,18 +35,10 @@ initramfs_install::() {
 		print_info 1 "Skipping installation of the initramfs: --initramfs-internal enabled"
 	else
 		[ "$(profile_get_key debuglevel)" -gt "1" ] && ARGS="-v"
-	
-		print_info 1 ">> Installing initramfs to $(profile_get_key install-initramfs-path)/initramfs-${KV_FULL}"
+		[ "$(profile_get_key debuglevel)" -gt "1" ] &&\	
+			print_info 1 ">> Installing initramfs to $(profile_get_key install-initramfs-path)/initramfs-${KV_FULL}"
 		cp ${ARGS} "${TEMP}/initramfs-output.cpio.gz" "$(profile_get_key install-initramfs-path)/initramfs-${KV_FULL}"
 			
-		messages_register '    root=/dev/ram0 real_root=/dev/$ROOT init=/linuxrc'
-    	messages_register ''
-    	messages_register '    Where $ROOT is the device node for your root partition as the'
-    	messages_register '    one specified in /etc/fstab'
-    	messages_register ''
-    	messages_register "If you require Genkernel's hardware detection features; you MUST"
-    	messages_register 'tell your bootloader to use the provided initramfs file. Otherwise;'
-    	messages_register 'substitute the root argument for the real_root argument if you are'
-    	messages_register 'not planning to use the initrd...'
 	fi
+		
 }

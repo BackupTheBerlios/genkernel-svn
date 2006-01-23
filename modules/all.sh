@@ -9,13 +9,16 @@ then
 fi
 
 all::() { 
-messages_register 'Do NOT report kernel bugs as genkernel bugs unless your bug'
-messages_register 'is about the default genkernel configuration...'
-messages_register ''
-messages_register 'Make sure you have the latest genkernel before reporting bugs.'
 
-
-messages_register_read
 
 cfg_register_read
+kernel_cmdline_register_read
+
+print_info 1 'Do NOT report kernel bugs as genkernel bugs unless your bug'
+print_info 1 'is about the default genkernel configuration...'
+print_info 1 ''
+print_info 1 'Make sure you have the latest genkernel before reporting bugs.'
+print_info 1 ''
+
+
 }

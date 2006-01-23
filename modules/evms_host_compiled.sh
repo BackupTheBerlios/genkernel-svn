@@ -31,6 +31,9 @@ evms_host_compiled::() {
 		# the newest one.
 		genkernel_generate_cpio_path "evms-host-compiled" . || die "Could not create the cpio"
 	    initramfs_register_cpio "evms-host-compiled" || die "Could not register evms cpio"
+		
+		message_register 'add "doevms2" for evms support'
+
 
 	else
 		die "Evms is not installed on your host system. Install it on your host sytem."
