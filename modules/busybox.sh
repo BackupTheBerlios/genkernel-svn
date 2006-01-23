@@ -29,6 +29,12 @@ busybox::check_package_status()
 	if [ -n "$(profile_get_key busybox-config)" ]
 	then
 		BUSYBOX_CONFIG="$(profile_get_key busybox-config)"
+	elif [ -f "${TEMP}/busybox-custom-${BUSYBOX_VER}.config" ]
+	then
+		BUSYBOX_CONFIG="${TEMP}/busybox-custom-${BUSYBOX_VER}.config"
+	elif [ -f "/etc/kernels/busybox-custom-${BUSYBOX_VER}.config" ]
+	then
+		BUSYBOX_CONFIG="/etc/kernels/busybox-custom-${BUSYBOX_VER}.config"
 	elif [ -f "${CONFIG_DIR}/busybox.config" ]
 	then
 		BUSYBOX_CONFIG="${CONFIG_DIR}/busybox.config"

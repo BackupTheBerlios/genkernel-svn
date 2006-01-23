@@ -1,10 +1,10 @@
 Things to fix:
 
 * fix manpage [plasmaroo]
-* Save kernel config to alternate location
-* Save busybox config to alternate location
 
 * mount /boot
+
+* cmdline kernel config parameter changing
 
 * fix linuxrc
 

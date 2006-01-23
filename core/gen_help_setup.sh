@@ -56,15 +56,15 @@ profile_set_key force-config false 'system'
 
 ## Initramfs options
 __register_config_option 'Initramfs' 'gmi' 'false' 'true' "Disable genkernel's initramfs scripts"
-profile_set_key gmi true
+profile_set_key gmi true 'system'
 
 __register_config_option 'Initramfs' 'busybox' 'false' 'true' 'Add busybox to the initramfs'
-profile_set_key busybox true
+profile_set_key busybox true 'system'
 __register_config_option 'Initramfs' 'busybox-config' 'true' 'false' 'busybox config file to use'
 __register_config_option 'Initramfs' 'busybox-menuconfig' 'false' 'true' 'Run menuconfig on busybox config file'
 
 __register_config_option 'Initramfs' 'udev' 'false' 'true' 'Add udev to the initramfs'
-profile_set_key udev true
+profile_set_key udev true 'system'
 
 __register_config_option 'Initramfs' 'evms2' 'false' 'true' 'Include EVMS2 support.'
 __register_config_option 'Initramfs' 'lvm2' 'false' 'true' 'Include LVM2 support.'
@@ -73,7 +73,7 @@ __register_config_option 'Initramfs' 'disklabel' 'false' 'true' 'Include disk la
 
 __register_config_option 'Initramfs' 'kernel-modules'   'true!m' 'false' 'Add or subtract kernel modules from the initramfs. --kernel-module="GROUP:module -module"' 'cmdline_modules_register'
 __register_config_option 'Initramfs' 'kernel-modules-cpio' 'false' 'true' 'Add kernel modules to the initramfs'
-profile_set_key kernel_modules_cpio true
+profile_set_key kernel-modules-cpio true 'system'
 
 __register_config_option 'Initramfs' 'initramfs-overlay' 'true' 'false' 'Directory structure to include in the initramfs.'
 __register_config_option 'Initramfs' 'external-cpio' 'true!m' 'false' 'Include an external cpio file.'

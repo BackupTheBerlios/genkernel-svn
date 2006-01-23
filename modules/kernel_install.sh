@@ -40,4 +40,22 @@ kernel_install::()
 		print_info 1 ">> Installing kernel to $(profile_get_key install-path)/kernel-${KV_FULL}"
 	cp ${CP_ARGS} "$(profile_get_key kernel-binary)" "$(profile_get_key install-path)/kernel-${KV_FULL}"
 	cp ${CP_ARGS} "System.map" "$(profile_get_key install-path)/System.map-${KV_FULL}"
+
+	if [ -w /etc/kernels ]
+	then
+		profile_set_key kernel-config-destination-path "/etc/kernels"
+	else
+		print_info 1 ">> Kernel config install path: ${BOLD}/etc/kernels${NORMAL} is not writeable attempting to use ${TEMP}/genkernel-output"
+		if [ ! -w ${TEMP} ]
+		then
+			die "Could not write to ${TEMP}/genkernel-output."
+		else
+			mkdir -p ${TEMP}/genkernel-output || die "Could not make ${TEMP}/genkernel-output."
+			profile_set_key kernel-config-destination-path "${TEMP}/genkernel-output"
+		fi
+	fi
+	
+	cp .config "$(profile_get_key kernel-config-destination-path)/kernel-config-${KV_FULL}"
+	print_info 1 "Kernel config file saved to $(profile_get_key kernel-config-destination-path)/kernel-config-${KV_FULL}"
+
 }

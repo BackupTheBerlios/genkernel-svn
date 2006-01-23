@@ -10,6 +10,12 @@ busybox_compile::()
 	if [ -n "$(profile_get_key busybox-config)" ]
 	then
 		BUSYBOX_CONFIG="$(profile_get_key busybox-config)"
+	elif [ -f "${TEMP}/busybox-custom-${BUSYBOX_VER}.config" ]
+	then
+		BUSYBOX_CONFIG="${TEMP}/busybox-custom-${BUSYBOX_VER}.config"
+	elif [ -f "/etc/kernels/busybox-custom-${BUSYBOX_VER}.config" ]
+	then
+		BUSYBOX_CONFIG="/etc/kernels/busybox-custom-${BUSYBOX_VER}.config"
 	elif [ -f "${CONFIG_DIR}/busybox.config" ]
 	then
 		BUSYBOX_CONFIG="${CONFIG_DIR}/busybox.config"
@@ -37,6 +43,23 @@ busybox_compile::()
 		print_info 1 "${PRINT_PREFIX}>> Running busybox menuconfig..."
 		compile_generic runtask ${KERNEL_ARGS} menuconfig
 		[ "$?" ] || die 'Error: busybox menuconfig failed!'
+		
+		if [ -w /etc/kernels ]
+		then
+			profile_set_key busybox-config-destination-path "/etc/kernels"
+		else
+			print_info 1 ">> Busybox config install path: ${BOLD}/etc/kernels ${NORMAL}is not writeable attempting to use ${TEMP}/genkernel-output"
+			if [ ! -w ${TEMP} ]
+			then
+				die "Could not write to ${TEMP}/genkernel-output."
+			else
+				mkdir -p ${TEMP}/genkernel-output || die "Could not make ${TEMP}/genkernel-output."
+				profile_set_key busybox-config-destination-path "${TEMP}/genkernel-output"
+			fi
+		fi
+		cp .config "$(profile_get_key busybox-config-destination-path)/busybox-custom-${BUSYBOX_VER}.config"	
+		print_info 1 "Custom busybox config file saved to $(profile_get_key busybox-config-destination-path)/busybox-custom-${BUSYBOX_VER}.config"
+
 	fi
 	
 	# TODO Add busybox config changing support
@@ -65,7 +88,10 @@ busybox_compile::()
 	
 	[ -f "busybox" ] || die 'Busybox executable does not exist!'
 	strip "busybox" || die 'Could not strip busybox binary!'
+	
+	[ -e "${TEMP}/busybox-compile" ] && rm -r ${TEMP}/busybox-compile
 	mkdir ${TEMP}/busybox-compile
+	
 	cp busybox ${BUSYBOX_CONFIG} ${TEMP}/busybox-compile
 	cd ${TEMP}/busybox-compile
 	genkernel_generate_package "busybox-${BUSYBOX_VER}" "."

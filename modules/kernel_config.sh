@@ -26,7 +26,12 @@ kernel_config::()
 	# Source dir needs to be clean or kbuild complains
 	if [ ! "$(profile_get_key kbuild-output)" == "$(profile_get_key kernel-tree)" ]
 	then
-		compile_generic mrproper
+		if [ -w $(profile_get_key kernel-tree) ]
+		then
+			compile_generic mrproper
+		else
+			print_warning 1 ">> Unable clean the kernel source tree via make mrproper.  Run make mrproper manually if the kernel build fails."
+		fi
 	fi
 	
 	logicTrue $(profile_get_key mrproper) && \

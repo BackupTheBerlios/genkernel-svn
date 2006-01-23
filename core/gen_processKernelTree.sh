@@ -14,17 +14,19 @@ get_KV() {
 		KBUILD_OUTPUT=${KERNEL_DIR}
 	fi
 
-	if [ ! -w ${KBUILD_OUTPUT} ]
+	if [ ! -w $(dirname ${KBUILD_OUTPUT}) ]
 	then
 		print_info 1 "${KBUILD_OUTPUT} not writeable attempting to use ${TEMP}/kbuild_output"
 		KBUILD_OUTPUT="${TEMP}/kbuild_output"
-			if [ ! -w ${TEMP} ]
-			then
-				die "Could not write to ${KBUILD_OUTPUT}.  Set kbuild-output to a writeable directory or run as root"
-			else
-				mkdir -p ${KBUILD_OUTPUT} || die "Could not make ${KBUILD_OUTPUT}.  Set kbuild-output to a writeable directory or run as root"
-			fi
-	fi
+		if [ ! -w ${TEMP} ]
+		then
+			die "Could not write to ${KBUILD_OUTPUT}.  Set kbuild-output to a writeable directory or run as root"
+		else
+			mkdir -p ${KBUILD_OUTPUT} || die "Could not make ${KBUILD_OUTPUT}.  Set kbuild-output to a writeable directory or run as root"
+		fi
+	else
+		mkdir -p ${KBUILD_OUTPUT} || die "Could not make ${KBUILD_OUTPUT}.  Set kbuild-output to a writeable directory or run as root"
+    fi
 		
 	profile_set_key kbuild-output ${KBUILD_OUTPUT}
     
@@ -257,9 +259,9 @@ determine_config_file() {
     then
         KERNEL_CONFIG="$(profile_get_key kernel-config)"
 		
-    elif [ -f "/etc/kernels/kernel-config-${ARCH}-${KV_FULL}" ]
+    elif [ -f "/etc/kernels/kernel-config-${KV_FULL}" ]
     then
-        KERNEL_CONFIG="/etc/kernels/kernel-config-${ARCH}-${KV_FULL}"
+        KERNEL_CONFIG="/etc/kernels/kernel-config-${KV_FULL}"
     elif [ -f "${CONFIG_DIR}/kernel-config-${KV_FULL}" ]
     then
         KERNEL_CONFIG="${CONFIG_DIR}/kernel-config-${KV_FULL}"
@@ -292,27 +294,6 @@ setup_kernel_args() {
 	# Override the default arch being built
 	[ -n "$(profile_get_key arch-override)" ] && KERNEL_ARGS="${KERNEL_ARGS} ARCH=$(profile_get_key arch-override)"
 
-   	# Setup kbuild output 
-	if [ -n "$(profile_get_key kbuild-output)" ]
-    then
-        KBUILD_OUTPUT="$(profile_get_key kbuild-output)"
-    else
-        KBUILD_OUTPUT="$(profile_get_key kernel-tree)"
-    fi
-
-    if [ ! -w ${KBUILD_OUTPUT} ]
-    then
-        print_info 1 "${KBUILD_OUTPUT} not writeable attempting to use ${TEMP}/kbuild_output"
-        KBUILD_OUTPUT="${TEMP}/kbuild_output"
-            if [ ! -w ${TEMP} ]
-            then
-                die "Could not write to ${KBUILD_OUTPUT}.  Set kbuild-output to a writeable directory or run as root"
-            else
-                mkdir -p ${KBUILD_OUTPUT} || die "Could not make ${KBUILD_OUTPUT}.  Set kbuild-output to a writeable directory or run as root"
-            fi
-    fi
-
-    profile_set_key kbuild-output ${KBUILD_OUTPUT}
 	if [ "$(profile_get_key kbuild-output)" == "$(profile_get_key kernel-tree)"	]
 	then
 		if [ "$(profile_get_key arch-override)" == "um" \
