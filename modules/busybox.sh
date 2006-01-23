@@ -1,5 +1,6 @@
 require @pkg_busybox-${BUSYBOX_VER}:null:busybox_compile
 ### XXX package_check_register pkg_busybox-${BUSYBOX_VER} busybox::check_package_status
+package_check_register pkg_busybox-${BUSYBOX_VER} busybox::check_package_status
 
 busybox::()
 {
@@ -23,6 +24,37 @@ busybox::()
 
 busybox::check_package_status()
 {
-	echo Debug: busybox recompile forced...
-	__INTERNAL__PKG__CALLBACK__STATUS=true
+	logicTrue $(profile_get_key busybox-menuconfig) && __INTERNAL__PKG__CALLBACK__STATUS=true && return
+
+	if [ -n "$(profile_get_key busybox-config)" ]
+	then
+		BUSYBOX_CONFIG="$(profile_get_key busybox-config)"
+	elif [ -f "${CONFIG_DIR}/busybox.config" ]
+	then
+		BUSYBOX_CONFIG="${CONFIG_DIR}/busybox.config"
+	elif [ -f "${CONFIG_GENERIC_DIR}/busybox.config" ]
+	then
+		BUSYBOX_CONFIG="${CONFIG_GENERIC_DIR}/busybox.config"
+	elif [ "${DEFAULT_BUSYBOX_CONFIG}" != "" -a -f "${DEFAULT_BUSYBOX_CONFIG}" ]
+	then
+		BUSYBOX_CONFIG="${DEFAULT_BUSYBOX_CONFIG}"
+	else
+		die 'Error: No busybox .config specified, or file not found!'
+	fi
+	
+	[ -e ${TEMP}/busybox-temp ] && rm -r ${TEMP}/busybox-temp
+	mkdir -p ${TEMP}/busybox-temp
+	cd ${TEMP}/busybox-temp
+	genkernel_extract_package "busybox-${BUSYBOX_VER}"
+	
+	local MD5_CACHED_BUSY_CONFIG=$(md5sum busybox.config)
+	local MD5_NEW_BUSY_CONFIG=$(md5sum ${BUSYBOX_CONFIG})
+	
+	[ -e ${TEMP}/busybox-temp ] && rm -r ${TEMP}/busybox-temp
+	
+	if [ "${MD5_CACHED_BUSY_CONFIG/ */}" != "${MD5_NEW_BUSY_CONFIG/ */}" ]
+	then
+		echo Debug: busybox recompile forced...
+		__INTERNAL__PKG__CALLBACK__STATUS=true
+	fi
 }

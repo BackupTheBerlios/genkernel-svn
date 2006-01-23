@@ -149,12 +149,12 @@ require () {
 			# echo ">> Loading: $i"
 
 			__INTERNAL__MODULES_LOADING="$i"
-			if [ ! -e "modules/$i.sh" ]
+			if [ ! -e "${MODULES_DIR}/$i.sh" ]
 			then
 				echo ">> Module request [$i] not resolvable: $i.sh not found; halting..."
 				exit 255
 			else
-				source modules/$i.sh
+				source ${MODULES_DIR}/$i.sh
 			fi
 		else
 			# We may or may not have a cyclic loop. Traverse the call stack and see if $myCaller is in there.

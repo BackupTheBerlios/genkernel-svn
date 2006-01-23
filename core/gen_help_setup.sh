@@ -60,6 +60,8 @@ profile_set_key gmi true
 
 __register_config_option 'Initramfs' 'busybox' 'false' 'true' 'Add busybox to the initramfs'
 profile_set_key busybox true
+__register_config_option 'Initramfs' 'busybox-config' 'true' 'false' 'busybox config file to use'
+__register_config_option 'Initramfs' 'busybox-menuconfig' 'false' 'true' 'Run menuconfig on busybox config file'
 
 __register_config_option 'Initramfs' 'udev' 'false' 'true' 'Add udev to the initramfs'
 profile_set_key udev true

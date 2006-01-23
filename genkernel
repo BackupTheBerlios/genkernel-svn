@@ -65,9 +65,6 @@ genkernel_determine_arch
 CACHE_DIR="$(arch_replace ${CACHE_DIR})"
 CONFIG_DIR="$(arch_replace ${CONFIG_DIR})"
 
-# Make the cache directory if it doesnt exist
-[ -e "${CACHE_DIR}" ] || mkdir -p "${CACHE_DIR}"
-
 # Failed to parse the cmdline properly, die so we can investigate...
 logicTrue ${__INTERNAL__CONFIG_PARSING_FAILED} && die 'Fatal error processing arguments; exiting...'
 
@@ -93,6 +90,23 @@ fi
 
 clear_log
 genkernel_print_header
+
+if [ ! -w ${CACHE_DIR} ]
+then
+	if [ ! -w $(dirname ${CACHE_DIR}) ]
+   	then
+		echo "CACHE_DIR: ${BOLD}${CACHE_DIR} ${NORMAL}is not writeable attempting to use ${TEMP}/genkernel_cache"
+		if [ ! -w ${TEMP} ]
+		then
+			die "Could not write to ${TEMP}/genkernel_cache.  Set CACHE_DIR in genkernel.conf to use a writeable cache directory."
+		fi
+		CACHE_DIR="${TEMP}/genkernel_cache"
+	fi
+		
+	# Make the cache directory if it doesnt exist
+	[ -e "${CACHE_DIR}" ] || mkdir -p "${CACHE_DIR}"
+
+fi
 
 if [ "$(profile_get_key debuglevel)" -gt "2" ]
 then

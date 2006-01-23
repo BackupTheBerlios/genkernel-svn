@@ -1,7 +1,13 @@
 Things to fix:
 
 * fix manpage [plasmaroo]
-* busybox config file
+* Save kernel config to alternate location
+* Save busybox config to alternate location
+
+* mount /boot
+
+* fix linuxrc
 
 * epatch function
 
+* make some functions more generic .. ( not necessary right away but would be nice to get done )
