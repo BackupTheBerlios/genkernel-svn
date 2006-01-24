@@ -1,4 +1,4 @@
-require kernel_modules_compile
+#require kernel_modules_compile
 
 # Set the destination path for the kernel modules
 if [ -z "$(profile_get_key install-mod-path)" ]

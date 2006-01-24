@@ -19,11 +19,5 @@ all::() {
 cfg_register_read
 kernel_cmdline_register_read
 
-print_info 1 'Do NOT report kernel bugs as genkernel bugs unless your bug'
-print_info 1 'is about the default genkernel configuration...'
-print_info 1 ''
-print_info 1 'Make sure you have the latest genkernel before reporting bugs.'
-print_info 1 ''
-
-
+print_info 1 ">> Genkernel completed successfully..."
 }

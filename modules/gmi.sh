@@ -1,7 +1,6 @@
 gmi::()
 {
 	cd ${TEMP}
-
 	rm -rf "${TEMP}/initramfs-base-temp"
 	mkdir -p ${TEMP}/initramfs-base-temp/{bin,etc,usr,proc,temp,sbin,sys}
 	mkdir -p ${TEMP}/initramfs-base-temp/etc/modules
@@ -77,7 +76,7 @@ gmi::()
 	done
 	echo '"' >> "${TEMP}/initramfs-base-temp/etc/initrd.defaults"	
 
-	cp "${GMI_DIR}/generic/modprobe" "${TEMP}/initramfs-base-temp/sbin/modprobe"
+	#cp "${GMI_DIR}/generic/modprobe" "${TEMP}/initramfs-base-temp/sbin/modprobe"
 	logicTrue "$(profile_get_key do-keymap-auto)" && echo 'MY_HWOPTS="${MY_HWOPTS} keymap"' >> ${TEMP}/initramfs-base-temp/etc/initrd.defaults
 	logicTrue "$(profile_get_key bladecenter)" && echo 'MY_HWOPTS="${MY_HWOPTS} bladecenter"' >> ${TEMP}/initramfs-base-temp/etc/initrd.defaults
 
@@ -88,7 +87,7 @@ gmi::()
 	chmod +x "${TEMP}/initramfs-base-temp/init"
 	chmod +x "${TEMP}/initramfs-base-temp/etc/initrd.scripts"
 	chmod +x "${TEMP}/initramfs-base-temp/etc/initrd.defaults"
-	chmod +x "${TEMP}/initramfs-base-temp/sbin/modprobe"
+	#chmod +x "${TEMP}/initramfs-base-temp/sbin/modprobe"
 
 	# Generate CPIO
 	cd "${TEMP}/initramfs-base-temp/"

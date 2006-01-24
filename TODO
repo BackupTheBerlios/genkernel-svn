@@ -9,3 +9,6 @@ Things to fix:
 * epatch function
 
 * make some functions more generic .. ( not necessary right away but would be nice to get done )
+
+* kbuild output writeable check
+

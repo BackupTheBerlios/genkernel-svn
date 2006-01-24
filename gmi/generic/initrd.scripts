@@ -52,10 +52,10 @@ modules_scan() {
 			# find -name does not work since the return status is always zero
 			if find /lib/modules | grep "${x}${KSUFF}" >/dev/null 2>&1
 			then
-				echo -ne "${BOLD}   ::${NORMAL} Scanning for ${x}..."
-				modprobe ${x} -n
-				backup
-				echo -ne "${NORMAL}"
+				#echo -ne "${BOLD}   ::${NORMAL} Scanning for ${x}..."
+				modprobe ${x} >/dev/null 2>&1
+				#backup
+				#echo -ne "${NORMAL}"
 			fi
 		else
 			echo -e "${BOLD}   ::${NORMAL} Skipping ${x}..."

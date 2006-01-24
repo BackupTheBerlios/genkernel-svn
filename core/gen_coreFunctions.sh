@@ -105,7 +105,7 @@ print_info() {
 
 	# PRINT TO SCREEN ONLY IF PASSED DEBUGLEVEL IS HIGHER THAN
 	# OR EQUAL TO SET DEBUG LEVEL
-	if [ "$1" -lt "${DEBUGLEVEL}" -o "$1" -eq "${DEBUGLEVEL}" ]
+	if [ "$1" -lt "$(profile_get_key debuglevel)" -o "$1" -eq "$(profile_get_key debuglevel)" ]
 	then
 		SCRPRINT='1'
 	fi

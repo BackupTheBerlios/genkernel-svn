@@ -62,8 +62,10 @@ genkernel_lookup_packages()
 genkernel_generate_cpio() {
 	if [ -z "$2" ]
 	then
+		[ -e "${TEMP}/$1.cpio.gz" ] && rm "${TEMP}/$1.cpio.gz"
 		cpio --quiet -o -H newc | gzip -9 > "${TEMP}/$1.cpio.gz"
 	else
+		[ -e "${TEMP}/$1.cpio" ] && rm "${TEMP}/$1.cpio"
 		cpio --quiet -o -H newc > "${TEMP}/$1.cpio"
 	fi
 }
@@ -118,6 +120,7 @@ genkernel_generate_cpio_files() {
 }
 
 genkernel_generate_package() {
+	[ -e "${CACHE_DIR}/pkg_$1.tar.bz2" ] && rm "${CACHE_DIR}/pkg_$1.tar.bz2"
 	tar cjf "${CACHE_DIR}/pkg_$1.tar.bz2" "$2" || die "Could not create binary cache for $1!"
 }
 

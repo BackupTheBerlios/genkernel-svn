@@ -35,8 +35,7 @@ initramfs_install::() {
 		print_info 1 "Skipping installation of the initramfs: --initramfs-internal enabled"
 	else
 		[ "$(profile_get_key debuglevel)" -gt "1" ] && ARGS="-v"
-		[ "$(profile_get_key debuglevel)" -gt "1" ] &&\	
-			print_info 1 ">> Installing initramfs to $(profile_get_key install-initramfs-path)/initramfs-${KV_FULL}"
+		print_info 1 ">> Installing initramfs to $(profile_get_key install-initramfs-path)/initramfs-${KV_FULL}"
 		cp ${ARGS} "${TEMP}/initramfs-output.cpio.gz" "$(profile_get_key install-initramfs-path)/initramfs-${KV_FULL}"
 			
 	fi
