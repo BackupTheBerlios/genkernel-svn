@@ -1,3 +1,8 @@
+if logicTrue $(profile_get_key install) && logicTrue $(profile_get_key mountboot)
+then
+	require mount_boot
+fi
+
 require kernel
 
 logicTrue $(initramfs) && require initramfs

@@ -2,8 +2,6 @@ Things to fix:
 
 * fix manpage [plasmaroo]
 
-* mount /boot
-
 * cmdline kernel config parameter changing
 
 * fix linuxrc
