@@ -68,6 +68,9 @@ REAL_ROOT=''
 for x in ${CMDLINE}
 do
   case "${x}" in
+      root\=*)
+	  REAL_ROOT=`parse_opt "${x}"`
+	  ;;
       real_root\=*)
 	  REAL_ROOT=`parse_opt "${x}"`
 	  ;;
