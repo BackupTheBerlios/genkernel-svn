@@ -52,6 +52,7 @@ initramfs_create::() {
 		done
 	else
 		print_info 1 'Merging:'
+		[ -e "${TEMP}/initramfs-output.cpio.gz" ] && rm "${TEMP}/initramfs-output.cpio.gz"
 		for i in $(initramfs_register_cpio_read)
 		do
 			if [ ! -f "$i" ]
