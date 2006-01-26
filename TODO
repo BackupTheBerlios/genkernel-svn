@@ -12,3 +12,5 @@ Things to fix:
 
 * kbuild output writeable check
 
+* make critical variables (arch, etc) bombproof and readonly so modules can't b0rk things
+  up
