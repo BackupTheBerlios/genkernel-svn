@@ -206,27 +206,30 @@ cache_replace() {
 }
 
 clear_log() {
-
 	# Set DEBUGFILE if log-override is defined
 	[ -n "${DEBUGFILE}" ] && profile_set_key debugfile "${DEBUGFILE}"
-	[ -n "$(profile_get_key log-override)" ] && profile_set_key debugfile "$(profile_get_key log-override)"
+	if [ -n "$(profile_get_key log-override)" ]
+	then
+		DEBUGFILE="$(profile_get_key log-override)"
+		profile_set_key debugfile "${DEBUGFILE}"
+	fi
 
-    if [ ! -w $(dirname $(profile_get_key debugfile)) ]
-    then
-        profile_set_key debugfile "${TEMP}/genkernel.log"
+	if [ ! -w "$(dirname $(profile_get_key debugfile))" ]
+	then
+		profile_set_key debugfile "${TEMP}/genkernel.log"
 		DEBUGFILE="$(profile_get_key debugfile)"
-        print_info 1 ">> Debugfile: ${BOLD}$(profile_get_key debugfile) ${NORMAL}is not writeable attempting to use ${TEMP}/genkernel.log"
-        if [ ! -w ${TEMP} ]
-        then
-            die "Could not write to ${TEMP}/genkernel.log.  Set DEBUGFILE in genkernel.conf or use log-override to use a writeable logfile."
-        fi
-    fi
+		print_info 1 ">> Debugfile: ${BOLD}$(profile_get_key debugfile) ${NORMAL}is not writeable; attempting to use ${TEMP}/genkernel.log"
+		if [ ! -w ${TEMP} ]
+		then
+			die "Could not write to ${TEMP}/genkernel.log. Set DEBUGFILE in genkernel.conf or use log-override to use a writeable logfile."
+		fi
+	fi
 	
-    if [ -f "${DEBUGFILE}" ]
-    then
-	(echo > "${DEBUGFILE}") 2>/dev/null || \
-		die "Could not write to ${TEMP}/genkernel.log.  Set DEBUGFILE in genkernel.conf or use log-override to use a writeable logfile."
-    fi   
+	if [ -f "${DEBUGFILE}" ]
+	then
+		(echo > "${DEBUGFILE}") 2>/dev/null || \
+		die "Could not write to ${TEMP}/genkernel.log. Set DEBUGFILE in genkernel.conf or use log-override to set a writeable logfile."
+	fi
 }
 
 die_debugged() {

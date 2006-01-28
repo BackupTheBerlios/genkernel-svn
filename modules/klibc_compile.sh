@@ -1,11 +1,8 @@
-# Output: binpackage { /klibc-build-tree -> [[Build tree]] }
-# Placement: Not relevant as not included in initramfs product.
-
 # Used by the klibc module which defines KLCC to point to the klcc binary
 # for usage by other modules.
 
 if [ "$(profile_get_key arch-override)" == "um" -o "$(profile_get_key arch-override)" == "xen0" \
-             -o "$(profile_get_key arch-override)" == "xenU" ]
+     -o "$(profile_get_key arch-override)" == "xenU" ]
 then
 	require kernel_config_i386_stub
 else
@@ -88,5 +85,4 @@ klibc_compile::() {
 	cd ${TEMP}
 	genkernel_generate_package "klibc-${KLIBC_VER}" klibc-build-${KLIBC_VER}
 	rm -rf "${KLIBC_DIR}" klibc-build-${KLIBC_VER}
-
 }

@@ -1,16 +1,19 @@
-# require 'module'
-# Load module and add module to dependency order generation table
-# This is multi-load safe but is coded to die if a circular dependency is found... since those are well, bad.
+# Genkernel 4.0.0 dependency engine <plasmaroo@gentoo.org>
 
-# Clear up if we need a new deptree
+# This module handles the dependecy requirements of genkernel, parsing
+# the require and provide instructions of modules and building a relevant
+# dependency tree which can then be used by the main loop to execute
+# the intended result.
+
+# We might be getting reloaded; clear up if we need a new deptree
 unset __INTERNAL__DEPS__REQ_N __INTERNAL__DEPS__REQ_D __INTERNAL__DEPS__PRV_S __INTERNAL__DEPS__PRV_P \
       __MODULE__DEPS__VARS_N __MODULE__DEPS__VARS_D
 
+# These are used for checking for cyclic loops
 __INTERNAL__MODULES_LOADING=''
 __INTERNAL__MODULES_LOADED=''
 
 kernel_cmdline_unregister
-
 
 declare -a __INTERNAL__DEPS__REQ_N # Name
 declare -a __INTERNAL__DEPS__REQ_D # Data
@@ -23,7 +26,7 @@ declare -a __MODULE__DEPS__VARS_D # Data
 # Look up the module which provides "provide"; return null
 # if no matches are found.
 provide_lookup() {
-	local source provides
+	local n source provides
 
 	for (( n = 0 ; n <= ${#__INTERNAL__DEPS__PRV_S[@]}; ++n )) ; do
 		source=${__INTERNAL__DEPS__PRV_S[${n}]}
@@ -36,7 +39,7 @@ provide_lookup() {
 # provide {list}
 # {list}: list of provides to check and register with the calling module.
 provide () {
-	local myCaller myCheck
+	local i myCaller myCheck
 	myCaller=$(basename ${BASH_SOURCE[1]} .sh)
 
 	# Check something does not already provide this functionality,
@@ -57,8 +60,11 @@ provide () {
 }
 
 # require {list}
+# Load {list} and add modules to the dependency queue. This can be invoked multiple times,
+# conditionally if needed, from a module to add dependencies. Dependencies are always additive.
+
 # {list}:item:	"xyz" - require module "xyz"
-#		"@xyz" - require a module which provides the functionality "xyz"
+#		"@xyz" - require a module which provides "xyz". Alias for @xyz:null:fail.
 #		"@xyz:yes:no" - require "yes" if a module that provides functionality "xyz"
 #				exists, otherwise require "no"
 
@@ -68,11 +74,15 @@ provide () {
 
 #		"null" is a special target which does nothing and is not added to the deptree.
 #		"fail" is another special target which halts deptree processing and informs
-# 		that the deptree is unsatisfied.
+# 		that the deptree is unsatisfied at that point.
+
 require () {
+	local i myCaller myDeps myConditonalVar myLookup
+
 	# Get Caller Module; step back twice in the execution list to get to the caller.
-	local myCaller myDeps myConditonalVar myLookup
 	myCaller=$(basename ${BASH_SOURCE[1]} .sh)
+
+	# Guard against cyclic loops
 	__INTERNAL__MODULES_LOADED="${__INTERNAL__MODULES_LOADED} ${__INTERNAL__MODULES_LOADING}"
 
 	# Process dependency list
@@ -81,45 +91,40 @@ require () {
 		# Special-case for 'null'
 		[ "${i}" = 'null' ] && continue
 		
-		# Process conditional provide-based deps:
+		# Process conditional provide-dependent deps:
 		if [ "${i:0:1}" = '@' ]
 		then
-			# If we have no conditionality then we require that item's presence:
+			# Re-alias if needed:
+			[ "${i/:/}" = "${i}" ] && i="${i}:null:fail"
 
-			if [ "${i/:/}" != "${i}" ]
+			# Get first term and strip @; lookup the provide
+			myLookup="${i%%:*}"
+			myLookup="${myLookup:1}"
+			myConditionalVar="$(provide_lookup ${myLookup})"
+
+			if [ -n "${myConditionalVar}" ]
 			then
-				# Get first term and strip @
-				
-				myLookup="${i%%:*}"
-				myLookup="${myLookup:1}"
-				myConditionalVar="$(provide_lookup ${myLookup})"
+				# Success - get the second field (strip first and then leading fields)
 
-				if [ -n "${myConditionalVar}" ]
-				then
-					# Success - get the second field (strip first and then leading fields)
-
-					myConditionalVar="${i#*:}"
-					myConditionalVar="${myConditionalVar%%:*}"
-				else
-					# Get last field
-					myConditionalVar="${i##*:}"
-				fi
-
-				# Special-case for 'null'
-				[ "${myConditionalVar}" = 'null' ] && continue
-				if [ "${myConditionalVar}" = 'fail' ]
-				then
-					echo "Error: module ${myCaller} requires functionality ${myLookup} which is"
-					echo '       unresolved. Deptree creation failed.'
-					exit 255 # XXX
-				fi
-
-				myDeps="${myDeps} ${myConditionalVar}"
-				continue
+				myConditionalVar="${i#*:}"
+				myConditionalVar="${myConditionalVar%%:*}"
 			else
-				# Check if we have the provide, otherwise fail.
-				false
+				# Get last field
+				myConditionalVar="${i##*:}"
 			fi
+
+			# Special-case for 'null' and 'fail'
+			[ "${myConditionalVar}" = 'null' ] && continue
+			if [ "${myConditionalVar}" = 'fail' ]
+			then
+				echo "Error: module ${myCaller} requires functionality ${myLookup} which is"
+				echo '       unresolved. Deptree creation failed.'
+				exit 255 # XXX
+			fi
+
+			# We're good; add to deptree
+			myDeps="${myDeps} ${myConditionalVar}"
+			continue
 		fi
 
 		# Process conditional var-defined deps:
@@ -172,7 +177,7 @@ require () {
 }
 
 require_dep_lookup() {
-	local name data
+	local n name data
 
         for (( n = 0 ; n <= ${#MODULE_DEPS__VARS_N[@]}; ++n )) ; do
 		name=${MODULE__DEPS__VARS_N[${n}]}
@@ -183,7 +188,7 @@ require_dep_lookup() {
 }
 
 require_lookup() {
-	local name data
+	local n name data
 
         for (( n = 0 ; n <= ${#__INTERNAL__DEPS__REQ_N[@]}; ++n )) ; do
 		name=${__INTERNAL__DEPS__REQ_N[${n}]}
@@ -194,6 +199,8 @@ require_lookup() {
 }
 
 require_set() {
+	local n
+
 	# See if we have n, if we do overwrite. Otherwise append.
         for (( n = 0 ; n <= ${#__INTERNAL__DEPS__REQ_N[@]}; ++n )) ; do
 		if [ "${__INTERNAL__DEPS__REQ_N[${n}]}" = "$1" ]
@@ -204,12 +211,12 @@ require_set() {
         done
 
 	# For $myCaller deps are $myDeps
-	__INTERNAL__DEPS__REQ_N[${#__INTERNAL__DEPS__REQ_N[@]}]="${myCaller}"
-	__INTERNAL__DEPS__REQ_D[${#__INTERNAL__DEPS__REQ_D[@]}]="${myDeps}"	
+	__INTERNAL__DEPS__REQ_N[${#__INTERNAL__DEPS__REQ_N[@]}]="$1"
+	__INTERNAL__DEPS__REQ_D[${#__INTERNAL__DEPS__REQ_D[@]}]="$2"	
 }
 
 require_DebugStack() {
-	local name data
+	local n name data
 
         for (( n = 0 ; n <= ${#__INTERNAL__DEPS__REQ_N[@]}; ++n )) ; do
 		name=${__INTERNAL__DEPS__REQ_N[${n}]}
@@ -220,6 +227,7 @@ require_DebugStack() {
 
 require_SearchStackForRecursion() {
 	# Ignore the last n = since that is the original require call
+	local n
 	for (( n = 1 ; n < $(( ${#FUNCNAME[@]} - 1 )); ++n )) ; do
 		[ "$(basename ${BASH_SOURCE[$(( n - 1 ))]} .sh)" = "$1" ] && return 0
 	done
@@ -232,7 +240,7 @@ require_SearchStackForRecursion() {
 # [carryIn]: do not assign, used internally for cyclic checks
 
 buildDepTreeGeneric () {
-	local localTree resultTree myDeps myDone returnVal
+	local dep localTree resultTree myDeps myDone returnVal
 	myDeps=$(require_lookup $1)
 
 	# Check if we are at the end of our tree, if so, return and
@@ -274,7 +282,7 @@ buildDepTreeGeneric () {
 
 buildDepTreeSolution()
 {
-	local routeName myResult myRoute myOut
+	local routeName myResult myRoute myOut n
 
 	# Keep building dep trees for nodes we haven't included, add them recursively to our
 	# output tree and don't worry about duplicates just yet...

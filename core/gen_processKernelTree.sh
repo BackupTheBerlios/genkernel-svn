@@ -16,7 +16,7 @@ get_KV() {
 
 	if [ ! -w $(dirname ${KBUILD_OUTPUT}) ]
 	then
-		print_info 1 "${KBUILD_OUTPUT} not writeable attempting to use ${TEMP}/kbuild_output"
+		print_info 1 "${KBUILD_OUTPUT} not writeable; attempting to use ${TEMP}/kbuild_output"
 		KBUILD_OUTPUT="${TEMP}/kbuild_output"
 		if [ ! -w ${TEMP} ]
 		then
@@ -26,15 +26,15 @@ get_KV() {
 		fi
 	else
 		mkdir -p ${KBUILD_OUTPUT} || die "Could not make ${KBUILD_OUTPUT}.  Set kbuild-output to a writeable directory or run as root"
-    fi
+	fi
 		
 	profile_set_key kbuild-output ${KBUILD_OUTPUT}
     
 	if [ -f "$(profile_get_key kbuild-output)/localversion-genkernel" ]
-    then
-        version_string=$(cat $(profile_get_key kbuild-output)/localversion-genkernel)
-    fi
-    
+	then
+		version_string=$(cat $(profile_get_key kbuild-output)/localversion-genkernel)
+	fi
+
 	if [ "${version_string}" != "-${KNAME}-${ARCH}" ]
 	then
 		echo "-${KNAME}-${ARCH}" > "$(profile_get_key kbuild-output)/localversion-genkernel" || die "No permissions to write to $(profile_get_key kbuild-output)/localversion-genkernel"
@@ -52,7 +52,8 @@ get_KV() {
 
 	# Local version
 	local myLookup myList
-	#[[ -e "${KERNEL_DIR}/localversion" ]] && myList='localversion'
+
+#[[ -e "${KERNEL_DIR}/localversion" ]] && myList='localversion'
 #
 #	[[ -n "$(ls ${KERNEL_DIR}/localversion*[^~] 2>/dev/null)" ]] && myList="${myList} $(ls ${KERNEL_DIR}/localversion*[^~])"
 #	[[ -n "$(ls ${KBUILD_OUTPUT}/localversion*[^~] 2>/dev/null)" ]] && myList="${myList} $(ls ${KBUILD_OUTPUT}/localversion*[^~])"
@@ -78,15 +79,12 @@ get_KV() {
 	
 	KV_LOCAL="${KV_LOCAL// /}"
 	
-	#echo "Before version.h ${KV_LOCAL}"
 	if [ -f ${KBUILD_OUTPUT}/include/linux/version.h ]
 	then
 		UTS_RELEASE=`grep UTS_RELEASE ${KBUILD_OUTPUT}/include/linux/version.h | sed -e 's/#define UTS_RELEASE "\(.*\)"/\1/'`
 		KV_LOCAL=`echo ${UTS_RELEASE}|sed -e "s/${KV_MAJOR}.${KV_MINOR}.${KV_PATCH}${KV_EXTRA}//"`
 	fi
 	
-	#echo "After version.h ${KV_LOCAL}"
-
 	if [ "${KV_MINOR}" -lt '6' -a "${KV_MAJOR}" -eq '2' ]
 	then
 		die 'Kernel unsupported (2.6 or newer needed); exiting.'
@@ -248,35 +246,34 @@ kernel_config_is_not_set() {
 }
 
 determine_config_file() {
-	#echo "$(profile_get_key kernel-config)"
-	#echo "/etc/kernels/kernel-config-${ARCH}-${KV_FULL}"
-	#echo "${CONFIG_DIR}/kernel-config-${KV_FULL}"
-	#echo "${DEFAULT_KERNEL_CONFIG}"
-	#echo "${CONFIG_DIR}/kernel-config-${KV_MAJOR}.${KV_MINOR}"
-	#echo "${CONFIG_DIR}/kernel-config"
-    
+	# echo "$(profile_get_key kernel-config)"
+	# echo "/etc/kernels/kernel-config-${ARCH}-${KV_FULL}"
+	# echo "${CONFIG_DIR}/kernel-config-${KV_FULL}"
+	# echo "${DEFAULT_KERNEL_CONFIG}"
+	# echo "${CONFIG_DIR}/kernel-config-${KV_MAJOR}.${KV_MINOR}"
+	# echo "${CONFIG_DIR}/kernel-config"
+
 	if [ -n "$(profile_get_key kernel-config)" ]
-    then
-        KERNEL_CONFIG="$(profile_get_key kernel-config)"
-		
-    elif [ -f "/etc/kernels/kernel-config-${KV_FULL}" ]
-    then
-        KERNEL_CONFIG="/etc/kernels/kernel-config-${KV_FULL}"
-    elif [ -f "${CONFIG_DIR}/kernel-config-${KV_FULL}" ]
-    then
-        KERNEL_CONFIG="${CONFIG_DIR}/kernel-config-${KV_FULL}"
+	then
+		KERNEL_CONFIG="$(profile_get_key kernel-config)"
+	elif [ -f "/etc/kernels/kernel-config-${KV_FULL}" ]
+	then
+		KERNEL_CONFIG="/etc/kernels/kernel-config-${KV_FULL}"
+	elif [ -f "${CONFIG_DIR}/kernel-config-${KV_FULL}" ]
+	then
+		KERNEL_CONFIG="${CONFIG_DIR}/kernel-config-${KV_FULL}"
 	elif [ "${DEFAULT_KERNEL_CONFIG}" != "" -a -f "${DEFAULT_KERNEL_CONFIG}" ]
-    then
-        KERNEL_CONFIG="${DEFAULT_KERNEL_CONFIG}"
-    elif [ -f "${CONFIG_DIR}/kernel-config-${KV_MAJOR}.${KV_MINOR}" ]
-    then
-        KERNEL_CONFIG="${CONFIG_DIR}/kernel-config-${KV_MAJOR}.${KV_MINOR}"
-    elif [ -f "${CONFIG_DIR}/kernel-config" ]
-    then
-        KERNEL_CONFIG="${CONFIG_DIR}/kernel-config"
-    else
-        die 'Error: No kernel .config specified, or file not found!'
-    fi
+	then
+		KERNEL_CONFIG="${DEFAULT_KERNEL_CONFIG}"
+	elif [ -f "${CONFIG_DIR}/kernel-config-${KV_MAJOR}.${KV_MINOR}" ]
+	then
+		KERNEL_CONFIG="${CONFIG_DIR}/kernel-config-${KV_MAJOR}.${KV_MINOR}"
+	elif [ -f "${CONFIG_DIR}/kernel-config" ]
+	then
+	KERNEL_CONFIG="${CONFIG_DIR}/kernel-config"
+	else
+		die 'Error: No kernel .config specified, or file not found!'
+	fi
 }
 
 kbuild_enabled() {
@@ -305,8 +302,6 @@ setup_kernel_args() {
 	fi
 
 	KERNEL_ARGS="${KERNEL_ARGS} KBUILD_OUTPUT=$(profile_get_key kbuild-output)"
-
-
 
 	# Kernel cross compiling support
 	if [ -n "$(profile_get_key cross-compile)" ]
