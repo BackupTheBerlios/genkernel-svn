@@ -1,8 +1,9 @@
-.TH GENKERNEL "8" "July 2005" "genkernel 3.3" "Gentoo Linux"
+.TH GENKERNEL "8" "February 2006" "genkernel 4.0" "Gentoo Linux"
 .SH NAME
-genkernel \- the Gentoo Linux automatic kernel compiler.
+genkernel \- the Gentoo Linux automatic kernel compiler and initramfs
+generation tool.
 .SH SYNOPSIS
-genkernel [options...] action
+genkernel [options/modules]+
 .SH INTRODUCTION
 Genkernel is designed to allow users who are not previously used to
 compiling a kernel to use a similar setup to that one that is used on
@@ -13,35 +14,41 @@ which requires initialization and a working kernel before it can be
 booted because genkernel also automatically compiles your kernel
 modules, allowing hardware which needs to be loaded with module
 parameters to be used.
+.PP
+Note that since genkernel 4.0 builds initramfs based images; a
+Linux kernel of 2.6 or newer is required. For initrd generation
+please use the legacy genkernel 3.3.
 .SH USAGE
-All that is needed to run genkernel is just ``genkernel'' with an action
-and any flags you might need:
+Unlike previous versions of genkernel, genkernel 4.0 uses a modular
+architecture and functions are performed in discrete steps. The general
+syntax is:
 .PP
-# genkernel --menuconfig --no-clean --no-install --bootsplash all
+# genkernel --flags module1:: module2::
 .PP
-This would produce a kernel, asking you what how to configure it
-to your desire, leaving alone any existing compiled object files, enabling
-bootsplash support but not installing anything.
-.SH ACTIONS
-An action tells genkernel what you want it to do - the following
-actions are supported:
+This would run module1 and module2 as well as any dependencies
+with the specified flags. Note the "::" that is appended onto
+the module name.
+.SH USEFUL MODULES
+The following useful modules are listed here for convenience:
 .PP
 .I \fBall\fR
 .RS
-Build all steps - the kernel, modules, and the initrd.
-.RE
-.I \fBbzImage\fR
-.RS
-Build only the kernel.
+This is a metamodule which mimics the 'all' functionality of
+genkernel-3.3; producing a kernel, initramfs (if needed) and
+running any extra steps such as the installation and bootloader
+configuration of the kernel.
 .RE
 .I \fBkernel\fR
 .RS
 Build only the kernel and the modules.
 .RE
-.I \fBinitrd\fR
+.I \fBinitramfs\fR
 .RS
-Build only the initrd.
+Build only the initramfs.
 .RE
+.PP
+For other modules see the contents of the
+.I /usr/share/genkernel\fR directory.
 .SH OPTIONS
 Genkernel supports the following options which alter its
 behaviour. Certain options have ``\fB--no-\fR'' variants which
@@ -59,10 +66,14 @@ This outputs full debugging data; regardless of --debuglevel to the file
 <outfile>. By default this is
 .I /var/log/genkernel.log\fR.
 .TP
-\fB\-\-\fR[no\-]\fBcolor\fR
-Turns on, or off, output in color using escape sequences.
+\fB\-\-\fR[no\-]\fBusecolor\fR
+Turns on, or off, console output in color using escape sequences.
 .PP
 .BR Kernel \ Configuration
+.TP
+\fB\-\-kernel\-config=\fR<file>
+This specifies a kernel configuration file to use for compilation; by default
+.config in the kernel source tree is used.
 .TP
 \fB\-\-\fR[no\-]\fBmenuconfig\fR
 Runs, or does not run "make menuconfig" after running "make oldconfig".
@@ -72,10 +83,10 @@ Saves, or does not save the kernel configuration to
 .I /etc/kernels
 if the kernel is successfully compiled.
 .TP
-\fB\-\-gconfig\fR
+\fB\-\-\fR[no\-]\fBgconfig\fR
 Run "make gconfig" after "make oldconfig".
 .TP
-\fB\-\-xconfig\fR
+\fB\-\-\fR[no\-]\fBxconfig\fR
 Run "make xconfig" after "make oldconfig".
 .PP
 .BR Kernel \ Compilation
@@ -117,10 +128,6 @@ modules have been compiled.
 \fB\-\-kerneldir=\fR<dir>
 This specifies the location of the kernel sources; the default is
 /usr/src/linux.
-.TP
-\fB\-\-kernel\-config=\fR<file>
-This specifies a kernel configuration file to use for compilation; by default
-.config in the kernel source tree is used.
 .PP
 .BR Low-Level \ Compilation \ Options
 .TP
@@ -155,12 +162,6 @@ module compilation stage of 2.4 series kernels to avoid bottlenecks; the
 .PP
 .BR Initialization
 .TP
-\fB\-\-\fR[no\-]\fBbootsplash=\fR<theme>
-If the extra argument is specified, bootsplash is forced using <theme>
-rather than the default theme specified in your bootsplash
-configuration. If \fB\-\-no-bootsplash\fR is specified, then
-bootsplash is disabled.
-.TP
 \fB\-\-\fR[no\-]\fBgensplash=\fR<theme>
 If the extra argument is specified, gensplash is forced using <theme>
 rather than the default theme specified in your gensplash
@@ -188,9 +189,6 @@ or compile static LVM2 binaries if static ones do not exist.
 .TP
 \fB\-\-no-udev\fR
 Force devfs on 2.6 series kernels. Not recommended or supported.
-.TP
-\fB\-\-unionfs\fR
-Add unionfs support.
 .TP
 \fB\-\-linuxrc=\fR<file>
 Use <file> for the linuxrc instead of the genkernel linuxrc.
