@@ -1,7 +1,5 @@
 Things to fix:
 
-* fix manpage [plasmaroo]
-
 * cmdline kernel config parameter changing
 
 * fix linuxrc
@@ -14,3 +12,5 @@ Things to fix:
 
 * make critical variables (arch, etc) bombproof and readonly so modules can't b0rk things
   up
+
+* --list-module-groups for gmi

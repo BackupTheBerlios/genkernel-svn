@@ -65,15 +65,54 @@ possible is given.
 This outputs full debugging data; regardless of --debuglevel to the file 
 <outfile>. By default this is
 .I /var/log/genkernel.log\fR.
+.PP
+.BR Internals
+.TP
+\fB\-\-arch\-override=\fR<...>
+Forces genkernel to compile for the selected architecture (useful for
+cross-compiling).
+.TP
+\fB\-\-callback=\fR<...>
+Run the specified arguments in the current environment after the kernel and
+modules have been compiled.
+.TP
+\fB\-\-cachedir=\fR<...>
+Override the default cache location for initrd components.
+.TP
+\fB\-\-tempdir=\fR<...>
+Override the default location for storing temporary files.
+.TP
+\fB\-\-profile=\fR<...>
+Import the named profile into the configuration tree.
+.TP
+\fB\-\-profile-dump\fR
+Override the default location for storing temporary files.
 .TP
 \fB\-\-\fR[no\-]\fBusecolor\fR
 Turns on, or off, console output in color using escape sequences.
+.PP
+.BR Cross \ Compiling
+.TP
+\fB\-\-cross\-compile=\fR<...>
+Specifies the cross compiler to use for both the kernel and utilities.
+.TP
+\fB\-\-kernel\-cross\-compile=\fR<...>
+Specifies the cross compiler to use for the kernel.
+.TP
+\fB\-\-utils\-cross\-compile=\fR<...>
+Specifies the cross compiler to use for utilities.
 .PP
 .BR Kernel \ Configuration
 .TP
 \fB\-\-kernel\-config=\fR<file>
 This specifies a kernel configuration file to use for compilation; by default
 .config in the kernel source tree is used.
+.TP
+\fB\-\-\fR[no\-]\fBforce-config\fR
+This options allows genkernel to forcefully edit the configuration file and turn
+on any missing options that it deems to be mandatory -- for example, if LVM
+support is requested but not enabled then genkernel would automatically turn
+it on in the kernel configuration. This option is off by default.
 .TP
 \fB\-\-\fR[no\-]\fBmenuconfig\fR
 Runs, or does not run "make menuconfig" after running "make oldconfig".
@@ -83,153 +122,146 @@ Saves, or does not save the kernel configuration to
 .I /etc/kernels
 if the kernel is successfully compiled.
 .TP
+\fB\-\-\fR[no\-]\fBoldconfig\fR
+Run, or do not run "make oldconfig". The default is to have the option enabled;
+it is also implied if the \-\-\fBclean\fR option is enabled.
+.TP
+\fB\-\-\fR[no\-]\fBconfig\fR
+Run "make config" to configure the kernel.
+.TP
 \fB\-\-\fR[no\-]\fBgconfig\fR
-Run "make gconfig" after "make oldconfig".
+Run "make gconfig" to configure the kernel.
 .TP
 \fB\-\-\fR[no\-]\fBxconfig\fR
-Run "make xconfig" after "make oldconfig".
-.PP
-.BR Kernel \ Compilation
-.TP
-\fB\-\-\fR[no\-]\fBclean\fR
-Runs, or does not run, "make clean" before compilation - this erases any
-compiled object files in the kernel source tree but does not have an impact
-on the kernel configuration. Specifying \fB\-\-no\-clean\fR implies
-\fB\-\-no\-mrproper\fR.
+Run "make xconfig" to configure the kernel.
 .TP
 \fB\-\-\fR[no\-]\fBmrproper\fR
 Runs, or does not run, "make mrproper" before compilation - this erases both
 any compiled object files in the kernel source tree as well as the kernel
-configuration.
+configuration. This option is implied if Kbuild output is used.
 .TP
-\fB\-\-\fR[no\-]\fBinstall\fR
-Installs, or does not install the kernel to
-.I /boot
-after building. If MOUNTBOOT is set in
-.I /etc/genkernel.conf
-then
-.I /boot
-will be automatically mounted if it is
-not already mounted before the initrd and kernel image is copied over.
+\fB\-\-\fR[no\-]\fBclean\fR
+Runs, or does not run, "make clean" before compilation - this erases any
+compiled object files in the kernel source tree but does not have an impact
+on the kernel configuration.
 .TP
-\fB\-\-no\-initrdmodules\fR
-Don't copy any modules to the initrd.
+\fB\-\-\fR[no\-]\fBinternal-initramfs\fR
+This option creates a kernel with an embedded initramfs image in the kernel
+image.
 .TP
-\fB\-\-oldconfig\fR
-Implies \fB\-\-no\-clean\fR, and thus \fB\-\-no\-mrproper\fR, running a
-"make oldconfig".
-.TP
-\fB\-\-callback=\fR<...>
-Run the specified arguments in the current environment after the kernel and
-modules have been compiled.
-.PP
-.BR Kernel \ Locations
-.TP
-\fB\-\-kerneldir=\fR<dir>
+\fB\-\-kernel-tree=\fR<dir>
 This specifies the location of the kernel sources; the default is
 /usr/src/linux.
-.PP
-.BR Low-Level \ Compilation \ Options
 .TP
-\fB\-\-kernel\-cc=\fR<compiler>
-Compiler to use for the kernel compilation (e.g. distcc).
+\fB\-\-kbuild-output=\fR<dir>
+This enables Kbuild output and specifies the directory to use for
+it.
 .TP
-\fB\-\-kernel\-as=\fR<assembler>
-Assembler to use for the kernel compilation.
-.TP
-\fB\-\-kernel\-ld=\fR<linker>
-Linker to use for the kernel compilation.
-.TP
-\fB\-\-kernel\-make=\fR<makeprg>
-GNU Make to use for the kernel compilation.
-.TP
-\fB\-\-utils\-cc=\fR<compiler>
-Compiler to use for utilities.
-.TP
-\fB\-\-utils\-as=\fR<assembler>
-Assembler to use for utilities.
-.TP
-\fB\-\-utils\-ld=\fR<linker>
-Linker to use for utilities.
-.TP
-\fB\-\-utils\-make=\fR<makeprog>
-GNU Make to use for utilities.
+\fB\-\-kernel-name=\fR<...>
+This options tags the kernel and initramfs with a name; if not defined
+this defaults to "genkernel".
 .TP
 \fB\-\-makeopts=\fR<makeopts>
 GNU Make options such as \fB\-j2\fR, etc. \fB\-j\fRX is filtered during the
 module compilation stage of 2.4 series kernels to avoid bottlenecks; the
 2.6 build system does not have this issue and \fB\-j\fRX is not filtered for it.
 .PP
-.BR Initialization
+.BR initramfs
 .TP
-\fB\-\-\fR[no\-]\fBgensplash=\fR<theme>
-If the extra argument is specified, gensplash is forced using <theme>
-rather than the default theme specified in your gensplash
-configuration. If \fB\-\-no-gensplash\fR is specified, then
-gensplash is disabled.
-.TP
-\fB\-\-gensplash-res=\fR<resolutions>
-Optionally select gensplash resolutions to include.
-.TP
-\fB\-\-do\-keymap\-auto\fR
-Force keymap selection at boot.
-.TP
-\fB\-\-dmraid\fR
-Add DMRAID support.
-.TP
-\fB\-\-evms2\fR
-Add in EVMS2 support from static binaries if they exist on the system:
-you should run "emerge evms2" first.
-.TP
-\fB\-\-lvm2\fR
-.RS
-Add in LVM2 support from static binaries if they exist on the system,
-or compile static LVM2 binaries if static ones do not exist.
-.RE
-.TP
-\fB\-\-no-udev\fR
-Force devfs on 2.6 series kernels. Not recommended or supported.
-.TP
-\fB\-\-linuxrc=\fR<file>
-Use <file> for the linuxrc instead of the genkernel linuxrc.
-.PP
-.BR Internals
-.TP
-\fB\-\-arch\-override=\fR<arch>
-Force the architecture settings described by the <arch> profile
-instead of autodetecting the running architecture.
+\fB\-\-\fR[no\-]\fBgmi\fR
+Disable genkernel's initramfs scripts allowing you to use an overlay
+of your own.
+\fB\-\-\fR[no\-]\fBbusybox\fR
+Enable or disable busybox in the initramfs. By default, busybox is
+included.
 .TP
 \fB\-\-busybox\-config=\fR<file>
 Busybox configuration file to use when compiling busybox.
 .TP
-\fB\-\-busybox\-bin=\fR<file>
-Don't compile busybox, and use this static .bz2 binary instead.
-.PP
-.BR Output \ Settings
+\fB\-\-\fR[no\-]\fBbusybox-menuconfig\fR
+Run busybox's menuconfig before compiling busybox.
 .TP
-\fB\-\-kernname=\fR<...>
-Tag the kernel and initrd with a name, if not defined this option defaults to genkernel
+\fB\-\-\fR[no\-]\fBudev\fR
+Enable or disable udev in the initramfs. By default, udev is
+included.
 .TP
-\fB\-\-minkernpackage=\fR<tbz2>
-File to output a .tar.bz2'd kernel and initrd: no modules outside of the
-initrd will be included...
+\fB\-\-\fR[no\-]\fBdmraid\fR
+Enable or disable dmraid in the initramfs. By default, this option
+is not included. Be sure to enable the requires kenrel configuration
+features to use DMRAID.
 .TP
-\fB\-\-modulespackage=\fR<tbz2>
-File to output a .tar.bz2'd modules after the callbacks have run
+\fB\-\-\fR[no\-]\fBevms2\fR
+Enable or disable EVMS2 in the initramfs. By default, this option
+is not included. Be sure to enable the required kernel configuration
+features to use EVMS2.
 .TP
-\fB\-\-kerncache=\fR<tbz2>
-File to output a .tar.bz2'd kernel, contents of /lib/modules/ and the kernel config.
-\fBNOTE\fR: This is created before the callbacks are run.
+\fB\-\-\fR[no\-]\fBlvm2\fR
+Enable or disable LVM2 in the initramfs. By default, this option
+is not included. Be sure to enable the required kernel configuration
+features to use LVM2.
 .TP
-\fB\-\-no\-kernel\-sources=\fR<tbz2>
-This option is only valid if kerncache is defined
-If there is a valid kerncache no checks will be made
-against a kernel source tree.
+\fB\-\-\fR[no\-]\fBe2fsprogs\fR
+Enable or disable e2fsprogs in the initramfs. By default, this option
+is not included. Enabling it includes the "blkid" application in the
+initramfs.
+.TP
+\fB\-\-kernel-modules=\fR<...>
+This option adds or subtracts from the list of included kernel modules
+that are merged into the initramfs. To remove a module specify "-module",
+while to add a module specify "GROUP:module" to add the module to the
+specified module group.
+.TP
+\fB\-\-\fR[no\-]\fBkernel-modules-cpio\fR
+Enable or disable kernel-modules in the initramfs, by default kernel
+modules are enabled.
 .TP
 \fB\-\-initramfs\-overlay=\fR<dir>
-Directory structure to inject into the initramfs.
-Only available on 2.6 kernels that don't use bootsplash; use a CPIO
-archive as a parameter.
+Directory structure to inject into the initramfs; this option will
+automatically generate a CPIO as needed from the directory.
+.TP
+\fB\-\-external\-cpio=\fR<cpio>
+CPIO file to inject into the initramfs.
+.TP
+\fB\-\-linuxrc=\fR<file>
+Use <file> for the linuxrc instead of the genkernel linuxrc.
+.TP
+\fB\-\-\fR[no\-]\fBkeymap\-auto\fR
+Force keymap selection at boot.
+.TP
+\fB\-\-\fR[no\-]\fBgensplash\fR
+Enables or disables gensplash support.
+.TP
+\fB\-\-gensplash-res=\fR<resolutions>
+Optionally select gensplash resolutions to include.
+.TP
+\fB\-\-gensplash-theme=\fR<theme>
+Select the gensplash theme to use if gensplash support is enabled.
+.PP
+.BR "all::" \ target
+.TP
+.TP
+\fB\-\-\fR[no\-]\fBinitramfs\fR
+Do not build a initramfs.
+.TP
+\fB\-\-\fR[no\-]\fBinstall\fR
+Install or do not install the kernel/initramfs to /boot after building.
+.TP
+\fB\-\-install\-initramfs\-path=\fR<...>
+This option specifies an installation destination for the initramfs image.
+.TP
+\fB\-\-install\-path=\fR<...>
+This option specifies an installation destination for the initramfs image
+and the kernel.
+.TP
+\fB\-\-install\-mod\-path=\fR<...>
+This option specifies an installation destination for the kernel modules.
+.TP
+\fB\-\-\fR[no\-]\fBsetgrup\fR
+If enabled this option modifies the grub.conf settings to reflect the
+newly installed kernel and initramfs images.
+\fB\-\-\fR[no\-]\fBmountboot\fR
+If enabled /boot will be automatically mounted if needed to install
+the kernel and initramfs images.
 .SH INITRD OPTIONS
 The following options can be passed as kernel parameters from the
 bootloader, which the initrd scripts would recognize.
