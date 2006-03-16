@@ -1,0 +1,30 @@
+load_modules() {
+	if [ -d '/lib/modules' ]
+	then
+		good_msg 'Scanning module classes'
+		cd /etc/modules
+		for i in *
+		do
+			if has "no$i" $CMDLINE
+			then
+				warn_msg "\tCMDLINE: no$i detected. Skipping load of $i class"
+			else
+				good_msg "\t$i"
+				for j in $(cat $i)
+				do
+					module_location=$(find /lib/modules/`uname -r` -name ${j}*)
+					if [ -n "${module_location}" ]
+					then
+						if ! has $j $LOADED_MODULES
+						then
+							good_msg "\tLoading kernel module: $j"
+							#insmod "${module_location}"
+							modprobe $j
+							LOADED_MODULES="${LOADED_MODULES} $j"
+						fi
+					fi
+				done
+			fi
+		done
+	fi
+}

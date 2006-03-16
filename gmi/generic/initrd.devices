@@ -1,0 +1,11 @@
+
+set_default_cdrom_devices() {
+CDROM_DEVICES=""
+CDROM_DEVICES="$CDROM_DEVICES /dev/cdroms/*" # CDROM DEVICES
+CDROM_DEVICES="$CDROM_DEVICES /dev/ide/cd/*" # CDROM DEVICES
+CDROM_DEVICES="$CDROM_DEVICES /dev/sr*" # UML DEVICES
+CDROM_DEVICES="$CDROM_DEVICES /dev/sd*" # USB Keychain
+CDROM_DEVICES="$CDROM_DEVICES /dev/hd*" # IDE devices
+CDROM_DEVICES="$CDROM_DEVICES /dev/ubd* /dev/ubd/*" # UML DEVICES
+CDROM_DEVICES="$CDROM_DEVICES /dev/iseries/vcd*" # iSeries Devices
+}

@@ -1,3 +1,4 @@
+#logicTrue $(profile_get_key internal-uclibc) && require gcc
 require device_mapper
 lvm2_compile::() {
 	local LVM2_DIR="LVM2.${LVM2_VER}" LVM2_SRCTAR="${SRCPKG_DIR}/LVM2.${LVM2_VER}.tgz"

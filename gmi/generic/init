@@ -1,0 +1,248 @@
+#!/bin/busybox sh
+. /etc/initrd.defaults
+. /etc/initrd.cmdline
+
+. /etc/initrd.devices
+. /etc/initrd.modules
+. /etc/initrd.scripts
+. /etc/initrd.unionfs
+
+[ -e /etc/initrd.splash ] && . /etc/initrd.splash
+
+/bin/busybox mount -o remount,rw /
+/bin/busybox mount -t proc proc /proc
+/bin/busybox mount -t sysfs /sys /sys
+
+# Setup the busybox applets
+/bin/busybox --install -s
+
+if [ "$$" != '1' ]
+then
+	echo '/init has to be run as the init process with a PID of 1'
+	exit 1
+fi
+
+splash 'init'
+
+# mv /sbin/insmod to /bin/insmod or modprobe breaks 
+# Busybox 1.1.0
+[ -e /sbin/insmod ] && mv /sbin/insmod /bin/insmod
+
+# suppress kernel messages
+quiet_kmsg 
+
+# busybox udev replacement
+mdev -s
+
+# catch udev hotplug events
+echo /sbin/mdev > /proc/sys/kernel/hotplug
+
+# Read the cmdline settings
+CMDLINE=$(cat /proc/cmdline)
+parse_cmdline
+
+# load the kernel modules
+load_modules
+
+# Startup the raid and volume groups
+startup_volumes
+
+# Make the new root directory
+mkdir -p ${NEWROOT}
+
+setup_networking
+
+setup_unionfs
+
+scan_for_init() {
+
+
+	# Image loading process .. usually a squashfs
+	# looks for cdroot on the cmdline for legacy gentoo reasons.
+	
+	if [ -n "${cdroot}" ]
+	then
+		
+		# Tmpdir required for switch_root to work properly
+		# newroot cant be the same filesystem as / for safety
+		good_msg "Making tmpfs for ${NEWROOT}"
+		mount -t tmpfs tmpfs ${NEWROOT}
+		for i in dev 
+		do
+			mkdir -p ${NEWROOT}/$i
+			chmod 755 ${NEWROOT}/$i
+		done
+
+		# Copies dont work here for some reason .. dont know why .. 
+		mv /dev/null ${NEWROOT}/dev
+		mv ${CONSOLE} ${NEWROOT}/dev
+
+		# Load the default cdrom scan list
+		set_default_cdrom_devices
+
+		# Prepend Device specified on the command line or interactive prompt
+		if [ -n '${REAL_ROOT}' -a -b '${REAL_ROOT}' ]
+		then
+			echo "Appending root ${ROOT} to CDROM_DEVICES"
+			[ -n "${REAL_ROOT}" ] && CDROM_DEVICES="$REAL_ROOT $CDROM_DEVICES"
+		fi
+
+		findcdmount $CDROM_DEVICES
+
+	fi
+
+	if [ -z "${cdroot}" ]
+	then
+		if [ '${REAL_ROOT}' == '/dev/nfs' ]
+		then
+			findnfsmount
+		fi
+
+		# Fall through to a hard disk search .. hopefully we have the block device...
+		if [ -b "${REAL_ROOT}" ]
+		then
+			mount ${REAL_ROOT} ${NEWROOT}
+			if [ "$?" -eq '0' -a -x ${NEWROOT}/${SUBDIR}/${INIT} ]
+			then
+				good_msg "Booting from ${REAL_ROOT}"
+				got_good_root=1
+			else
+				got_good_root=0
+				REAL_ROOT=''
+			fi
+		fi
+	fi
+}
+
+# Run a debug shell 
+rundebugshell
+
+# Scan Delay here !!!!!
+
+
+# If we havent found our bootable media yet
+# Allow a user to enter an emergency shell
+# or specify the path to the media again
+while [ "${got_good_root}" != '1' ]
+do
+	case "${REAL_ROOT}" in
+		LABEL\=*|UUID\=*)
+
+			ROOT_DEV=""
+			retval=1
+
+			if [ "${retval}" -ne '0' ]; then
+				ROOT_DEV=`findfs "${REAL_ROOT}" 2>/dev/null`
+				retval=$?
+			fi
+
+			if [ "$retval" -ne '0' ]; then
+				ROOT_DEV=`busybox findfs "${REAL_ROOT}" 2>/dev/null`
+				retval=$?
+			fi
+
+			if [ "${retval}" -ne '0' ]; then
+				ROOT_DEV=`blkid -t "${REAL_ROOT}" | cut -d ":" -f 1 2>/dev/null`
+				retval=$?
+			fi
+
+			if [ "${retval}" -eq '0' ] && [ -n "${ROOT_DEV}" ]; then
+				good_msg "Detected root=${ROOT_DEV}"
+				REAL_ROOT="${ROOT_DEV}"
+			else
+				REAL_ROOT=''
+				got_good_root=0
+			fi
+		;;
+	esac
+
+	if [ "${REAL_ROOT}" = 'shell' ]
+	then
+		run_shell
+		REAL_ROOT=''
+		got_good_root=0
+		continue
+	elif [ "${REAL_ROOT}" = '' ]
+	then
+		bad_msg "The root is unspecified or not detected."
+		echo '   Please specify a device to boot, or "shell" for a shell...'
+		echo -n 'boot() :: '
+		read REAL_ROOT 
+		got_good_root=0
+	elif [ -n "${REAL_ROOT}" ]
+	then
+		# scans cd/hd/nfs for init and or image_key.  if found set got_good_root=1
+		scan_for_init
+	
+		if [ "${got_good_root}" = '0' ]
+		then
+			REAL_ROOT=''
+		fi
+	else
+		bad_msg "${REAL_ROOT} is not a valid root device..."
+		REAL_ROOT=''
+		got_good_root=0
+	fi
+done
+
+
+if [ -n "${IMAGE_ROOT}" ]
+then
+	# We have an image .. lets setup the newroot
+
+	if [ -z "${UNIONFS}" ]
+	then
+		if [ -n "${cache}" ]
+		then
+			cache_cd_contents
+		else
+			setup_links
+		fi
+	fi
+fi
+
+# Required for gensplash to work.  Not an issue with the initrd as this device isnt created there and is not needed.
+if [ -e /dev/tty1 -a ! -e ${NEWROOT}/dev/tty1 ]
+then
+	mv /dev/tty1 ${NEWROOT}/dev
+fi
+
+
+if [ -n "${UNIONFS}" ]
+then
+	if [ -n "${IMAGE_ROOT}" ]
+	then
+		union_insert_dir $UNION ${IMAGE_ROOT}
+	else
+		union_insert_dir $UNION ${NEWROOT}
+	fi
+
+	# Make sure fstab notes / is mounted ro.  Makes system skip remount which fails on unionfs dirs.
+	cat ${UNION}/etc/fstab |grep -v "\s/\s" > ${UNION}/etc/fstab.new
+	echo "none	/	tmpfs	defaults,ro	0 0" >> ${UNION}/etc/fstab.new
+	mv ${UNION}/etc/fstab.new ${UNION}/etc/fstab
+	NEWROOT=${UNION}
+fi
+
+
+# turn kernel messages back on
+verbose_kmsg 
+
+# Make sure we are in the root before the switch_root command is called
+cd /
+good_msg "Transferring control to ${INIT} ..."
+umount /sys
+umount /proc
+if [ -n "${CONSOLE}" ]
+then 
+	exec switch_root -c "${CONSOLE}" "${NEWROOT}" "${INIT}" "${INIT_ARGS}"
+else
+	exec switch_root "${NEWROOT}" "${INIT}" "${INIT_ARGS}"
+fi
+
+splash 'verbose'
+
+echo 'A fatal error has probably occured since /sbin/init did not'
+echo 'boot correctly. Trying to open a shell...'
+echo
+exec ash

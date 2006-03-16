@@ -126,8 +126,9 @@ print_info() {
 			STR="${2}"
 		fi
 
-		if [ "${NEWLINE}" = '0' ]
+		if [ "${NEWLINE}" -eq '0' ]
 		then
+
 			echo -ne "${STR}"
 		else
 			echo "${STR}"
@@ -368,21 +369,23 @@ compile_generic() {
 		myAction='other'
 	fi
 
+	OPTS=$@
 	if [ "${myAction}" == 'runtask' ]
 	then
-		print_info 2 "COMMAND: ${MAKE} ${MAKEOPTS/-j?/j1} $@" 1 0 1
+		print_info 2 "COMMAND: ${MAKE} ${MAKEOPTS/-j?/j1} ${OPTS}" 1 0 1
 		make -s "$@"
 		RET=$?
 	else
 		if [ "$(profile_get_key debuglevel)" -gt "1" ]
 		then
 			# Output to stdout and debugfile
-			print_info 2 "COMMAND: ${MAKE} ${MAKEOPTS} $@" 1 0 1
+			print_info 2 "COMMAND: make ${MAKEOPTS} ${OPTS}" 1 0 1
+
 			make $(profile_get_key makeopts) "$@" 2>&1 | tee -a ${DEBUGFILE}
 			RET=${PIPESTATUS[0]}
 		else
 			# Output to debugfile only
-			print_info 2 "COMMAND: ${MAKE} ${MAKEOPTS} $@" 1 0 1
+			print_info 2 "COMMAND: make ${MAKEOPTS} ${OPTS}" 1 0 1
 			make $(profile_get_key makeopts) "$@" >> ${DEBUGFILE} 2>&1
 			RET=$?
 		fi
@@ -483,4 +486,89 @@ initramfs() {
 	else
 		echo "false"
 	fi
+}
+
+config_set_string() {
+    #TODO need to check for null entry entirely
+	print_info 1 "entering set string with $2"
+    sed -i ${1} -e "s|#\? \?${2} is.*|${2}=\"${3}\"|g"
+    sed -i ${1} -e "s|${2}=.*|${2}=\"${3}\"|g"
+	grep $2 $1
+    config_is_not_set ${1} ${2}
+    if config_is_not_set ${1} ${2}
+    then
+		echo "The config val wasnt set"
+        echo "${2}=\"${3}\"" >>  ${1}
+	else
+		echo "The config val was set"
+	fi
+	print_info 1 "exiting set string with $2"
+}
+config_set() {
+    #TODO need to check for null entry entirely
+    sed -i ${1} -e "s|#\? \?${2} is.*|${2}=${3}|g"
+    sed -i ${1} -e "s|${2}=.*|${2}=${3}|g"
+	grep $2 $1
+    config_is_not_set ${1} ${2}
+    if config_is_not_set ${1} ${2}
+    then
+		echo "The config val wasnt set"
+        echo "${2}=${3}" >>  ${1}
+	else
+		echo "The config val was set"
+	fi
+}
+
+config_unset() {
+    sed -i ${1} -e "s/${2}=.*/# ${2} is not set/g"
+}
+
+config_is_set() {
+    local RET_STR
+    RET_STR=$(grep ${2}= ${1})
+    [ "${RET_STR%%=*}=" == "$2=" ] && return 0 || return 1
+}
+
+config_is_not_set() {
+    local RET_STR
+    RET_STR=$(grep ${2} ${1})
+    [ "${RET_STR}" == "# $2 is not set" ] && return 0
+    [ "${RET_STR}" == "" ] && return 0
+    return 1
+}
+
+gen_patch() {
+	cwd=$(pwd)
+	patchdir=$1
+	targetdir=$2	
+	patchpatter='.patch'
+	if [ -d $patchdir ]
+	then	
+		for i in `cd ${patchdir}; ls ${patchpattern} 2> /dev/null` ; do
+		echo $i
+    	case "$i" in
+    	*.gz)
+    		type="gzip"; uncomp="gunzip -dc"; ;;
+    	*.bz)
+    		type="bzip"; uncomp="bunzip -dc"; ;;
+    	*.bz2)
+    		type="bzip2"; uncomp="bunzip2 -dc"; ;;
+    	*.zip)
+    		type="zip"; uncomp="unzip -d"; ;;
+    	*.Z)
+    		type="compress"; uncomp="uncompress -c"; ;;
+    	*)
+    		type="plaintext"; uncomp="cat"; ;;
+    	esac
+    
+		echo ""
+    	echo "Applying ${i} using ${type}: "
+    	${uncomp} ${patchdir}/${i} | patch -p1 -E -d ${targetdir}
+    	if [ $? != 0 ] ; then
+        	echo "Patch failed!  Please fix $i!"
+    		exit 1
+    	fi
+		done
+	fi
+	cd $cwd
 }

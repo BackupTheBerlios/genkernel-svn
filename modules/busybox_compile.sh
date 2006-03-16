@@ -1,6 +1,6 @@
 # Output: binpackage { / -> "busybox" }
 # Placement: TBD
-
+logicTrue $(profile_get_key internal-uclibc) && require gcc
 busybox_compile::()
 {
 	local	BUSYBOX_SRCTAR="${SRCPKG_DIR}/busybox-${BUSYBOX_VER}.tar.bz2" BUSYBOX_DIR="busybox-${BUSYBOX_VER}" \
@@ -33,15 +33,16 @@ busybox_compile::()
 	rm -rf ${BUSYBOX_DIR} > /dev/null
 	unpack ${BUSYBOX_SRCTAR} || die 'Could not extract busybox source tarball!'
 	[ -d "${BUSYBOX_DIR}" ] || die 'Busybox directory ${BUSYBOX_DIR} is invalid!'
-
-	cd "${BUSYBOX_DIR}"
+	cd "${BUSYBOX_DIR}" > /dev/null
+	
+	gen_patch ${FIXES_PATCHES_DIR}/busybox/${BUSYBOX_VER} .
 	cp "${BUSYBOX_CONFIG}" .config
    
 	print_info 1 'busybox: >> Configuring...'
 	if logicTrue $(profile_get_key busybox-menuconfig)
 	then
 		print_info 1 "${PRINT_PREFIX}>> Running busybox menuconfig..."
-		compile_generic runtask ${KERNEL_ARGS} menuconfig
+		compile_generic runtask menuconfig
 		[ "$?" ] || die 'Error: busybox menuconfig failed!'
 		
 		if [ -w /etc/kernels ]
@@ -57,30 +58,32 @@ busybox_compile::()
 				profile_set_key busybox-config-destination-path "${TEMP}/genkernel-output"
 			fi
 		fi
+		mkdir -p "$(profile_get_key busybox-config-destination-path)"
 		cp .config "$(profile_get_key busybox-config-destination-path)/busybox-custom-${BUSYBOX_VER}.config"	
 		print_info 1 "Custom busybox config file saved to $(profile_get_key busybox-config-destination-path)/busybox-custom-${BUSYBOX_VER}.config"
 
 	fi
 	
 	# TODO Add busybox config changing support
-	busybox_config_set ".config" "CONFIG_FEATURE_INSTALLER" "y"
+	config_set ".config" "CONFIG_FEATURE_INSTALLER" "y"
 
 	# turn on/off the cross compiler
-	if [ -n "$(profile_get_key cross-compile)" ]
+	if [ "$(profile_get_key cross-compile)" != "" ]
 	then
-		busybox_config_set ".config" "USING_CROSS_COMPILER" "y"
-		busybox_config_set ".config" "CROSS_COMPILER_PREFIX" "$(profile_get_key cross-compile)"
-    elif [ -n "$(profile_get_key utils-cross-compile)" ]
+		print_info 1 "Setting cross compiler to $(profile_get_key utils-cross-compile)"
+		config_set ".config" "USING_CROSS_COMPILER" "y"
+		config_set_string ".config" "CROSS_COMPILER_PREFIX" "$(profile_get_key cross-compile)"
+    elif [ "$(profile_get_key utils-cross-compile)" != "" ]
 	then
-		busybox_config_set ".config" "USING_CROSS_COMPILER" "y"
-		busybox_config_set ".config" "CROSS_COMPILER_PREFIX" "$(profile_get_key utils-cross-compile)"
+		print_info 1 "Setting cross compiler to $(profile_get_key utils-cross-compile)"
+		config_set ".config" "USING_CROSS_COMPILER" "y"
+		config_set_string ".config" "CROSS_COMPILER_PREFIX" "$(profile_get_key utils-cross-compile)"
 	else
-		busybox_config_unset ".config" "USING_CROSS_COMPILER"
-		busybox_config_unset ".config" "CROSS_COMPILER_PREFIX"
+		config_unset ".config" "USING_CROSS_COMPILER"
+		config_unset ".config" "CROSS_COMPILER_PREFIX"
 	fi
 	
 	yes '' 2>/dev/null | compile_generic oldconfig
-
 	
 	print_info 1 'busybox: >> Compiling...'
 	compile_generic all
@@ -99,35 +102,3 @@ busybox_compile::()
 	cd "${TEMP}"
 	rm -rf "${BUSYBOX_DIR}" > /dev/null
 }
-
-
-# Busybox specific functions
-busybox_config_set() {
-    #TODO need to check for null entry entirely
-    sed -i ${1} -e "s|#\? \?${2} is.*|${2}=${3}|g"
-    sed -i ${1} -e "s|${2}=.*|CONFIG_${2}=${3}|g"
-    if ! busybox_config_is_set ${1} ${2}
-    then
-        echo "${2}=${3}" >>  ${1}
-    fi
-}
-
-busybox_config_unset() {
-    sed -i ${1} -e "s/${2}=.*/# CONFIG_${2} is not set/g"
-}
-
-
-busybox_config_is_set() {
-    local RET_STR
-    RET_STR=$(grep ${2}= ${1})
-    [ "${RET_STR%%=*}=" == "$2=" ] && return 0 || return 1
-}
-
-busybox_config_is_not_set() {
-    local RET_STR
-    RET_STR=$(grep ${2} ${1})
-    [ "${RET_STR}" == "# $2 is not set" ] && return 0
-    [ "${RET_STR}" == "" ] && return 0
-    return 1
-}
-

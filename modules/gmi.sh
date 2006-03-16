@@ -16,6 +16,13 @@ gmi::()
 		proc          /proc       proc    defaults    0 0
 	EOF
 	
+	echo "order hosts,bind" > ${TEMP}/initramfs-base-temp/etc/host.conf
+	echo "multi on" >> ${TEMP}/initramfs-base-temp/etc/host.conf
+	
+	echo "127.0.0.1 localhost" > ${TEMP}/initramfs-base-temp/etc/hosts
+	echo "hosts:    files dns" > ${TEMP}/initramfs-base-temp/etc/nsswitch.conf
+
+
 	# SGI LiveCDs need the following binary (no better place for it than here)
 	# getdvhoff is a DEPEND of genkernel, so it *should* exist
 	if [ "${MIPS_EMBEDDED_IMAGE}" != '' ]
@@ -37,38 +44,35 @@ gmi::()
 		initramfs_register_cpio gmi-core-devices
 	fi
 
-	local LINUXRC=$(profile_get_key linuxrc)
-	if [ -f "${LINUXRC}" ]
+	local INIT=$(profile_get_key init)
+	if [ -f "${INIT}" ]
 	then
-		cp "${LINUXRC}" "${TEMP}/initramfs-base-temp/init"
-		print_info 2 ">> Copying user specified linuxrc: ${LINUXRC} to init"
+		cp "${INIT}" "${TEMP}/initramfs-base-temp/init"
+		print_info 2 ">> Copying user specified init: ${INIT} to init"
 	else	
-		if [ -f "${GMI_DIR}/${ARCH}/linuxrc" ]
+		if [ -f "${GMI_DIR}/${ARCH}/init" ]
 		then
-			cp "${GMI_DIR}/${ARCH}/linuxrc" "${TEMP}/initramfs-base-temp/init"
+			cp "${GMI_DIR}/${ARCH}/init" "${TEMP}/initramfs-base-temp/init"
 		else
-			cp "${GMI_DIR}/generic/linuxrc" "${TEMP}/initramfs-base-temp/init"
+			cp "${GMI_DIR}/generic/init" "${TEMP}/initramfs-base-temp/init"
 		fi
 	fi
 
 	# Make a symlink to init in case we are bundled inside the kernel as one big cpio.
 	cd ${TEMP}/initramfs-base-temp
-	ln -s init linuxrc
-
-	if [ -f "${GMI_DIR}/${ARCH}/initrd.scripts" ]
-	then
-		cp "${GMI_DIR}/${ARCH}/initrd.scripts" "${TEMP}/initramfs-base-temp/etc/initrd.scripts"
-	else	
-		cp "${GMI_DIR}/generic/initrd.scripts" "${TEMP}/initramfs-base-temp/etc/initrd.scripts"
-	fi
-
-	if [ -f "${GMI_DIR}/${ARCH}/initrd.defaults" ]
-	then
-		cp "${GMI_DIR}/${ARCH}/initrd.defaults" "${TEMP}/initramfs-base-temp/etc/initrd.defaults"
-	else
-		cp "${GMI_DIR}/generic/initrd.defaults" "${TEMP}/initramfs-base-temp/etc/initrd.defaults"
-	fi
 	
+	for i in initrd.defaults initrd.modules initrd.scripts initrd.cmdline initrd.devices initrd.unionfs
+	do
+
+		if [ -f "${GMI_DIR}/${ARCH}/${i}" ]
+		then
+			cp "${GMI_DIR}/${ARCH}/${i}" "${TEMP}/initramfs-base-temp/etc/${i}"
+		else	
+			cp "${GMI_DIR}/generic/${i}" "${TEMP}/initramfs-base-temp/etc/${i}"
+		fi
+		chmod +x "${TEMP}/initramfs-base-temp/etc/${i}"
+	done
+
 	echo -n 'HWOPTS="$HWOPTS ' >> "${TEMP}/initramfs-base-temp/etc/initrd.defaults"	
 	for group_modules in ${!MODULES_*}; do
 		group="$(echo $group_modules | cut -d_ -f2 | tr "[:upper:]" "[:lower:]")"
@@ -85,8 +89,6 @@ gmi::()
 
 	cd ${TEMP}/initramfs-base-temp/sbin && ln -s ../init init
 	chmod +x "${TEMP}/initramfs-base-temp/init"
-	chmod +x "${TEMP}/initramfs-base-temp/etc/initrd.scripts"
-	chmod +x "${TEMP}/initramfs-base-temp/etc/initrd.defaults"
 	#chmod +x "${TEMP}/initramfs-base-temp/sbin/modprobe"
 
 	# Generate CPIO

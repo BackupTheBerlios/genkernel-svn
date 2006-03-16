@@ -1,6 +1,7 @@
 # Output: { / -> [[ udev install tree ]] } as designated for the initramfs
 # Placement: Included in output.
 
+logicTrue $(profile_get_key internal-uclibc) && require gcc
 require klibc
 udev_compile::() {
 	local UDEV_DIR="udev-${UDEV_VER}" UDEV_SRCTAR="${SRCPKG_DIR}/udev-${UDEV_VER}.tar.bz2"

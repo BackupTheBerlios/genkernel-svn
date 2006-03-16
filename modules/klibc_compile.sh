@@ -1,6 +1,16 @@
 # Used by the klibc module which defines KLCC to point to the klcc binary
 # for usage by other modules.
+logicTrue $(profile_get_key internal-uclibc) && require gcc
 
+<<<<<<< .mine
+##if [ "$(profile_get_key arch-override)" == "um" -o "$(profile_get_key arch-override)" == "xen0" \
+##             -o "$(profile_get_key arch-override)" == "xenU" ]
+##then
+##	require kernel_config_i386_stub
+##else
+##	require kernel_config
+##fi
+=======
 if [ "$(profile_get_key arch-override)" == "um" -o "$(profile_get_key arch-override)" == "xen0" \
      -o "$(profile_get_key arch-override)" == "xenU" ]
 then
@@ -8,6 +18,7 @@ then
 else
 	require kernel_config
 fi
+>>>>>>> .r126
 
 klibc_compile::() {
 	local KLIBC_DIR="klibc-${KLIBC_VER}" KLIBC_SRCTAR="${SRCPKG_DIR}/klibc-1.1.1.tar.gz"
@@ -30,9 +41,14 @@ klibc_compile::() {
 	fi
 
 	print_info 1 'klibc: >> Compiling...'
-	
+	echo "The kernel tree is set to $(profile_get_key kernel-tree)"
+
 	ln -snf "$(profile_get_key kernel-tree)" linux || die "Could not link to $(profile_get_key kernel-tree)"
 	sed -i MCONFIG -e "s|prefix      =.*|prefix      = ${TEMP}/klibc-build-${KLIBC_VER}|g" # Set the build directory
+	sed -i Makefile -e 's|$(INSTALLDIR)/$(KCROSS)bin|$(INSTALLDIR)/bin|g' # Set the build directory
+	sed -i Makefile -e 's|$(INSTALLDIR)/$(KCROSS)lib|$(INSTALLDIR)/lib|g' # Set the build directory
+	sed -i Makefile -e 's|$(INSTALLDIR)/$(KCROSS)include|$(INSTALLDIR)/include|g' # Set the build directory
+	sed -i Makefile -e 's|$(INSTALLROOT)$(INSTALLDIR)/$(CROSS)include/$$d|$(INSTALLROOT)$(INSTALLDIR)/include/$$d|g' # Set the build directory
 
 	if [ ! "$(profile_get_key kbuild-output)" == "$(profile_get_key kernel-tree)" ]
 	then

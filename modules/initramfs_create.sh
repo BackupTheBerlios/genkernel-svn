@@ -1,12 +1,14 @@
 
 logicTrue $(profile_get_key gmi) && require gmi
 logicTrue $(profile_get_key busybox) && require busybox 
-logicTrue $(profile_get_key udev) && require udev
+#logicTrue $(profile_get_key udev) && require udev
 logicTrue $(profile_get_key kernel-modules-cpio) && require kernel_modules_cpio
 logicTrue $(profile_get_key evms2) && require evms_host_compiled
 logicTrue $(profile_get_key lvm2) && require lvm2
 logicTrue $(profile_get_key e2fsprogs) && require e2fsprogs
 logicTrue $(profile_get_key gensplash) && require gensplash
+logicTrue $(profile_get_key portmap) && require portmap
+logicTrue $(profile_get_key unionfs) && require unionfs
 
 # Get kernel modules
 # Register a new cpio of the kernel modules

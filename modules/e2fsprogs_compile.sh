@@ -1,6 +1,6 @@
 # Output: binpackage { / -> blkid }
 # Placement: TBD
-
+logicTrue $(profile_get_key internal-uclibc) && require gcc
 e2fsprogs_compile::() {
 	local E2FSPROGS_DIR="e2fsprogs-${E2FSPROGS_VER}"
 

@@ -1,0 +1,147 @@
+parse_cmdline() {
+	for x in ${CMDLINE}
+	do
+		case "${x}" in
+		root\=*)
+			REAL_ROOT=${x#root=}
+		;;
+		real_root\=*)
+			REAL_ROOT=${x#real_root=}
+		;;
+		real_init\=*)
+			INIT=${x#real_init=}
+		;;
+		init\=*)
+			INIT=${x#init=}
+		;;
+		
+		subdir\=*)
+			SUBDIR=${x#subdir=}
+		;;
+	    
+		# Livecd options
+		cdroot)
+			cdroot=1
+		;;
+		cache)
+			cache=1
+		;;
+		cdroot\=*)
+			cdroot=1
+			REAL_ROOT=${x#cdroot=}
+		;;
+
+		# loop file name
+		loop\=*)
+			LOOP=${x#loop=}
+		;;
+		
+		# looptype options
+		looptype\=*)
+			LOOPTYPE=${x#looptype=}
+		;;
+		
+		# Start Volume manager options 
+		lvm2)
+			LVM2=1
+		;;
+		dmraid)
+			DMRAID=1
+		;;
+		dmraid\=*)
+			DMRAID=${x#dodmraid=}
+		;;
+		evms2)
+			EVMS2=1
+		;;
+
+		# Debug Options
+		debug)
+			DEBUG='yes'
+		;;
+
+		# Scan delay options 
+		scandelay)
+			SCANDELAY=10
+		;;
+		scandelay\=*)
+			SCANDELAY=${x#scandelay=}
+		;;
+
+
+
+
+
+
+		# Module no-loads
+		doload\=*)
+			MDOLIST=${x#doload=}
+			MDOLIST="`echo ${MDOLIST} | sed -e \"s/,/ /g\"`"
+		;;
+		noload\=*)
+			MLIST=${x#noload=}
+			MLIST="`echo ${MLIST} | sed -e \"s/,/ /g\"`"
+			export MLIST
+		;;
+		nodetect)
+			NODETECT=1
+		;;
+		
+		
+		
+		CONSOLE\=*)
+			CONSOLE=${x#console=}
+			exec >${CONSOLE} <${CONSOLE} 2>&1
+		;;
+
+		# /dev/md
+		lvmraid\=*)
+			RAID_DEVICES=${x#lvmraid=}
+			RAID_DEVICES="`echo ${RAID_DEVICES} | sed -e 's/,/ /g'`"
+		;;
+		part\=*)
+			MDPART=${x#part=}
+		;;
+
+		# NETWORKING
+		ip\=*)
+			IP=${x#ip=}
+		;;
+		nameserver\=*)
+			NAMESERVER=${x#nameserver=}
+		;;
+
+
+		nfsroot\=*)
+			NFSROOT=${x#nfsroot=}
+		;;
+
+		# Unionfs support
+		unionfs)
+			if [ ! -x /sbin/unionctl ]
+			then
+				bad_msg 'Unionctl not found: aborting use of unionfs!'
+			else
+				UNIONFS=1
+			fi
+		;;
+		unionfs\=*)
+			if [ ! -x /sbin/unionctl ]
+			then
+				bad_msg 'Unionctl not found: aborting use of unionfs!'
+			else
+				CMD_UNIONFS=${x#unionfs=}
+		        echo ${CMD_UNIONFS}|grep , >/dev/null 2>&1
+        		if [ "$?" -eq '0' ]
+        		then
+            		UID=`echo ${CMD_UNIONFS#*,}`
+            		UNIONFS=`echo ${CMD_UNIONFS%,*}`
+        		else
+            		UNIONFS=${CMD_UNIONFS}
+        		fi
+				unset CMD_UNIONFS
+      		fi
+      	;;
+		esac
+	done
+}

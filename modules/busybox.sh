@@ -15,10 +15,10 @@ busybox::()
 	mkdir -p ${TEMP}/busybox-cpiogen/bin
 	mv "${TEMP}/busybox-temp/busybox" "${TEMP}/busybox-cpiogen/bin/busybox"
 
-	for i in '[' ash sh mount uname echo cut; do
-		ln ${TEMP}/busybox-cpiogen/bin/busybox ${TEMP}/busybox-cpiogen/bin/$i ||
-			die "Busybox error: could not link ${i}!"
-	done
+	#for i in '[' ash sh mount uname echo cut; do
+	#	ln ${TEMP}/busybox-cpiogen/bin/busybox ${TEMP}/busybox-cpiogen/bin/$i ||
+	#		die "Busybox error: could not link ${i}!"
+	#done
 	
 	cd ${TEMP}/busybox-cpiogen 2>&1 >/dev/null
 	genkernel_generate_cpio_files "busybox-${BUSYBOX_VER}" bin/*

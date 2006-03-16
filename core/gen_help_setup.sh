@@ -25,6 +25,8 @@ __register_config_option 'Internals' 'log-override' 'true' 'false' '' # Hidden.
 __register_config_option 'Cross compile' 'cross-compile' 'true' 'false' 'Cross compiler settings (Overrides kernel-cross-compile and utils-cross-compile)'
 __register_config_option 'Cross compile' 'kernel-cross-compile' 'true' 'false' 'Kernel cross compiler settings.'
 __register_config_option 'Cross compile' 'utils-cross-compile' 'true' 'false' 'Utilities cross compiler settings.'
+__register_config_option 'Cross compile' 'internal-uclibc' 'false' 'true' 'Build using a uclibc cross compiling environment.  Will take a long time.'
+
 
 ## Kernel Config
 __register_config_option 'Kernel Configuration' 'kernel-config' 'true' 'false' 'Kernel configuration file to use for compilation.'
@@ -68,6 +70,10 @@ __register_config_option 'Initramfs' 'dmraid' 'false' 'true' 'Include DMRAID sup
 __register_config_option 'Initramfs' 'evms2' 'false' 'true' 'Include EVMS2 support.'
 __register_config_option 'Initramfs' 'lvm2' 'false' 'true' 'Include LVM2 support.'
 __register_config_option 'Initramfs' 'e2fsprogs' 'false' 'true' 'Include e2fsprogs blkid support.'
+__register_config_option 'Initramfs' 'disklabel' 'false' 'true' 'Include disk label and uuid support in your initramfs.'
+__register_config_option 'Initramfs' 'portmap' 'false' 'true' 'Include portmap inside the initramfs.'
+__register_config_option 'Initramfs' 'unionfs' 'false' 'true' 'Include unionfs inside the initramfs.'
+
 __register_config_option 'Initramfs' 'kernel-modules'   'true!m' 'false' 'Add or subtract kernel modules from the initramfs. --kernel-module="GROUP:module -module"' 'cmdline_modules_register'
 __register_config_option 'Initramfs' 'kernel-modules-cpio' 'false' 'true' 'Add kernel modules to the initramfs'
 profile_set_key kernel-modules-cpio true 'system'
