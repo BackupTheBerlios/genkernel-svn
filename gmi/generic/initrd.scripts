@@ -430,6 +430,6 @@ rundebugshell(){
 
 run_shell() {
 	cd /
-	/bin/ash
+	openvt 0 /bin/ash
 }
 

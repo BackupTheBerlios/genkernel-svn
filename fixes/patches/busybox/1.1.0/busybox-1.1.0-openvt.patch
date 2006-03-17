@@ -1,0 +1,12 @@
+diff -urN busybox-1.1.0.orig/console-tools/openvt.c busybox-1.1.0/console-tools/openvt.c
+--- busybox-1.1.0.orig/console-tools/openvt.c	2006-01-10 23:43:57.000000000 -0600
++++ busybox-1.1.0/console-tools/openvt.c	2006-03-17 14:55:02.505351000 -0600
+@@ -42,7 +42,7 @@
+         bb_show_usage();
+ 
+ 	/* check for Illegal vt number: < 1 or > 12 */
+-	sprintf(vtname, VC_FORMAT,(int)bb_xgetlarg(argv[1], 10, 1, 12));
++	sprintf(vtname, VC_FORMAT,(int)bb_xgetlarg(argv[1], 10, 0, 12));
+ 
+ 	argv+=2;
+ 	argc-=2;
