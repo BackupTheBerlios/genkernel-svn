@@ -428,8 +428,19 @@ rundebugshell(){
 	fi
 }
 
-run_shell() {
-	cd /
-	openvt 0 /bin/ash
+is_uml_sys() {
+	grep -qs 'UML' /proc/cpuinfo
+	return $?
 }
 
+run_shell() {
+	cd /
+
+	# Fix for UML
+	if is_uml_sys
+	then
+		openvt 1 /bin/ash
+	else
+		openvt 0 /bin/ash
+	fi
+}
