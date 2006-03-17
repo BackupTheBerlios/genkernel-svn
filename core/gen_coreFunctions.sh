@@ -442,7 +442,6 @@ genkernel_determine_arch() {
 	profile_set_key "arch" "${ARCH}" "running"
 }
 
-
 print_list()
 {
 	local x
@@ -489,34 +488,29 @@ initramfs() {
 }
 
 config_set_string() {
-    #TODO need to check for null entry entirely
-	print_info 1 "entering set string with $2"
+    # TODO need to check for null entry entirely
     sed -i ${1} -e "s|#\? \?${2} is.*|${2}=\"${3}\"|g"
     sed -i ${1} -e "s|${2}=.*|${2}=\"${3}\"|g"
-	grep $2 $1
-    config_is_not_set ${1} ${2}
     if config_is_not_set ${1} ${2}
     then
-		echo "The config val wasnt set"
+	print_info 1 "subconfig: Forced setting ${2}=${3} on ${1}"
         echo "${2}=\"${3}\"" >>  ${1}
-	else
-		echo "The config val was set"
-	fi
-	print_info 1 "exiting set string with $2"
+#    else
+#	echo "The config val was set"
+    fi
 }
+
 config_set() {
-    #TODO need to check for null entry entirely
+    # TODO need to check for null entry entirely
     sed -i ${1} -e "s|#\? \?${2} is.*|${2}=${3}|g"
     sed -i ${1} -e "s|${2}=.*|${2}=${3}|g"
-	grep $2 $1
-    config_is_not_set ${1} ${2}
     if config_is_not_set ${1} ${2}
     then
-		echo "The config val wasnt set"
+	print_info 1 "subconfig: Forced setting ${2}=${3} on ${1}"
         echo "${2}=${3}" >>  ${1}
-	else
-		echo "The config val was set"
-	fi
+#   else
+#	echo "The config val was set"
+    fi
 }
 
 config_unset() {
@@ -538,37 +532,40 @@ config_is_not_set() {
 }
 
 gen_patch() {
-	cwd=$(pwd)
 	patchdir=$1
 	targetdir=$2	
-	patchpatter='.patch'
+
 	if [ -d $patchdir ]
 	then	
-		for i in `cd ${patchdir}; ls ${patchpattern} 2> /dev/null` ; do
-		echo $i
-    	case "$i" in
-    	*.gz)
-    		type="gzip"; uncomp="gunzip -dc"; ;;
-    	*.bz)
-    		type="bzip"; uncomp="bunzip -dc"; ;;
-    	*.bz2)
-    		type="bzip2"; uncomp="bunzip2 -dc"; ;;
-    	*.zip)
-    		type="zip"; uncomp="unzip -d"; ;;
-    	*.Z)
-    		type="compress"; uncomp="uncompress -c"; ;;
-    	*)
-    		type="plaintext"; uncomp="cat"; ;;
-    	esac
-    
-		echo ""
-    	echo "Applying ${i} using ${type}: "
-    	${uncomp} ${patchdir}/${i} | patch -p1 -E -d ${targetdir}
-    	if [ $? != 0 ] ; then
-        	echo "Patch failed!  Please fix $i!"
-    		exit 1
-    	fi
-		done
+	    for i in $(find ${patchdir} -type f -iname \*.patch)
+	    do
+    		case "$i" in
+    		    *.gz)
+    			type="gzip"; uncomp="gunzip -dc";
+			;;
+    		    *.bz)
+    			type="bzip"; uncomp="bunzip -dc";
+			;;
+    		    *.bz2)
+    			type="bzip2"; uncomp="bunzip2 -dc";
+			;;
+    		    *.zip)
+    			type="zip"; uncomp="unzip -d";
+			;;
+    		    *.Z)
+    			type="compress"; uncomp="uncompress -c";
+			;;
+    		    *)
+    			type="plaintext"; uncomp="cat";
+			;;
+    		esac
+
+		print_info 1 "patch-o-matic: ${i}"
+    		${uncomp} ${i} | patch -p1 -E -d ${targetdir}
+    		if [ $? != 0 ] ; then
+        	    echo "Patch failed! Please fix $i!"
+    		    return 1
+    		fi
+	    done
 	fi
-	cd $cwd
 }

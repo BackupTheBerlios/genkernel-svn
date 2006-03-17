@@ -28,7 +28,6 @@ source ${CORE_DIR}/gen_cfg.sh || die "Failed to source gen_cfg.sh"
 # Parse all command line options...
 Options=$@
 
-
 # Internal flag to check if config parsing succeeded
 __INTERNAL__CONFIG_PARSING_FAILED=false
 while [ $# -gt 0 ]

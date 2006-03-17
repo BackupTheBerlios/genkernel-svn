@@ -3,11 +3,9 @@ kernel_modules_compile::()
 {
 	if kernel_config_is_not_set "MODULES"
 	then
-		print_info 1 ">> Modules not enabled in .config .. skipping modules compile"
+		print_info 1 ">> Modules not enabled in .config... skipping modules compile"
 	else
-
 		setup_kernel_args
-
 		cd $(profile_get_key kernel-tree)
 
 		# make the modules	

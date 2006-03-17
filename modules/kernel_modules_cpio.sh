@@ -3,7 +3,7 @@ kernel_modules_cpio::()
 {
 	if kernel_config_is_not_set "MODULES" 
 	then
-		print_info 1 ">> Modules not enabled in .config .. skipping modules compile"
+		print_info 1 ">> Modules not enabled in .config... skipping modules compile"
 	else
 		MOD_EXT=".ko"
 		INSTALL_MOD_PATH="$(profile_get_key install-mod-path)"

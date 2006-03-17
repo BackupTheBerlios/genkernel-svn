@@ -1,31 +1,30 @@
 require kernel_compile
 
-
-# Set the destination path for the kernel
-if [ -z "$(profile_get_key install-path)" ]
-then
-	profile_set_key install-path "/boot"
-fi
-
-if [ -w $(dirname $(profile_get_key install-path)) ]
-then
-	mkdir -p $(profile_get_key install-path) || \
-		die "Could not make $(profile_get_key install-path).  Set $(profile_get_key install-path) to a writeable directory or run as root"
-else
-	print_info 1 ">> Kernel install path: ${BOLD}$(profile_get_key install-path) ${NORMAL}is not writeable attempting to use ${TEMP}/genkernel-output"
-	if [ ! -w ${TEMP} ]
-	then
-		die "Could not write to ${TEMP}/genkernel-output.  Set install-path to a writeable directory or run as root"
-	else
-		mkdir -p ${TEMP}/genkernel-output || die "Could not make ${TEMP}/genkernel-output.  Set install-path to a writeable directory or run as root"
-		profile_set_key install-path "${TEMP}/genkernel-output"
-	fi
-fi
-
-KERNEL_ARGS="${KERNEL_ARGS} INSTALL_PATH=$(profile_get_key install-path)"
-
 kernel_install::()
 {
+	# Set up some globals
+	# Set the destination path for the kernel
+	if [ -z "$(profile_get_key install-path)" ]
+	then
+		profile_set_key install-path "/boot"
+	fi
+
+	if [ -w $(dirname $(profile_get_key install-path)) ]
+	then
+		mkdir -p $(profile_get_key install-path) || \
+			die "Could not make $(profile_get_key install-path).  Set $(profile_get_key install-path) to a writeable directory or run as root"
+	else
+		print_info 1 ">> Kernel install path: ${BOLD}$(profile_get_key install-path) ${NORMAL}is not writeable, attempting to use ${TEMP}/genkernel-output"
+		if [ ! -w ${TEMP} ]
+		then
+			die "Could not write to ${TEMP}/genkernel-output.  Set install-path to a writeable directory or run as root"
+		else
+			mkdir -p ${TEMP}/genkernel-output || die "Could not make ${TEMP}/genkernel-output.  Set install-path to a writeable directory or run as root"
+			profile_set_key install-path "${TEMP}/genkernel-output"
+		fi
+	fi
+	KERNEL_ARGS="${KERNEL_ARGS} INSTALL_PATH=$(profile_get_key install-path)"
+
 	local CP_ARGS KNAME
 
 	KNAME="$(profile_get_key kernel-name)"

@@ -14,3 +14,10 @@ Things to fix:
   up
 
 * --list-module-groups for gmi
+
+gmi: read -t fix
+gmi: mdboot backportey
+
+busybox: fix config (add --busybox-networking opt or something)
+
+general: "Failed to compile" errors need to produce backtrace & etc...

@@ -51,18 +51,14 @@ startup_volumes
 mkdir -p ${NEWROOT}
 
 setup_networking
-
 setup_unionfs
 
 scan_for_init() {
-
-
 	# Image loading process .. usually a squashfs
 	# looks for cdroot on the cmdline for legacy gentoo reasons.
 	
 	if [ -n "${cdroot}" ]
 	then
-		
 		# Tmpdir required for switch_root to work properly
 		# newroot cant be the same filesystem as / for safety
 		good_msg "Making tmpfs for ${NEWROOT}"
@@ -88,7 +84,6 @@ scan_for_init() {
 		fi
 
 		findcdmount $CDROM_DEVICES
-
 	fi
 
 	if [ -z "${cdroot}" ]
@@ -117,12 +112,12 @@ scan_for_init() {
 # Run a debug shell 
 rundebugshell
 
-# Scan Delay here !!!!!
-
+# Scan delay?
 
 # If we havent found our bootable media yet
 # Allow a user to enter an emergency shell
 # or specify the path to the media again
+got_good_root=0
 while [ "${got_good_root}" != '1' ]
 do
 	case "${REAL_ROOT}" in
@@ -184,7 +179,6 @@ do
 		got_good_root=0
 	fi
 done
-
 
 if [ -n "${IMAGE_ROOT}" ]
 then

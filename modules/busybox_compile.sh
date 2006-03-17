@@ -34,7 +34,6 @@ busybox_compile::()
 	unpack ${BUSYBOX_SRCTAR} || die 'Could not extract busybox source tarball!'
 	[ -d "${BUSYBOX_DIR}" ] || die 'Busybox directory ${BUSYBOX_DIR} is invalid!'
 	cd "${BUSYBOX_DIR}" > /dev/null
-	
 	gen_patch ${FIXES_PATCHES_DIR}/busybox/${BUSYBOX_VER} .
 	cp "${BUSYBOX_CONFIG}" .config
    

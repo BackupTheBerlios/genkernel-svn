@@ -187,7 +187,7 @@ check_asm_link_ok() {
 }
 
 kernel_config_set_string() {
-	#TODO need to check for null entry entirely
+	# TODO need to check for null entry entirely
 	sed -i ${KBUILD_OUTPUT}/.config -e "s|#\? \?CONFIG_${1} is.*|CONFIG_${1}=\"${2}\"|g"
 	sed -i ${KBUILD_OUTPUT}/.config -e "s|CONFIG_${1}=.*|CONFIG_${1}=\"${2}\"|g"
 	if ! kernel_config_is_set ${1}
@@ -196,7 +196,7 @@ kernel_config_set_string() {
 	fi
 }
 kernel_config_set_builtin() {
-	#TODO need to check for null entry entirely
+	# TODO need to check for null entry entirely
 	sed -i ${KBUILD_OUTPUT}/.config -e "s/CONFIG_${1}=m/CONFIG_${1}=y/g"
 	sed -i ${KBUILD_OUTPUT}/.config -e "s/#\? \?CONFIG_${1} is.*/CONFIG_${1}=y/g"
 	if ! kernel_config_is_set ${1}
@@ -206,7 +206,7 @@ kernel_config_set_builtin() {
 }
 
 kernel_config_set_module() {
-	#TODO need to check for null entry entirely
+	# TODO need to check for null entry entirely
 	sed -i ${KBUILD_OUTPUT}/.config -e "s/CONFIG_${1}=y/CONFIG_${1}=m/g"
 	sed -i ${KBUILD_OUTPUT}/.config -e "s/#\? \?CONFIG_${1} is.*/CONFIG_${1}=m/g"
 	if ! kernel_config_is_set ${1}
@@ -221,25 +221,25 @@ kernel_config_unset() {
 
 kernel_config_is_builtin() {
 	local RET_STR
-	RET_STR=$(grep CONFIG_$1=y ${KBUILD_OUTPUT}/.config)
+	RET_STR=$(grep CONFIG_$1=y ${KBUILD_OUTPUT}/.config 2>/dev/null)
 	[ "${RET_STR}" == "CONFIG_$1=y" ] && return 0 || return 1
 }
 
 kernel_config_is_module() {
 	local RET_STR
-	RET_STR=$(grep CONFIG_$1=m ${KBUILD_OUTPUT}/.config)
+	RET_STR=$(grep CONFIG_$1=m ${KBUILD_OUTPUT}/.config 2>/dev/null)
 	[ "${RET_STR}" == "CONFIG_$1=m" ] && return 0 || return 1
 }
 
 kernel_config_is_set() {
 	local RET_STR
-	RET_STR=$(grep CONFIG_$1= ${KBUILD_OUTPUT}/.config)
+	RET_STR=$(grep CONFIG_$1= ${KBUILD_OUTPUT}/.config 2>/dev/null)
 	[ "${RET_STR%%=*}=" == "CONFIG_$1=" ] && return 0 || return 1
 }
 
 kernel_config_is_not_set() {
 	local RET_STR
-	RET_STR=$(grep CONFIG_$1 ${KBUILD_OUTPUT}/.config)
+	RET_STR=$(grep CONFIG_$1 ${KBUILD_OUTPUT}/.config 2>/dev/null)
 	[ "${RET_STR}" == "# CONFIG_$1 is not set" ] && return 0 
 	[ "${RET_STR}" == "" ] && return 0 
 	return 1

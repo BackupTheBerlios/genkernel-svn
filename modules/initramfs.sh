@@ -1,5 +1,3 @@
-
-
 if logicTrue $(profile_get_key install)
 then
 	require initramfs_install
@@ -19,7 +17,5 @@ then
 	kernel_cmdline_register 'tell your bootloader to use the provided initramfs file.'
 	kernel_cmdline_register ''
 fi
-
-
 
 initramfs::() { true; }
