@@ -14,7 +14,7 @@ cfg_register_read() {
 			if [ "${header_printed}" != "1" ]
 			then
 				echo
-				print_warning 1 "YOU HAVE THE FOLLOWING KERNEL CONFIG OPTIONS ${BOLD}DISABLED"
+				print_warning 1 "YOU HAVE THE FOLLOWING KERNEL CONFIG OPTIONS ${BOLD}DISABLED!"
 				header_printed=1
 			fi
 				
@@ -22,7 +22,7 @@ cfg_register_read() {
 			then
 				print_warning 1 "CONFIG_${__CONFIG__REG__D[${n}]}: ${__CONFIG__REG__M[${n}]} "
 			else
-				print_warning 1 "CONFIG_${__CONFIG__REG__D[${n}]} is missing.  You may have problems booting your system...."
+				print_warning 1 "CONFIG_${__CONFIG__REG__D[${n}]} is missing. You may have problems booting your system..."
 			fi
 		fi
 	done
@@ -92,4 +92,3 @@ cfg_register() {
 		fi
 	fi
 }
-

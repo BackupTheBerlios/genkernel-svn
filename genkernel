@@ -2,7 +2,7 @@
 # Genkernel v4
 
 PATH='/bin:/usr/bin:/sbin:/usr/sbin'
-GK_V='4.0.0_alpha1'
+GK_V='4.0.0_alpha_tag_20060317'
 
 # Needs to be here in case sourcing a file fails. 
 die() {
@@ -41,7 +41,6 @@ done
 for i in $(profile_list); do
 	if [ "${i:0:8}" == "cmdline-" ]
 	then
-
 		profile_copy $i "user"
 		
 		# Copy the modules into its own profiles
@@ -53,7 +52,6 @@ for i in $(profile_list); do
 		done
 	fi
 done
-
 
 # Override with the cmdline
 profile_copy cmdline "user"
@@ -90,6 +88,7 @@ fi
 clear_log
 genkernel_print_header
 
+# FIXME: Needs to be absolute path
 if [ ! -w ${CACHE_DIR} ]
 then
 	if [ ! -w $(dirname ${CACHE_DIR}) ]
@@ -144,23 +143,15 @@ genkernel_lookup_packages
 genkernel_lookup_kernel silent
 require "$(profile_get_key 'gk-run-modules')"
 
-#Create the cache dir if it doesnt exist
+# Create the cache dir if it doesn't exist
 setup_cache_dir
-
-# Genkernel module...
-genkernel::()
-{
-	true
-}
 
 # If we have a callback set require the callback module
 [ -n "$(profile_get_key callback)" ] && require callback
 
 for i in $(buildDepTreeSolution)
 do
-	# Don't print the message for the genkernel module as that's where we end
-	# our execution. Otherwise, print the module name.
-	[ "$i" != 'genkernel' ] && print_info 1 ">> Executing module $i..."
+	print_info 1 ">> Executing module $i..."
 	$i:: || die "$i module call failed!"
 done
 
