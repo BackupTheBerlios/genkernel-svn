@@ -291,7 +291,7 @@ setup_kernel_args() {
 	# Override the default arch being built
 	[ -n "$(profile_get_key arch-override)" ] && KERNEL_ARGS="${KERNEL_ARGS} ARCH=$(profile_get_key arch-override)"
 
-	if [ "$(profile_get_key kbuild-output)" == "$(profile_get_key kernel-tree)"	]
+	if [ "$(profile_get_key kbuild-output)" == "$(profile_get_key kernel-tree)" ]
 	then
 		if [ "$(profile_get_key arch-override)" == "um" \
 			-o "$(profile_get_key arch-override)" == "xen0" \
@@ -299,9 +299,9 @@ setup_kernel_args() {
 		then
 			die "Compiling for ARCH=$(profile_get_key arch-override) requires kbuild_output to differ from the kernel-tree"
 		fi
+	else
+		KERNEL_ARGS="${KERNEL_ARGS} KBUILD_OUTPUT=$(profile_get_key kbuild-output)"		
 	fi
-
-	KERNEL_ARGS="${KERNEL_ARGS} KBUILD_OUTPUT=$(profile_get_key kbuild-output)"
 
 	# Kernel cross compiling support
 	if [ -n "$(profile_get_key cross-compile)" ]
