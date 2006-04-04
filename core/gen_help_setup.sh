@@ -1,4 +1,6 @@
 #!/bin/bash
+# This file stores the default genkernel settings
+
 #  GROUP -> OPTION -> DATA (Boolean):[DEFAULT] -> Allow no'X' (Boolean) -> DESCRIPTION -> Optional (handler function)
 
 ## Debug

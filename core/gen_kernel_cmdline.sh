@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# genkernel-modular/core/gen_kernel_cmdline.sh
+# -- Kernel parameter callback system
+
+# Copyright: 2006 rocket@gentoo.org
+# License: GPLv2
+
 declare -a __KERNEL_PARAM__REG__D # Data
 
 kernel_cmdline_register_read() {

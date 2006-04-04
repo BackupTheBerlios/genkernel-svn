@@ -1,4 +1,8 @@
-# Genkernel 4.0.0 dependency engine <plasmaroo@gentoo.org>
+# genkernel-modular/core/gen_depedencyEngine.sh
+# -- Core dependency engine
+
+# Copyright: 2006 plasmaroo@gentoo,org
+# License: GPLv2
 
 # This module handles the dependecy requirements of genkernel, parsing
 # the require and provide instructions of modules and building a relevant

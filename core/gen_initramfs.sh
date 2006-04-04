@@ -1,3 +1,9 @@
+# genkernel-modular/core/gen_initramfs.sh
+# -- Core initramfs handling subroutines
+
+# Copyright: 2006 plasmaroo@gentoo,org, rocket@gentoo.org
+# License: GPLv2
+
 declare -a __INITRAMFS__REG__S # Source
 declare -a __INITRAMFS__REG__D # Data
 

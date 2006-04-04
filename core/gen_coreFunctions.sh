@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# genkernel-modular/core/gen_coreFunctions.sh
+# -- Various core subroutines
+
+# Copyright: 2006 plasmaroo@gentoo,org, rocket@gentoo.org
+# License: GPLv2
+
 die() {
 	echo "${BAD}Error${NORMAL}: $1"
 	exit 1

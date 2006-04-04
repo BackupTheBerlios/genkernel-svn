@@ -1,5 +1,9 @@
 #!/bin/bash 
-# Genkernel v4
+# genkernel v4
+# -- the main genkernel script
+
+# Copyright: 2006 plasmaroo@gentoo,org, rocket@gentoo.org
+# License: GPLv2
 
 PATH='/bin:/usr/bin:/sbin:/usr/sbin'
 GK_V='4.0.0_alpha_tag_20060317'

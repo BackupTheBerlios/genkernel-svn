@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# genkernel-modular/core/gen_cmdline.sh
+# -- Core command line grokking and storage routines
+
+# Copyright: 2006 plasmaroo@gentoo,org, rocket@gentoo.org
+# License: GPLv2
+
 declare -a __INTERNAL__OPTIONS__GROUP # Grouping
 declare -a __INTERNAL__OPTIONS__NAME # Option to match
 declare -a __INTERNAL__OPTIONS__NEEDE # Need =<data> ?
@@ -7,7 +13,6 @@ declare -a __INTERNAL__OPTIONS__HAVEO # Have no<name> variant ?
 declare -a __INTERNAL__OPTIONS__SDESC # Short description
 declare -a __INTERNAL__OPTIONS__DDEFT # Data default
 declare -a __INTERNAL__OPTIONS__FUNC # Callback function for cmdline processing
-
 
 __register_config_option() {
 	# <Group> <Name> <Need data [Bool]> <Have inverse [Bool]> {Description} <callback function (optional)>

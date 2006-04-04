@@ -1,6 +1,11 @@
+# genkernel-modular/core/grub.awk
+# -- Core awk script to handle grub.conf manipulation
+
+# Copyright: 2006 plasmaroo@gentoo,org, rocket@gentoo.org
+# License: GPLv2
+
 BEGIN { RS="\n"; FS=""; OFS=""; ORS=""; state="0"; }
 {
-
 # State 0 = Just starting out
 # State 1 = found the first title
 # State 2 = found the next title

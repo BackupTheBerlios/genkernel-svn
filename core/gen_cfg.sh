@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# genkernel-modular/core/gen_cfg.sh
+# -- Core configuration queing routines
+
+# Copyright: 2006 plasmaroo@gentoo.org, rocket@gentoo.org
+# License: GPLv2
+
 declare -a __CONFIG__REG__S # Source
 declare -a __CONFIG__REG__D # Data
 declare -a __CONFIG__REG__V # Default Value

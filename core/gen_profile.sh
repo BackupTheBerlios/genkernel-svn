@@ -1,4 +1,10 @@
-#o!/bin/bash
+#!/bin/bash
+
+# genkernel-modular/core/gen_profile.sh
+# -- Core profile handling
+
+# Copyright: 2006 plasmaroo@gentoo,org, rocket@gentoo.org
+# License: GPLv2
 
 declare -a __INTERNAL__OPTIONS__KEY # Key
 declare -a __INTERNAL__OPTIONS__VALUE # = sign set

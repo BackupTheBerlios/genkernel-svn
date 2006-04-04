@@ -13,10 +13,6 @@ done
 #Internal flag to check if config parsing succeeded
 __INTERNAL__CONFIG_PARSING_FAILED=false
 
-
-
-
-
 # EVERYTHING BELOW HERE TO BE REMOVED  gen_menu_setup.sh is where the defaults are now.
 #Set some defaults (These go in the system profile as they are system wide defaults)
 

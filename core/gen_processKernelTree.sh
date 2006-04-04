@@ -1,7 +1,11 @@
-# Many functions borrowed and modified from linux-info.eclass 
+# genkernel-modular/core/gen_processKernelTree.sh
+# -- Core kernel tree processing
+
+# Copyright: 2006 plasmaroo@gentoo,org, rocket@gentoo.org
+#            Portions copyright 1999-2006 Gentoo Foundation
+# License: GPLv2
 
 get_KV() {
-	
 	KNAME="$(profile_get_key kernel-name)"
 	
 	KERNEL_DIR="$1"
@@ -316,4 +320,3 @@ setup_kernel_args() {
 	# KNAME="$(profile_get_key kernel-name)"
 	# ARGS="${ARGS} LOCALVERSION=-${KNAME}-${ARCH}"
 }
-

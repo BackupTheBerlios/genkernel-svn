@@ -1,4 +1,11 @@
 #!/bin/bash
+
+# genkernel-modular/core/gen_processPackages.sh
+# -- Core package processing routines
+
+# Copyright: 2006 plasmaroo@gentoo,org, rocket@gentoo.org
+# License: GPLv2
+
 declare -a __INTERNAL__PKG__CALLBACK__S # Source
 declare -a __INTERNAL__PKG__CALLBACK__D # Data
 
