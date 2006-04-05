@@ -146,27 +146,34 @@ kernel_config::()
 
 	# Turn on things that have to be on below ... 	
 
-    # Turn set the initramfs_source string if building an internal initramfs
-    if logicTrue $(internal_initramfs)
-    then
-		if kernel_config_is_not_set "INITRAMFS_SOURCE"
-		then
+	# Set the initramfs_source string if building an internal initramfs.
+	# You cannot use kernel_config_is_set 'INITRAMFS_SOURCE' as the unset value is ""
+	# which is actually technically set ;-)
+
+	# So, if this is not empty, then a initramfs is set.
+	local val_CONFIG_INITRAMFS_SOURCE
+	val_CONFIG_INITRAMFS_SOURCE=$(kernel_config_get "INITRAMFS_SOURCE")
+
+	if logicTrue $(internal_initramfs)
+	then
+		if [ -z "$val_CONFIG_INITRAMFS_SOURCE" ]; then
 			kernel_config_set_string "INITRAMFS_SOURCE" "${TEMP}/initramfs-internal ${TEMP}/initramfs-internal.devices"
+			kernel_config_set_raw "INITRAMFS_ROOT_UID" 0
+			kernel_config_set_raw "INITRAMFS_ROOT_GID" 0
 			UPDATED_KERNEL=true
 		fi
-    else
-		if kernel_config_is_set "INITRAMFS_SOURCE"
-		then
+	else
+		if [ -n "$val_CONFIG_INITRAMFS_SOURCE" ]; then
 			kernel_config_unset "INITRAMFS_SOURCE"
+			kernel_config_unset "INITRAMFS_ROOT_UID"
+			kernel_config_unset "INITRAMFS_ROOT_GID"
 			UPDATED_KERNEL=true
-		yes '' 2>/dev/null | compile_generic ${KERNEL_ARGS} oldconfig
 		fi
-    fi
+	fi
 
-	# Sets UPDATE_KERNEL to true if any config options are not defined
+	# Sets UPDATED_KERNEL to true if any config options are not defined
 	logicTrue $(profile_get_key force-config) && cfg_register_enable
-
-	if [ "${UPDATE_KERNEL}" == 'true' ]
+	if [ "${UPDATED_KERNEL}" == 'true' ]
 	then
 		yes '' 2>/dev/null | compile_generic ${KERNEL_ARGS} oldconfig
 	fi
@@ -180,5 +187,4 @@ kernel_config::()
 	# Kernel configuration may have changed our output names ..
 	unset KV_FULL
 	get_KV $(profile_get_key kernel-tree)
-
 }

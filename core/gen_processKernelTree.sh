@@ -190,15 +190,23 @@ check_asm_link_ok() {
 	fi
 }
 
-kernel_config_set_string() {
-	# TODO need to check for null entry entirely
-	sed -i ${KBUILD_OUTPUT}/.config -e "s|#\? \?CONFIG_${1} is.*|CONFIG_${1}=\"${2}\"|g"
-	sed -i ${KBUILD_OUTPUT}/.config -e "s|CONFIG_${1}=.*|CONFIG_${1}=\"${2}\"|g"
+# this is mainly for setting integers, but the other kernel_config_set could be
+# refactored to use it.
+kernel_config_set_raw() {
+	sed -i ${KBUILD_OUTPUT}/.config -e "s|#\? \?CONFIG_${1} is.*|CONFIG_${1}=${2}|g"
+	sed -i ${KBUILD_OUTPUT}/.config -e "s|CONFIG_${1}=.*|CONFIG_${1}=${2}|g"
 	if ! kernel_config_is_set ${1}
 	then
-		echo "CONFIG_${1}=\"${2}\"" >> ${KBUILD_OUTPUT}/.config
+		echo "CONFIG_${1}=${2}" >> ${KBUILD_OUTPUT}/.config
 	fi
 }
+
+kernel_config_set_string() {
+	key="${1}"
+	shift
+	kernel_config_set_raw "${key}" "\"${*}\""
+}
+
 kernel_config_set_builtin() {
 	# TODO need to check for null entry entirely
 	sed -i ${KBUILD_OUTPUT}/.config -e "s/CONFIG_${1}=m/CONFIG_${1}=y/g"
@@ -220,34 +228,43 @@ kernel_config_set_module() {
 }
 
 kernel_config_unset() {
-	sed -i ${KBUILD_OUTPUT}/.config -e "s/CONFIG_${1}=.*/# CONFIG_${1} is not set/g"
+	sed -i "${KBUILD_OUTPUT}"/.config -e "s/CONFIG_${1}=.*/# CONFIG_${1} is not set/g"
 }
 
+# you should check kernel_config_is_set before trusting this, beware
+kernel_config_get() {
+	local RET_STR
+	RET_STR=$(grep "CONFIG_$1=" "${KBUILD_OUTPUT}"/.config 2>/dev/null)
+	echo "${RET_STR#*=}"
+}
+
+# These should be tweaked to use kernel_config_get perhaps?
 kernel_config_is_builtin() {
 	local RET_STR
-	RET_STR=$(grep CONFIG_$1=y ${KBUILD_OUTPUT}/.config 2>/dev/null)
+	RET_STR=$(grep "CONFIG_$1=y" "${KBUILD_OUTPUT}"/.config 2>/dev/null)
 	[ "${RET_STR}" == "CONFIG_$1=y" ] && return 0 || return 1
 }
 
 kernel_config_is_module() {
 	local RET_STR
-	RET_STR=$(grep CONFIG_$1=m ${KBUILD_OUTPUT}/.config 2>/dev/null)
+	RET_STR=$(grep "CONFIG_$1=m" "${KBUILD_OUTPUT}"/.config 2>/dev/null)
 	[ "${RET_STR}" == "CONFIG_$1=m" ] && return 0 || return 1
 }
 
 kernel_config_is_set() {
 	local RET_STR
-	RET_STR=$(grep CONFIG_$1= ${KBUILD_OUTPUT}/.config 2>/dev/null)
+	RET_STR=$(grep "CONFIG_$1=" "${KBUILD_OUTPUT}"/.config 2>/dev/null)
 	[ "${RET_STR%%=*}=" == "CONFIG_$1=" ] && return 0 || return 1
 }
 
 kernel_config_is_not_set() {
 	local RET_STR
-	RET_STR=$(grep CONFIG_$1 ${KBUILD_OUTPUT}/.config 2>/dev/null)
+	RET_STR=$(grep "CONFIG_$1" "${KBUILD_OUTPUT}"/.config 2>/dev/null)
 	[ "${RET_STR}" == "# CONFIG_$1 is not set" ] && return 0 
 	[ "${RET_STR}" == "" ] && return 0 
 	return 1
 }
+
 
 determine_config_file() {
 	# echo "$(profile_get_key kernel-config)"
