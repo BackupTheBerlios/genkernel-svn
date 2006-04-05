@@ -4,19 +4,19 @@ gcc_compile::()
 {
 	local GCC_SRCTAR="${SRCPKG_DIR}/gcc-${GCC_VER}.tar.bz2" GCC_DIR="gcc-${GCC_VER}" 
 	local GCC_BUILD_DIR="gcc-${GCC_VER}-build"
-	#[ -f "${GCC_SRCTAR}" ] || die "Could not find binutils source tarball: ${GCC_SRCTAR}!"
+	[ -f "${GCC_SRCTAR}" ] || die "Could not find gcc source tarball: ${GCC_SRCTAR}!"
 
 	cd "${TEMP}"
-	#rm -rf ${GCC_DIR} > /dev/null
-	#unpack ${GCC_SRCTAR} || die 'Could not extract gcc source tarball!'
-	#[ -d "${GCC_DIR}" ] || die 'gcc directory ${BINUTILS_DIR} is invalid!'
+	rm -rf ${GCC_DIR} > /dev/null
+	unpack ${GCC_SRCTAR} || die 'Could not extract gcc source tarball!'
+	[ -d "${GCC_DIR}" ] || die 'gcc directory ${GCC_DIR} is invalid!'
 
+	# Apply patches
+	cd "${GCC_DIR}"
+	gen_patch ${FIXES_PATCHES_DIR}/gcc/${GCC_VER} .
+	
 	mkdir -p "${GCC_BUILD_DIR}"
 	cd "${GCC_BUILD_DIR}"
-
-
-
-	#gen_patch ${FIXES_PATCHES_DIR}/gcc/${GCC_VER} .
 
     print_info 1 'gcc: >> Configuring...'
 
@@ -87,7 +87,7 @@ gcc_compile::()
 #		make all-gcc
 	
 	PATH="${LOCAL_PATH}:/bin:/sbin:/usr/bin:/usr/sbin" \
-	compile_generic all-gcc
+	compile_generic install-gcc
 #		make install-gcc
 	
 	#[ -e "${TEMP}/uclibc-compile" ] && rm -r ${TEMP}/uclibc-compile
