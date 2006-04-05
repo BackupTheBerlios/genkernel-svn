@@ -2,7 +2,9 @@ require kernel_config
 #logicTrue $(profile_get_key internal-uclibc) && require gcc
 open_iscsi_compile::()
 {
-	local OPENISCSI_SRCTAR="${SRCPKG_DIR}/open-iscsi-${OPENISCSI_VER}.tar.gz" OPENISCSI_DIR="open-iscsi-${OPENISCSI_VER}"
+	local OPENISCSI_SRCTAR="${SRCPKG_DIR}/open-iscsi-${OPENISCSI_VER}.tar.gz" 
+	#local OPENISCSI_DIR="open-iscsi-${OPENISCSI_VER}"
+	local OPENISCSI_DIR="open-iscsi"
 	[ -f "${OPENISCSI_SRCTAR}" ] || die "Could not find open-iscsi source tarball: ${OPENISCSI_SRCTAR}!"
 
 	cd "${TEMP}"
@@ -40,9 +42,9 @@ open_iscsi_compile::()
 	print_info 1 'open-iscsi: >> Compiling...'
 	if [ ! "$(profile_get_key kbuild-output)" == "$(profile_get_key kernel-tree)" ]
 	then
-		compile_generic KSRC=$(profile_get_key kernel-tree) KBUILD_OUTPUT=$(profile_get_key kbuild-output) KARCH=ARCH=${OPENISCSI_TARGET_ARCH}
+		compile_generic KSRC=$(profile_get_key kernel-tree) KBUILD_OUTPUT=$(profile_get_key kbuild-output) KARCH=ARCH=${OPENISCSI_TARGET_ARCH} OPTFLAGS=-static
 	else
-		compile_generic KSRC=$(profile_get_key kernel-tree) KARCH=ARCH=${OPENISCSI_TARGET_ARCH}
+		compile_generic KSRC=$(profile_get_key kernel-tree) KARCH=ARCH=${OPENISCSI_TARGET_ARCH} OPTFLAGS=-static
 	fi
 	
 

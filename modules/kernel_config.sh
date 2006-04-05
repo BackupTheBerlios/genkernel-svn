@@ -11,6 +11,9 @@ kernel_config::()
 	elif [ "${ARCH}" == "x86" ]
 	then
 		check_asm_link_ok i386 || die "Bad asm link.  The output directory has already been configured for a different arch"
+	elif [ "${ARCH}" == "ppc64" ]
+	then
+		check_asm_link_ok powerpc || die "Bad asm link.  The output directory has already been configured for a different arch"
 	else
 		check_asm_link_ok ${ARCH} || die "Bad asm link.  The output directory has already been configured for a different arch"
 	fi
