@@ -1,0 +1,66 @@
+#!/bin/sh
+# Copyright 2006 Eric Edgar <rocket@gentoo.org>, 
+#                Tim Yamin <plasmaroo@gentoo.org> and 
+#                Jean-Francois Richard <jean-francois@richard.name> 
+# Distributed under the terms of the GNU General Public License v2
+#
+#
+# NFS root fs loader for genkernel
+#
+# ./nfs --do-mount mountpoint ip dir mount_opts
+#
+
+. /etc/initrd.defaults
+. "${LIBGK}/libgmi.sh"
+
+
+parameters() {
+        echo 'ip dir mount_opts'
+}
+
+
+help() {
+cat << EOHELP
+usage: nfs:<ip>:<dir>[:mount_opts] 
+example: 'real_root=nfs:192.168.0.1:/mnt/rootfs'
+         'real_root=nfs:10.0.0.2:/mnt/system1:ro,nolock'
+parameters are
+<ip>           IP address of the NFS server
+<dir>          directory to mount
+[mount_opts]   parameters to pass at mounting of the filesystem
+EOHELP
+}
+
+
+do_mount() {
+	# unwrapping parameters for human beings
+	local mountpoint="${1}"
+	local server_ip="${2}"
+	local dir="${3}"
+	local mount_opts="${4}"
+	local _mount_opts
+
+	gmi_is_set ${mount_opts} && _mount_opts="-o ${mount_opts}"
+
+	gmi_dbg_msg "mount -t nfs ${_mount_opts} ${server_ip}:${dir} ${mountpoint}"
+	mount -t nfs ${_mount_opts} ${server_ip}:${dir} ${mountpoint}
+	gmi_assert "$?" "Could not mount NFS share '${server_ip}:${dir}'" || return 1
+}
+
+
+case "${1}" in
+        "--help")
+                help
+                ;;
+        "--parameters")
+                parameters
+                ;;
+	"--do-mount")
+		shift
+		do_mount $@
+		exit $?
+		;;
+	*)
+		exit 1
+		;;
+esac

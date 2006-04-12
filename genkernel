@@ -6,7 +6,7 @@
 # License: GPLv2
 
 PATH='/bin:/usr/bin:/sbin:/usr/sbin'
-GK_V='4.0.0_alpha_tag_20060317'
+GK_V='4.0.0_alpha_tag_20060412'
 
 # Needs to be here in case sourcing a file fails. 
 die() {

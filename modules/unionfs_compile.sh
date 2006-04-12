@@ -8,6 +8,21 @@ unionfs_compile::()
 	then
 		print_info 1 ">> Modules not enabled in .config .. skipping unionfs compile"
 	else
+		# stolen from uclibc_compile.sh
+		UNIONFS_TARGET_ARCH=$(echo ${ARCH} | sed -e s'/-.*//' \
+			-e 's/x86/i386/' \
+			-e 's/i.86/i386/' \
+			-e 's/sparc.*/sparc/' \
+			-e 's/arm.*/arm/g' \
+			-e 's/m68k.*/m68k/' \
+			-e 's/ppc/powerpc/g' \
+			-e 's/v850.*/v850/g' \
+			-e 's/sh[234].*/sh/' \
+			-e 's/mips.*/mips/' \
+			-e 's/mipsel.*/mips/' \
+			-e 's/cris.*/cris/' \
+			-e 's/nios2.*/nios2/' \
+				)
 
 		cd "${TEMP}"
 		rm -rf ${UNIONFS_DIR} > /dev/null
@@ -16,7 +31,7 @@ unionfs_compile::()
 		cd "${UNIONFS_DIR}" > /dev/null	
 		gen_patch ${FIXES_PATCHES_DIR}/unionfs/${UNIONFS_VER} .
 		
-		echo "ARCH=${ARCH}" > fistdev.mk
+		echo "ARCH=${UNIONFS_TARGET_ARCH}" > fistdev.mk
 		echo "PREFIX=${TEMP}/unionfs-build" >> fistdev.mk
 		echo "EXTRAUCFLAGS=-static" >> fistdev.mk
 		

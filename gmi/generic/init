@@ -1,12 +1,18 @@
 #!/bin/busybox sh
+# Distributed under the terms of the GNU General Public License v2
+#
+# Authors:
+#  - Eric Edgar <rocket@gentoo.org>, 2006
+#  - Jean-Francois Richard <jean-francois@richard.name>, 2006
+#  - Tim Yamin <plasmaroo@gentoo.org>, 2006
+#
+# Initialization script called by kernel at boot.
+#
+
 . /etc/initrd.defaults
-. /etc/initrd.cmdline
+. "${LIBGK}/libgmi.sh"
 
-. /etc/initrd.devices
-. /etc/initrd.modules
-. /etc/initrd.scripts
-. /etc/initrd.unionfs
-
+### TODO: splash stuff...
 [ -e /etc/initrd.splash ] && . /etc/initrd.splash
 
 /bin/busybox mount -o remount,rw /
@@ -16,12 +22,18 @@
 # Setup the busybox applets
 /bin/busybox --install -s
 
+# Artwork is always good :)
+echo
+echo -e "   ${GOOD}GMI${NORMAL}${BOLD} starting ...${NORMAL}"
+echo
+
 if [ "$$" != '1' ]
 then
 	echo '/init has to be run as the init process with a PID of 1'
 	exit 1
 fi
 
+### TODO: splash stuff...
 splash 'init'
 
 # mv /sbin/insmod to /bin/insmod or modprobe breaks 
@@ -29,7 +41,7 @@ splash 'init'
 [ -e /sbin/insmod ] && mv /sbin/insmod /bin/insmod
 
 # suppress kernel messages
-quiet_kmsg 
+gmi_quiet_kmsg 
 
 # busybox udev replacement
 mdev -s
@@ -39,201 +51,281 @@ echo /sbin/mdev > /proc/sys/kernel/hotplug
 
 # Read the cmdline settings
 CMDLINE=$(cat /proc/cmdline)
-parse_cmdline
+gmi_parse_cmdline
+
+# Must export it for external scripts
+[ -n "${DEBUG}" ] && export DEBUG="yes"
 
 # load the kernel modules
-load_modules
+gmi_load_modules
 
-# Startup the raid and volume groups
-startup_volumes
 
-# Make the new root directory
-mkdir -p ${NEWROOT}
+# Make needed directories
+mkdir /tmp
+mkdir -p ${ROOTFS}
+mkdir -p ${GMIMNT}
+# because we may mount-move it further down... need tmpfs
+mount -t tmpfs tmpfs ${GMIMNT}
+mkdir -p ${UNIONS}
+mkdir -p ${MNTOTHER}
 
-setup_networking
-setup_unionfs
+gmi_setup_networking
 
-scan_for_init() {
-	# Image loading process .. usually a squashfs
-	# looks for cdroot on the cmdline for legacy gentoo reasons.
-	
-	if [ -n "${cdroot}" ]
+[ "${FORCED_UNIONFS}" = "yes" ] && gmi_setup_unionfs
+
+[ -n "$DEBUG" ] && gmi_shell
+
+got_good_root=no
+while [ "${got_good_root}" != "yes" ]; do
+
+	if [ "${REAL_ROOT}" = '' ]
 	then
-		# Tmpdir required for switch_root to work properly
-		# newroot cant be the same filesystem as / for safety
-		good_msg "Making tmpfs for ${NEWROOT}"
-		mount -t tmpfs tmpfs ${NEWROOT}
-		for i in dev 
-		do
-			mkdir -p ${NEWROOT}/$i
-			chmod 755 ${NEWROOT}/$i
-		done
-
-		# Copies dont work here for some reason .. dont know why .. 
-		mv /dev/null ${NEWROOT}/dev
-		mv ${CONSOLE} ${NEWROOT}/dev
-
-		# Load the default cdrom scan list
-		set_default_cdrom_devices
-
-		# Prepend Device specified on the command line or interactive prompt
-		if [ -n '${REAL_ROOT}' -a -b '${REAL_ROOT}' ]
+		echo
+		gmi_bad_msg "Please specify a valid real_root parameter to boot, 'help' or 'shell' ..."
+		if [ "${USE_UNIONFS}" = "yes" ]
 		then
-			echo "Appending root ${ROOT} to CDROM_DEVICES"
-			[ -n "${REAL_ROOT}" ] && CDROM_DEVICES="$REAL_ROOT $CDROM_DEVICES"
+			# We already started unionizing... shall we add something else?
+			gmi_bad_msg "If some filesystems were already mounted sucessfully, add the ones you "
+			gmi_bad_msg "would like mounted over those, or type \"continue\" to boot without adding"
+			gmi_bad_msg "any filesystem to the unionfs stack."
 		fi
-
-		findcdmount $CDROM_DEVICES
+		echo -n "real_root="
+		read REAL_ROOT
+		got_good_root=no
 	fi
 
-	if [ -z "${cdroot}" ]
+	if [ "${REAL_ROOT}" = 'continue' ]
 	then
-		if [ '${REAL_ROOT}' == '/dev/nfs' ]
-		then
-			findnfsmount
-		fi
-
-		# Fall through to a hard disk search .. hopefully we have the block device...
-		if [ -b "${REAL_ROOT}" ]
-		then
-			mount ${REAL_ROOT} ${NEWROOT}
-			if [ "$?" -eq '0' -a -x ${NEWROOT}/${SUBDIR}/${INIT} ]
-			then
-				good_msg "Booting from ${REAL_ROOT}"
-				got_good_root=1
-			else
-				got_good_root=0
-				REAL_ROOT=''
-			fi
-		fi
+		got_good_root=yes
+		continue
 	fi
-}
-
-# Run a debug shell 
-rundebugshell
-
-# Scan delay?
-
-# If we havent found our bootable media yet
-# Allow a user to enter an emergency shell
-# or specify the path to the media again
-got_good_root=0
-while [ "${got_good_root}" != '1' ]
-do
-	case "${REAL_ROOT}" in
-		LABEL\=*|UUID\=*)
-
-			ROOT_DEV=""
-			retval=1
-
-			if [ "${retval}" -ne '0' ]; then
-				ROOT_DEV=`findfs "${REAL_ROOT}" 2>/dev/null`
-				retval=$?
-			fi
-
-			if [ "$retval" -ne '0' ]; then
-				ROOT_DEV=`busybox findfs "${REAL_ROOT}" 2>/dev/null`
-				retval=$?
-			fi
-
-			if [ "${retval}" -ne '0' ]; then
-				ROOT_DEV=`blkid -t "${REAL_ROOT}" | cut -d ":" -f 1 2>/dev/null`
-				retval=$?
-			fi
-
-			if [ "${retval}" -eq '0' ] && [ -n "${ROOT_DEV}" ]; then
-				good_msg "Detected root=${ROOT_DEV}"
-				REAL_ROOT="${ROOT_DEV}"
-			else
-				REAL_ROOT=''
-				got_good_root=0
-			fi
-		;;
-	esac
 
 	if [ "${REAL_ROOT}" = 'shell' ]
 	then
-		run_shell
+		gmi_shell
 		REAL_ROOT=''
-		got_good_root=0
+		got_good_root=no
 		continue
-	elif [ "${REAL_ROOT}" = '' ]
-	then
-		bad_msg "The root is unspecified or not detected."
-		echo '   Please specify a device to boot, or "shell" for a shell...'
-		echo -n 'boot() :: '
-		read REAL_ROOT 
-		got_good_root=0
-	elif [ -n "${REAL_ROOT}" ]
-	then
-		# scans cd/hd/nfs for init and or image_key.  if found set got_good_root=1
-		scan_for_init
-	
-		if [ "${got_good_root}" = '0' ]
-		then
-			REAL_ROOT=''
-		fi
-	else
-		bad_msg "${REAL_ROOT} is not a valid root device..."
-		REAL_ROOT=''
-		got_good_root=0
 	fi
+
+	if [ "$( echo ${REAL_ROOT} | cut -f1 -d' ' )" = 'help' ]
+	then
+		ldr="$( echo ${REAL_ROOT} | sed 's/^help *//g' )"
+		if [ -n "${ldr}" ]
+		then
+			gmi_good_msg "Help for '${ldr}':"
+			if [ -x "${FSLOADERS}/${ldr}" ]
+			then
+				${FSLOADERS}/${ldr} --help
+			else
+				gmi_warn_msg "'${ldr}' is not a valid filesystem loader"
+				gmi_warn_msg "Type 'help' for more information"
+			fi
+		else
+			gmi_good_msg "List of root filesystem loaders and their parameters:"
+			for ldr in ${FSLOADERS}/*
+			do
+				_ldr=$( basename ${ldr} )
+				echo -en "   :: ${BOLD}${_ldr}${NORMAL}:"
+				${FSLOADERS}/${_ldr} --parameters | sed 's/ /:/g'
+			done
+			gmi_good_msg "Type 'help <fsloader>' for more information (example: real_root=help livecd)"
+		fi
+		REAL_ROOT=''
+		got_good_root=no
+		continue
+	fi
+
+	### Must do this stuff inside the loop, because people can change
+	### the real_root= manually if the first given real_root crashes...
+
+	# Remove any trailing ';' (a habit of C coders...)
+	REAL_ROOT=$( echo ${REAL_ROOT} | sed 's/;$//g' )
+
+	# If unionfs is needed by a ';' stacking, enable it.
+	if echo ${REAL_ROOT} | grep ";" > /dev/null
+	then
+		gmi_setup_unionfs
+	fi
+
+	gmi_dbg_msg "REAL_ROOT=${REAL_ROOT}"
+	gmi_good_msg "Mounting filesystems"
+	for rootfs in $( echo "${REAL_ROOT}"  | sed 's/;/ /g' )
+	do
+		# If rootfs is starting with /, assume it is a block device
+		# for backward compatibility
+		[ "$( echo ${rootfs} | cut -c1 )" = "/" ] && rootfs="block:${rootfs}"
+
+		fs_loader="$( echo ${rootfs} | cut -f1 -d: )"
+		if [ ! -x ${FSLOADERS}/${fs_loader} ]
+		then
+			gmi_bad_msg "Unknown filesystem loader '${fs_loader}'"
+			got_good_root="no"
+			REAL_ROOT=''
+			break
+		fi
+
+
+		fs_args=""
+		# If we got arguments, clean up and replace the ':' to pass
+		# to the fs loaders
+		if echo ${rootfs} | grep ':' > /dev/null
+		then
+			fs_args="$( echo ${rootfs} | sed 's/::/:NONE:/g' | cut -f2- -d: | sed 's/:/ /g'; )"
+		fi
+
+		mountpoint=$( gmi_mkumntpoint )
+		gmi_good_msg "\t${rootfs}"
+		${FSLOADERS}/${fs_loader} --do-mount ${mountpoint} ${fs_args}
+		retval=$?
+
+		if [ "${retval}" = "0" ]
+		then
+			# Integrate all the env variables that are meant to be passed to the
+			# running system (see libgmi.sh - register_env() )
+			[ -r /etc/profile.fsloaders ] && . /etc/profile.fsloaders
+
+			got_good_root="yes"
+
+			if [ "${USE_UNIONFS}" = "yes" ]
+			then
+				gmi_dbg_msg "Recorded ${mountpoint} as a union, will insert later"
+			else
+				gmi_dbg_msg "Moving ${mountpoint} to ${ROOTFS}"
+				mount -o move ${mountpoint} ${ROOTFS}
+				gmi_dbg_res
+				break
+			fi
+		else
+			rm -rf ${mountpoint}
+			gmi_bad_msg "Mounting of '${rootfs}' failed"
+			gmi_bad_msg "Help for the '${fs_loader}' filesystem loader:"
+			${FSLOADERS}/${fs_loader} --help
+			gmi_bad_msg "Try passing the 'debug' option on the kernel command-line for more"
+			gmi_bad_msg "information before filing a bug report."
+			got_good_root=no
+			REAL_ROOT=''
+			break
+		fi
+	done
 done
 
-if [ -n "${IMAGE_ROOT}" ]
-then
-	# We have an image .. lets setup the newroot
 
-	if [ -z "${UNIONFS}" ]
-	then
-		if [ -n "${cache}" ]
+if [ "${USE_UNIONFS}" = "yes" ]
+then
+	got_one_broken_union="no"
+	gmi_good_msg "Adding unions to the root filesystem"
+	for rootfs in ${UNIONS}/*
+	do
+		gmi_dbg_msg "Inserting for rootfs ${rootfs}"
+		# get the mode from the underlying fs' mode
+		mode="rw"
+		gmi_has "ro" "$( cat /proc/mounts | grep "${rootfs} " |  cut -f4 -d' ' )" && mode="ro"
+
+		gmi_good_msg "\t$( cat /proc/mounts | grep "${rootfs} " | cut -f1 -d' ' ) (${mode})"
+		/sbin/unionctl ${ROOTFS} --add --after 0 --mode ${mode} ${rootfs} 2> /dev/null
+		if [ "$?" != "0" ]
 		then
-			cache_cd_contents
-		else
-			setup_links
+			gmi_warn_msg "\t\tfailed, but continuing"
+			got_one_broken_union="yes"
 		fi
-	fi
-fi
+	done
 
-# Required for gensplash to work.  Not an issue with the initrd as this device isnt created there and is not needed.
-if [ -e /dev/tty1 -a ! -e ${NEWROOT}/dev/tty1 ]
-then
-	mv /dev/tty1 ${NEWROOT}/dev
-fi
-
-
-if [ -n "${UNIONFS}" ]
-then
-	if [ -n "${IMAGE_ROOT}" ]
+	if [ "${got_one_broken_union}" = "yes" ]
 	then
-		union_insert_dir $UNION ${IMAGE_ROOT}
-	else
-		union_insert_dir $UNION ${NEWROOT}
+		gmi_warn_msg "One of the unions was not added successfully."
+		gmi_warn_msg "GMI will try to continue, but you may experience problems."
+		gmi_warn_msg ""
+		gmi_warn_msg "Try passing the 'debug' option on the kernel command-line for more"
+		gmi_warn_msg "information before filing a bug report."
+		gmi_warn_msg ""
+		gmi_warn_msg "(Waiting 10 seconds...  CTRL-ALT-DEL to reboot now.)"
+		sleep 10
 	fi
 
-	# Make sure fstab notes / is mounted ro.  Makes system skip remount which fails on unionfs dirs.
-	cat ${UNION}/etc/fstab |grep -v "\s/\s" > ${UNION}/etc/fstab.new
-	echo "none	/	tmpfs	defaults,ro	0 0" >> ${UNION}/etc/fstab.new
-	mv ${UNION}/etc/fstab.new ${UNION}/etc/fstab
-	NEWROOT=${UNION}
+	# Remove the unionfs base
+	unionctl ${ROOTFS} --remove ${UNIONS}/.base
+	umount ${UNIONS}/.base
+fi
+
+# If there are any mounts _under_ GMIMNT, we try to move these into 
+# the future rootfs so they can be referenced and umounted easily
+if cat /proc/mounts | grep "${GMIMNT}/" > /dev/null
+then
+	mkdir ${ROOTFS}/.gmi 2> /dev/null
+	if [ -d "${ROOTFS}/.gmi" ]
+	then
+		mount -o move ${GMIMNT} ${ROOTFS}/.gmi
+	else
+		gmi_warn_msg "Could not move the mountpoints inside the root filesystem."
+		gmi_warn_msg "GMI will try to continue, but you may experience problems."
+		gmi_warn_msg ""
+		gmi_warn_msg "Make sure your real_root parameter yields a read-write root filesystem"
+		gmi_warn_msg "or that the '/.gmi' directory exists."
+		gmi_warn_msg ""
+		gmi_warn_msg "(Waiting 10 seconds...  CTRL-ALT-DEL to reboot now.)"
+		sleep 10
+	fi
+else
+	# No need to keep it mounted because it contains no mounts
+	umount ${GMIMNT}
+fi
+
+# The rootfs is now final, so let's unpack stuff if it is needed
+if [ -n "${UNPACK}" ]
+then
+	# Remove any trailing ';' (a habit of C coders...)
+	UNPACK=$( echo ${UNPACK} | sed 's/;$//g' )
+
+	gmi_good_msg "Unpacking"
+	for pkg in $( echo ${UNPACK} | sed 's/;/ /g' )
+	do
+		if [ -d ${ROOTFS}${pkg} ]
+		then
+			gmi_good_msg "\t${pkg}"
+			for pkgfile in ${ROOTFS}${pkg}/*
+			do
+				gmi_good_msg "\t\t$( basename ${pkgfile} )"
+				gmi_unpack ${pkgfile} ${ROOTFS}
+				[ "$?" != "0" ] && gmi_warn_msg "\t\t\tfailed, but continuing"
+			done
+		else
+			gmi_good_msg "\t${pkg}"
+			gmi_unpack ${ROOTFS}${pkg} ${ROOTFS}
+			[ "$?" != "0" ] && gmi_warn_msg "\t\tfailed, but continuing"
+		fi
+	done
 fi
 
 
-# turn kernel messages back on
-verbose_kmsg 
+### TODO: splash stuff...
+# Required for gensplash to work.  Not an issue with the initrd as this device isnt created there and is not needed.
+[ -n "$DEBUG" ] && gmi_shell
+if [ -e /dev/tty1 -a ! -e ${ROOTFS}/dev/tty1 ]
+then
+	mv /dev/tty1 ${ROOTFS}/dev
+fi
+
+# Clean up env
+unset DEBUG
+unset USE_UNIONFS
+
+gmi_verbose_kmsg 
 
 # Make sure we are in the root before the switch_root command is called
 cd /
-good_msg "Transferring control to ${INIT} ..."
+gmi_good_msg "Transferring control to ${INIT} ..."
 umount /sys
 umount /proc
 if [ -n "${CONSOLE}" ]
 then 
-	exec switch_root -c "${CONSOLE}" "${NEWROOT}" "${INIT}" "${INIT_ARGS}"
+	exec switch_root -c "${CONSOLE}" "${ROOTFS}" "${INIT}" "${INIT_ARGS}"
 else
-	exec switch_root "${NEWROOT}" "${INIT}" "${INIT_ARGS}"
+	[ ! -e ${ROOTFS}/dev/console ] && mknod ${ROOTFS}/dev/console c 5 1
+	exec switch_root "${ROOTFS}" "${INIT}" "${INIT_ARGS}"
 fi
 
+### TODO: splash stuff...
 splash 'verbose'
 
 echo 'A fatal error has probably occured since /sbin/init did not'
