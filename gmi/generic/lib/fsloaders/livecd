@@ -13,7 +13,7 @@
 #
 
 . /etc/initrd.defaults
-. "${LIBGK}/libgmi.sh"
+. "${LIBGMI}/libgmi.sh"
 
 # TODO: Tested only on booting over a network image (nfs, http, ftp), not 
 # from a block device (cd drive)

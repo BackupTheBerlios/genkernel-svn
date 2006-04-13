@@ -13,7 +13,7 @@
 #
 
 . /etc/initrd.defaults
-. "${LIBGK}/libgmi.sh"
+. "${LIBGMI}/libgmi.sh"
 
 
 parameters() {

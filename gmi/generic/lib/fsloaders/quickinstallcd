@@ -12,7 +12,7 @@
 #
 
 . /etc/initrd.defaults
-. "${LIBGK}/libgmi.sh"
+. "${LIBGMI}/libgmi.sh"
 
 ### TODO: add some more arch tests
 

@@ -16,8 +16,8 @@ BOLD="\033[1m"
 GOOD="\033[32;1m"
 
 # Libraries and paths
-LIBGK="/usr/lib/genkernel"
-FSLOADERS="${LIBGK}/fsloaders"
+LIBGMI="/usr/lib/genkernel"
+FSLOADERS="${LIBGMI}/fsloaders"
 
 # The future root fs
 ROOTFS="/rootfs"

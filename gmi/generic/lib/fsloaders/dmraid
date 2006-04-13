@@ -11,7 +11,7 @@
 #
 
 . /etc/initrd.defaults
-. "${LIBGK}/libgmi.sh"
+. "${LIBGMI}/libgmi.sh"
 
 ## TODO : UNTESTED, the help is incomplete (/me doesn't know about dmraid)
 

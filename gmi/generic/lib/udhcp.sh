@@ -9,7 +9,7 @@
 #
 
 . /etc/initrd.defaults
-. "${LIBGK}/libgmi.sh"
+. "${LIBGMI}/libgmi.sh"
 
 # Name the parameters
 action="${1}"

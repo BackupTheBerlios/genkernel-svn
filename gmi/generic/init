@@ -10,7 +10,7 @@
 #
 
 . /etc/initrd.defaults
-. "${LIBGK}/libgmi.sh"
+. "${LIBGMI}/libgmi.sh"
 
 ### TODO: splash stuff...
 [ -e /etc/initrd.splash ] && . /etc/initrd.splash
@@ -69,14 +69,65 @@ mount -t tmpfs tmpfs ${GMIMNT}
 mkdir -p ${UNIONS}
 mkdir -p ${MNTOTHER}
 
-gmi_setup_networking
+
+# Networking setup and error recovery
+got_good_net="no"
+while [ "${got_good_net}" != "yes" ]
+do
+	if [ "${IP}" = "continue" ]
+	then
+		break
+	fi
+
+	gmi_setup_networking
+
+	if ! gmi_assert "$?" "Unable to setup networking."
+	then
+		gmi_bad_msg 
+		gmi_bad_msg "The possible IP parameters are:"
+		gmi_bad_msg "\t'ip=dhcp' for automatic setup using DHCP"
+		gmi_bad_msg "\t'ip=<client-ip>::<gw-ip>:<netmask>:<hostname>:<device>'"
+		gmi_bad_msg "\t\tyou may leave <netmask>,<hostname> and <device>"
+		gmi_bad_msg "\t\tempty to use defaults (you can remove trailing ':')"
+		gmi_bad_msg "Examples:"
+		gmi_bad_msg "\tip=10.0.0.22::10.0.0.1:255.0.0.0:localhost:eth0"
+		gmi_bad_msg "\tip=10.0.0.22::10.0.0.1:::eth0"
+		gmi_bad_msg "\tip=10.0.0.22::10.0.0.1"
+		gmi_bad_msg 
+		gmi_bad_msg "You may add 'nameserver=w.x.y.z' to setup domain name resolution."
+		gmi_bad_msg "Example: ip=10.0.0.22:10.0.0.1 nameserver=10.0.0.2"
+		gmi_bad_msg 
+		gmi_bad_msg "Please provide a valid ip parameter or 'continue' to boot without"
+		gmi_bad_msg "setting up networking ..."
+		echo -n "ip="
+		### TODO : have a proper read -t, if user does not provide info in, say, 10secs, 
+		### break out of the while loop.
+
+		read ip
+
+		# Get the nameserver param if there is one
+		if echo "${ip}" | grep 'nameserver=' > /dev/null
+		then
+			nameserver=$( echo "${ip}" | cut -f2 -d' ' )
+			NAMESERVER=${x#nameserver=}
+		fi
+
+		# Make sure there is no garbage 
+		IP=$( echo "${ip}" | cut -f1 -d' ' )
+
+	else
+		got_good_net="yes"
+	fi
+done
+
 
 [ "${FORCED_UNIONFS}" = "yes" ] && gmi_setup_unionfs
 
 [ -n "$DEBUG" ] && gmi_shell
 
 got_good_root=no
-while [ "${got_good_root}" != "yes" ]; do
+while [ "${got_good_root}" != "yes" ]
+do
 
 	if [ "${REAL_ROOT}" = '' ]
 	then
@@ -86,8 +137,8 @@ while [ "${got_good_root}" != "yes" ]; do
 		then
 			# We already started unionizing... shall we add something else?
 			gmi_bad_msg "If some filesystems were already mounted sucessfully, add the ones you "
-			gmi_bad_msg "would like mounted over those, or type \"continue\" to boot without adding"
-			gmi_bad_msg "any filesystem to the unionfs stack."
+			gmi_bad_msg "would like mounted over those, or type 'continue' to boot without adding"
+			gmi_bad_msg "any filesystem to the UnionFS stack."
 		fi
 		echo -n "real_root="
 		read REAL_ROOT
