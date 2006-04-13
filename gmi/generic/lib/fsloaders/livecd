@@ -43,21 +43,21 @@ mount_cd_or_iso() {
 
 	if [ -n "${device}" ]
 	then
-		gmi_dbg_msg "Trying to mount LiveCD as loopback file (from ${device})"
+		dbg_msg "Trying to mount LiveCD as loopback file (from ${device})"
 		${FSLOADERS}/loop --do-mount ${mountpoint} ${device}
-		gmi_dbg_res
+		dbg_res
 	fi
 
 	if [ -e ${mountpoint}/livecd ]
 	then
-		gmi_dbg_msg "LiveCD mounted from loopback file"
+		dbg_msg "LiveCD mounted from loopback file"
 		return 0
 	else
-		gmi_dbg_msg "Not a loopback LiveCD"
+		dbg_msg "Not a loopback LiveCD"
 		umount ${mountpoint} 2> /dev/null
-		gmi_dbg_msg "Trying to mount LiveCD from block device"
+		dbg_msg "Trying to mount LiveCD from block device"
 
-		gmi_is_set "${device}" && DEVICES="$DEVICES ${devices}" 
+		is_set "${device}" && DEVICES="$DEVICES ${devices}" 
 		DEVICES="$DEVICES /dev/hd[a-z]" # IDE devices
 		DEVICES="$DEVICES /dev/iseries/vcd*" # iSeries Devices
 		DEVICES="$DEVICES /dev/sd*" # USB Keychain
@@ -70,16 +70,16 @@ mount_cd_or_iso() {
 			# Check for a block device to mount
 			if [ -b "${dev}" ]
 			then
-				gmi_good_msg "Attempting to mount CD from: ${dev}..."
+				good_msg "Attempting to mount CD from: ${dev}..."
 				mount -r ${dev} ${mountpoint} > /dev/null 2>&1
 				if [ -e ${mountpoint}/livecd ]
 				then
-					gmi_dbg_msg "LiveCD mounted from device ${dev}"
+					dbg_msg "LiveCD mounted from device ${dev}"
 					got_good_root="yes"
 				else
-					gmi_dbg_msg "Not a proper CD medium; unmounting"
+					dbg_msg "Not a proper CD medium; unmounting"
 					umount ${mountpoint} 2> /dev/null
-					gmi_dbg_res
+					dbg_res
 				fi
 			fi
 		done
@@ -113,21 +113,21 @@ do_mount() {
 	local ROOT_TREES='etc root home var'
 	local ROOT_LINKS='bin sbin lib lib32 lib64 boot usr opt'
 
-	gmi_register_env "CDBOOT=1"
+	register_env "CDBOOT=1"
 
 	# If we are in a unionfs stack, don't bother using the symlink
 	# trick to get RW root.  We will directly mount the squashfs as the
 	# root and overlay something over it
 	if [ "${USE_UNIONFS}" = "yes" ]
 	then
-		cdmount=$( gmi_mkmntpoint )
-		imagedir=$( gmi_mkmntpoint )
+		cdmount=$( mkmntpoint )
+		imagedir=$( mkmntpoint )
 		mount -t tmpfs tmpfs ${imagedir}
 	else
-		gmi_dbg_msg "Making tempfs for ${mountpoint}"
+		dbg_msg "Making tempfs for ${mountpoint}"
 		mount -t tmpfs tmpfs ${mountpoint}
 
-		gmi_dbg_msg "Creating directories and files for LiveCD"
+		dbg_msg "Creating directories and files for LiveCD"
 		for dev in dev mnt mnt/cdrom mnt/livecd tmp tmp/.initrd mnt/gentoo sys
 		do
 			mkdir -p ${mountpoint}/${dev}
@@ -139,12 +139,12 @@ do_mount() {
 	fi
 
 	mount_cd_or_iso ${cdmount} ${device}
-	gmi_assert "$?" "Could not mount a LiveCD image" || return 1
+	assert "$?" "Could not mount a LiveCD image" || return 1
 
 	# Caching of the loop fs if wanted
-	if gmi_has "docache" "${opts}"
+	if has "docache" "${opts}"
 	then
-		gmi_good_msg "Copying loop file for caching"
+		good_msg "Copying loop file for caching"
 
 		if ls ${cdmount}/image.* > /dev/null
 		then 
@@ -157,7 +157,7 @@ do_mount() {
 
 		if [ "${retval}" -ne 0 ]
 		then
-			gmi_warn_msg "Failed to cache the loop file.  Lack of memory space?"
+			warn_msg "Failed to cache the loop file.  Lack of memory space?"
 			rm -rf ${imagedir}/image.* ${imagedir}/livecd.* 2>/dev/null
 		fi
 	fi
@@ -170,18 +170,18 @@ do_mount() {
 		then
 			# If we use a union, no need for taking care of symlink black magic to have 
 			# a pseudo-RW system, the user knows what it wants on top the the LiveCD image
-			gmi_dbg_msg "Mounting the LiveCD directly on the root fs (unionfs on top)"
+			dbg_msg "Mounting the LiveCD directly on the root fs (unionfs on top)"
 			${FSLOADERS}/loop --do-mount ${mountpoint} ${im}
-			gmi_dbg_res
+			dbg_res
 
                         test_root_sanity
-			gmi_assert "$?" "The mounted LiveCD root filesystem is not sane" || return 1
+			assert "$?" "The mounted LiveCD root filesystem is not sane" || return 1
 			# We exit now, we use UnionFS and we don't need to go through the
 			# copying magic
 			return 0
 		else
 			${FSLOADERS}/loop --do-mount ${imagedir}/livecd ${im}
-			if gmi_assert "$?" "Could not mount LiveCD loopback image '${im}'"
+			if assert "$?" "Could not mount LiveCD loopback image '${im}'"
 			then
 				break
 			else
@@ -196,7 +196,7 @@ do_mount() {
 
 	FS_LOCATION=mnt/livecd
 
-	gmi_good_msg "Copying read-write image contents to memory..."
+	good_msg "Copying read-write image contents to memory..."
 	# Copy over stuff that should be writable
 	cd ${mountpoint}/${FS_LOCATION}
 	cp -a ${ROOT_TREES} ${mountpoint}
@@ -249,7 +249,7 @@ do_mount() {
 	chmod 1777 tmp
 
         test_root_sanity
-	gmi_assert "$?" "The mounted LiveCD root filesystem is not sane" || return 1
+	assert "$?" "The mounted LiveCD root filesystem is not sane" || return 1
 }
 
 

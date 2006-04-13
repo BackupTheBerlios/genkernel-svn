@@ -15,7 +15,7 @@
 action="${1}"
 
 RESOLV_CONF="/etc/resolv.conf"
-[ -z "${1}" ] && gmi_bad_msg "Error: should be called from udhcpc" && exit 1
+[ -z "${1}" ] && bad_msg "Error: should be called from udhcpc" && exit 1
 [ -n "${broadcast}" ] && BROADCAST="broadcast ${broadcast}"
 [ -n "${subnet}" ] && NETMASK="netmask ${subnet}"
 
@@ -25,7 +25,7 @@ case "${1}" in
 
 		if [ -n "${router}" ]
 		then
-			gmi_dbg_msg "Deleting routers"
+			dbg_msg "Deleting routers"
 			while route del default gw 0.0.0.0 dev ${interface} 2> /dev/null; do
 				:
 			done
@@ -40,7 +40,7 @@ case "${1}" in
 
 		for entry in ${dns}
 		do
-			gmi_dbg_msg adding dns ${entry}
+			dbg_msg adding dns ${entry}
 			echo nameserver ${entry} >> ${RESOLV_CONF}
 		done
 		;;

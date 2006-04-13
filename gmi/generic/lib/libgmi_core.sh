@@ -20,7 +20,7 @@ splash() {
 #
 # ${1} Variable to set (eg 'CDBOOT=1')
 #
-gmi_register_env() {
+register_env() {
         echo "export ${1}" >> /etc/profile.fsloaders
 }
 
@@ -29,7 +29,7 @@ gmi_register_env() {
 #
 # ${1} Variable to test
 #
-gmi_is_set() {
+is_set() {
         if [ "${1}" = "NONE" ]; then
                 return 1
         elif [ -z "${1}" ]; then
@@ -45,7 +45,7 @@ gmi_is_set() {
 #
 # (No parameters)
 #
-gmi_counter() {
+counter() {
 	if [ ! -r /tmp/counter ]
 	then
 		echo "0" > /tmp/counter
@@ -59,8 +59,8 @@ gmi_counter() {
 #
 # (No parameters)
 #
-gmi_mkmntpoint() {
-	local dir=${MNTOTHER}/mountpoint.`gmi_counter`
+mkmntpoint() {
+	local dir=${MNTOTHER}/mountpoint.`counter`
 	mkdir ${dir}
 	echo ${dir}
 }
@@ -69,8 +69,8 @@ gmi_mkmntpoint() {
 #
 # (No parameters)
 #
-gmi_mkumntpoint() {
-	local dir=${UNIONS}/mountpoint.`gmi_counter`
+mkumntpoint() {
+	local dir=${UNIONS}/mountpoint.`counter`
 	mkdir ${dir}
 	echo ${dir}
 }
@@ -86,7 +86,7 @@ gmi_mkumntpoint() {
 # ${2} ...this list...
 # ${3} ...with these separatros (',' if not set)
 #
-gmi_has() {
+has() {
         local separator="${3}"
         [ -z "${separator}" ] && separator=','
         local list="${separator}${2}${separator}"
@@ -101,7 +101,7 @@ gmi_has() {
 #
 # ${1} Message
 #
-gmi_good_msg() {
+good_msg() {
 	msg_string=$1
 	msg_string="${msg_string:-...}"
 	echo -e "${GOOD}>>${NORMAL}${BOLD} ${msg_string} ${NORMAL}"
@@ -112,7 +112,7 @@ gmi_good_msg() {
 #
 # ${1} Message
 #
-gmi_bad_msg() {
+bad_msg() {
 	msg_string=$1
 	msg_string="${msg_string:-...}"
 	echo -e "${BAD}!!${NORMAL}${BOLD} ${msg_string} ${NORMAL}"
@@ -123,7 +123,7 @@ gmi_bad_msg() {
 #
 # ${1} Message
 #
-gmi_warn_msg() {
+warn_msg() {
 	msg_string=$1
 	msg_string="${msg_string:-...}"
 	echo -e "${WARN}**${NORMAL}${BOLD} ${msg_string} ${NORMAL}"
@@ -134,7 +134,7 @@ gmi_warn_msg() {
 #
 # ${1} Message
 #
-gmi_dbg_msg() {
+dbg_msg() {
         [ -n "${DEBUG}" ] && echo -e "${BOLD}dbg${NORMAL} $1"
 }
 
@@ -142,11 +142,11 @@ gmi_dbg_msg() {
 #
 # (No parameters)
 #
-gmi_dbg_res() {
+dbg_res() {
 	if [ "$?" != '0' ]; then
-		gmi_dbg_msg 'error'
+		dbg_msg 'error'
 	else
-		gmi_dbg_msg 'ok'
+		dbg_msg 'ok'
 	fi
 }
 
@@ -156,10 +156,10 @@ gmi_dbg_res() {
 # ${1} Value
 # ${2} Message
 #
-gmi_assert() {
+assert() {
         if [ "${1}" != "0" ]
 	then
-		gmi_bad_msg "${2}"
+		bad_msg "${2}"
 		return 1
         else
 		return 0
@@ -171,16 +171,16 @@ gmi_assert() {
 #
 # (No parameters)
 #
-gmi_shell(){
+shell(){
 	if [ -n "$DEBUG" ]
 	then
-		gmi_good_msg 'Starting debug shell as requested by "debug" option.'
-		gmi_good_msg 'Type "exit" to continue with normal bootup.'
+		good_msg 'Starting debug shell as requested by "debug" option.'
+		good_msg 'Type "exit" to continue with normal bootup.'
 	fi
 	cd /
 
 	# Fix for UML
-	if gmi_is_uml_sys
+	if is_uml_sys
 	then
 		openvt 0 /bin/ash
 	else
@@ -192,7 +192,7 @@ gmi_shell(){
 #
 # (No parameters)
 #
-gmi_parse_cmdline() {
+parse_cmdline() {
 	for x in ${CMDLINE}
 	do
 		case "${x}" in
@@ -272,7 +272,7 @@ gmi_parse_cmdline() {
 # ${1} File path 
 # ${2} Directory
 #
-gmi_unpack() {
+unpack() {
 	local file="${1}"
 	local out="${2}"
 	local tarflags
@@ -292,7 +292,7 @@ gmi_unpack() {
 			tarflags=''
 			;;
 		*)
-			gmi_dbg_msg "Unrecognized filetype to unpack: ${file}!"
+			dbg_msg "Unrecognized filetype to unpack: ${file}!"
 			return 1
 			;;
 	esac
@@ -300,7 +300,7 @@ gmi_unpack() {
 	tar -${tarflags}xpf ${file} -C${out}
 	if [ "$?" != "0" ]
 	then
-		gmi_dbg_msg "Problem when unpacking ${file} to ${out}"
+		dbg_msg "Problem when unpacking ${file} to ${out}"
 		return 1
 	fi
 }

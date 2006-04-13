@@ -40,11 +40,11 @@ do_mount() {
 	local mount_opts="${4}"
 	local _mount_opts
 
-	gmi_is_set ${mount_opts} && _mount_opts="-o ${mount_opts}"
+	is_set ${mount_opts} && _mount_opts="-o ${mount_opts}"
 
-	gmi_dbg_msg "mount -t nfs ${_mount_opts} ${server_ip}:${dir} ${mountpoint}"
+	dbg_msg "mount -t nfs ${_mount_opts} ${server_ip}:${dir} ${mountpoint}"
 	mount -t nfs ${_mount_opts} ${server_ip}:${dir} ${mountpoint}
-	gmi_assert "$?" "Could not mount NFS share '${server_ip}:${dir}'" || return 1
+	assert "$?" "Could not mount NFS share '${server_ip}:${dir}'" || return 1
 }
 
 

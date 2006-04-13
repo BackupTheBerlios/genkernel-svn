@@ -39,24 +39,24 @@ do_mount() {
 	local dev
 	local _mount_opts
 
-	gmi_is_set ${mount_opts} && _mount_opts="-o ${mount_opts}"
+	is_set ${mount_opts} && _mount_opts="-o ${mount_opts}"
 
 	if [ -e /bin/lvm ]
 	then
 		ln -s /bin/lvm /bin/vgscan
 		ln -s /bin/lvm /bin/vgchange
 
-		gmi_dbg_msg "Scanning for Volume Groups"
+		dbg_msg "Scanning for Volume Groups"
 		/bin/vgscan --ignorelockingfailure --mknodes 2>/dev/null
-		gmi_dbg_msg "Activating Volume Groups"
+		dbg_msg "Activating Volume Groups"
 		/bin/vgchange -ay --ignorelockingfailure 2>/dev/null
 
-		gmi_dbg_msg "mount ${_mount_opts} ${lvmdevice} ${mountpoint}"
+		dbg_msg "mount ${_mount_opts} ${lvmdevice} ${mountpoint}"
 		mount ${_mount_opts} ${lvmdevice} ${mountpoint}
-		gmi_assert "$?" "Could not mount the LVM device '${lvmdevice}'" || return 1
+		assert "$?" "Could not mount the LVM device '${lvmdevice}'" || return 1
 
 	else
-		gmi_error_msg "/bin/lvm not found: skipping LVM2 volume group activation!"
+		error_msg "/bin/lvm not found: skipping LVM2 volume group activation!"
 		return 1
 	fi
 }

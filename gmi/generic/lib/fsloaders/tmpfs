@@ -38,11 +38,11 @@ do_mount() {
 	local mount_opts="${2}"
 	local _mount_opts
 
-	gmi_is_set ${mount_opts} && _mount_opts="-o ${mount_opts}"
+	is_set ${mount_opts} && _mount_opts="-o ${mount_opts}"
 
-	gmi_dbg_msg "mount -t tmpfs ${_mount_opts} tmpfs ${mountpoint}"
+	dbg_msg "mount -t tmpfs ${_mount_opts} tmpfs ${mountpoint}"
 	mount -t tmpfs ${_mount_opts} tmpfs ${mountpoint}
-	gmi_assert "$?" "Could not mount tmpfs" || return 1
+	assert "$?" "Could not mount tmpfs" || return 1
 }
 
 

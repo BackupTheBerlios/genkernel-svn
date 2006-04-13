@@ -40,13 +40,13 @@ do_mount() {
 	local livecdopts="${4}"
 	local loop_mntpoint
 
-	loop_mntpoint="$( gmi_mkmntpoint )"
+	loop_mntpoint="$( mkmntpoint )"
 
-	gmi_dbg_msg "Mounting NFS share ${server_ip}:$( dirname ${cdfilepath} )"
+	dbg_msg "Mounting NFS share ${server_ip}:$( dirname ${cdfilepath} )"
 	${FSLOADERS}/nfs --do-mount ${loop_mntpoint} ${server_ip} $( dirname ${cdfilepath} ) ro,nolock
 	[ "$?" != "0" ] && return 1
 
-	gmi_dbg_msg "Mounting LiveCD"
+	dbg_msg "Mounting LiveCD"
 	${FSLOADERS}/livecd --do-mount ${mountpoint} ${loop_mntpoint}/$( basename ${cdfilepath} ) ${livecdopts}
 	return $?
 }

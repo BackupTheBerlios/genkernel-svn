@@ -14,7 +14,7 @@
 # 
 # (No parameters)
 #
-gmi_setup_networking() {
+setup_networking() {
 	if [ -n "${IP}" ]
 	then
 		#ip=<client-ip>:<server-ip>:<gw-ip>:<netmask>:<hostname>:<device>:<autoconf>
@@ -22,16 +22,16 @@ gmi_setup_networking() {
 		then
 			if [ -e /sbin/udhcpc ]
 			then
-				gmi_good_msg "Setting up networking (${IP})"
+				good_msg "Setting up networking (${IP})"
 				/sbin/udhcpc --now -s ${LIBGMI}/udhcp.sh > /dev/null
-				gmi_assert "$?" "\t${IP} setup failed" || return 1
+				assert "$?" "\t${IP} setup failed" || return 1
 			fi
 
 		elif [ "${IP}" = "bootp" -o "${IP}" = "rarp" ]
 		then
-			gmi_good_msg "Using kernel IP configuration (${IP})"
+			good_msg "Using kernel IP configuration (${IP})"
 		else
-			gmi_good_msg "Setting up networking (manual config)"
+			good_msg "Setting up networking (manual config)"
 			CLIENT_IP=$(echo ${IP}|cut -d : -f 1)
 			SERVER_IP=$(echo ${IP}|cut -d : -f 2)
 			GW_IP=$(echo ${IP}|cut -d : -f 3)

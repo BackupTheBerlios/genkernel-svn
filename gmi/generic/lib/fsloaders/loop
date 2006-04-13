@@ -40,19 +40,19 @@ do_mount() {
 	case "${looptype}" in
 		# .mo is the extension in SLAX for unionizable squashfs modules
 		"squashfs" | "mo")
-			gmi_dbg_msg "Mounting SquashFS file"
+			dbg_msg "Mounting SquashFS file"
 			mount -t squashfs -o loop,ro ${loopfile} ${mountpoint}
-			gmi_assert "$?" "Could not mount SquashFS file '$( basename ${loopfile} )'" || return 1
+			assert "$?" "Could not mount SquashFS file '$( basename ${loopfile} )'" || return 1
 			;;
 		"iso")
-			gmi_dbg_msg "Mounting ISO file"
+			dbg_msg "Mounting ISO file"
 			mount -t iso9660 -o loop,ro ${loopfile} ${mountpoint}
-			gmi_assert "$?" "Could not mount ISO file '$( basename ${loopfile} )'" || return 1
+			assert "$?" "Could not mount ISO file '$( basename ${loopfile} )'" || return 1
 			;;
 		*)
-			gmi_dbg_msg "Mounting auto loopback"
+			dbg_msg "Mounting auto loopback"
 			mount -t auto -o loop,ro ${loopfile} ${mountpoint} 2> /dev/null  ### this one may well fail...
-			gmi_assert "$?" "Could not mount auto loop file '$( basename ${loopfile} )'" || return 1
+			assert "$?" "Could not mount auto loop file '$( basename ${loopfile} )'" || return 1
 			;;
 	esac
 }

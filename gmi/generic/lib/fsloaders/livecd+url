@@ -51,15 +51,15 @@ do_mount() {
 		opts="${url2}"
 	fi
 
-	gmi_dbg_msg "Downloading ISO image to memory"
-	gmi_dbg_msg "from ${url}"
-	iso_tmpfs="$( gmi_mkmntpoint )"
+	dbg_msg "Downloading ISO image to memory"
+	dbg_msg "from ${url}"
+	iso_tmpfs="$( mkmntpoint )"
 	mount -t tmpfs tmpfs "${iso_tmpfs}"
 	cd "${iso_tmpfs}"
 	wget -O loop.iso "${url}"
-	gmi_assert "$?" "Could not download LiveCD image from '${url}'" || return 1
+	assert "$?" "Could not download LiveCD image from '${url}'" || return 1
 
-	gmi_dbg_msg "Mounting LiveCD"
+	dbg_msg "Mounting LiveCD"
 	${FSLOADERS}/livecd --do-mount ${mountpoint} ${iso_tmpfs}/loop.iso ${opts}
 	return $?
 }

@@ -46,12 +46,12 @@ do_mount() {
 
 	for dev in $( echo "${devices}" | sed 's/,/ /g' )
 	do
-		gmi_dbg_msg 'Asking md to setup ${dev}'
+		dbg_msg 'Asking md to setup ${dev}'
 		${FSLOADERS}/md --setup-device "${dev}"
-		gmi_assert "$?" "Could not setup MD device '${dev}'" || return 1
+		assert "$?" "Could not setup MD device '${dev}'" || return 1
 	done
 
-	gmi_dbg_msg "${FSLOADERS}/lvm2 --do-mount ${mountpoint} ${lvmdevice} ${mount_opts}"
+	dbg_msg "${FSLOADERS}/lvm2 --do-mount ${mountpoint} ${lvmdevice} ${mount_opts}"
 	${FSLOADERS}/lvm2 --do-mount ${mountpoint} ${lvmdevice} ${mount_opts}
 	return $?
 }

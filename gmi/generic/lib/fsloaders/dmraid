@@ -43,21 +43,21 @@ do_mount() {
 	local dmraid_opts="${4}"
 	local _mount_opts
 
-	gmi_is_set ${mount_opts} && _mount_opts="-o ${mount_opts}"
+	is_set ${mount_opts} && _mount_opts="-o ${mount_opts}"
 
 	if [ -e '/sbin/dmraid' ]
 	then
-		gmi_dbg_msg "Activating Device-Mapper RAID(s)"
-		if gmi_is_set "${dmraid_opts}"
+		dbg_msg "Activating Device-Mapper RAID(s)"
+		if is_set "${dmraid_opts}"
 		then
 			/sbin/dmraid -ay
 		else
 			/sbin/dmraid -ay ${dmraid_opts}
 		fi
 
-		gmi_dbg_msg "mount ${_mount_opts} ${device} ${mountpoint}"
+		dbg_msg "mount ${_mount_opts} ${device} ${mountpoint}"
 		mount ${_mount_opts} ${device} ${mountpoint}
-		gmi_assert "$?" "Could not mount DMRAID device '${device}'" || return 1
+		assert "$?" "Could not mount DMRAID device '${device}'" || return 1
 	else
 		return 1
 	fi

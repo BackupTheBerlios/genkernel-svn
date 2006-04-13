@@ -41,7 +41,7 @@ splash 'init'
 [ -e /sbin/insmod ] && mv /sbin/insmod /bin/insmod
 
 # suppress kernel messages
-gmi_quiet_kmsg 
+quiet_kmsg 
 
 # busybox udev replacement
 mdev -s
@@ -51,13 +51,13 @@ echo /sbin/mdev > /proc/sys/kernel/hotplug
 
 # Read the cmdline settings
 CMDLINE=$(cat /proc/cmdline)
-gmi_parse_cmdline
+parse_cmdline
 
 # Must export it for external scripts
 [ -n "${DEBUG}" ] && export DEBUG="yes"
 
 # load the kernel modules
-gmi_load_modules
+load_modules
 
 
 # Make needed directories
@@ -79,26 +79,26 @@ do
 		break
 	fi
 
-	gmi_setup_networking
+	setup_networking
 
-	if ! gmi_assert "$?" "Unable to setup networking."
+	if ! assert "$?" "Unable to setup networking."
 	then
-		gmi_bad_msg 
-		gmi_bad_msg "The possible IP parameters are:"
-		gmi_bad_msg "\t'ip=dhcp' for automatic setup using DHCP"
-		gmi_bad_msg "\t'ip=<client-ip>::<gw-ip>:<netmask>:<hostname>:<device>'"
-		gmi_bad_msg "\t\tyou may leave <netmask>,<hostname> and <device>"
-		gmi_bad_msg "\t\tempty to use defaults (you can remove trailing ':')"
-		gmi_bad_msg "Examples:"
-		gmi_bad_msg "\tip=10.0.0.22::10.0.0.1:255.0.0.0:localhost:eth0"
-		gmi_bad_msg "\tip=10.0.0.22::10.0.0.1:::eth0"
-		gmi_bad_msg "\tip=10.0.0.22::10.0.0.1"
-		gmi_bad_msg 
-		gmi_bad_msg "You may add 'nameserver=w.x.y.z' to setup domain name resolution."
-		gmi_bad_msg "Example: ip=10.0.0.22:10.0.0.1 nameserver=10.0.0.2"
-		gmi_bad_msg 
-		gmi_bad_msg "Please provide a valid ip parameter or 'continue' to boot without"
-		gmi_bad_msg "setting up networking ..."
+		bad_msg 
+		bad_msg "The possible IP parameters are:"
+		bad_msg "\t'ip=dhcp' for automatic setup using DHCP"
+		bad_msg "\t'ip=<client-ip>::<gw-ip>:<netmask>:<hostname>:<device>'"
+		bad_msg "\t\tyou may leave <netmask>,<hostname> and <device>"
+		bad_msg "\t\tempty to use defaults (you can remove trailing ':')"
+		bad_msg "Examples:"
+		bad_msg "\tip=10.0.0.22::10.0.0.1:255.0.0.0:localhost:eth0"
+		bad_msg "\tip=10.0.0.22::10.0.0.1:::eth0"
+		bad_msg "\tip=10.0.0.22::10.0.0.1"
+		bad_msg 
+		bad_msg "You may add 'nameserver=w.x.y.z' to setup domain name resolution."
+		bad_msg "Example: ip=10.0.0.22:10.0.0.1 nameserver=10.0.0.2"
+		bad_msg 
+		bad_msg "Please provide a valid ip parameter or 'continue' to boot without"
+		bad_msg "setting up networking ..."
 		echo -n "ip="
 		### TODO : have a proper read -t, if user does not provide info in, say, 10secs, 
 		### break out of the while loop.
@@ -121,9 +121,9 @@ do
 done
 
 
-[ "${FORCED_UNIONFS}" = "yes" ] && gmi_setup_unionfs
+[ "${FORCED_UNIONFS}" = "yes" ] && setup_unionfs
 
-[ -n "$DEBUG" ] && gmi_shell
+[ -n "$DEBUG" ] && shell
 
 got_good_root=no
 while [ "${got_good_root}" != "yes" ]
@@ -132,13 +132,13 @@ do
 	if [ "${REAL_ROOT}" = '' ]
 	then
 		echo
-		gmi_bad_msg "Please specify a valid real_root parameter to boot, 'help' or 'shell' ..."
+		bad_msg "Please specify a valid real_root parameter to boot, 'help' or 'shell' ..."
 		if [ "${USE_UNIONFS}" = "yes" ]
 		then
 			# We already started unionizing... shall we add something else?
-			gmi_bad_msg "If some filesystems were already mounted sucessfully, add the ones you "
-			gmi_bad_msg "would like mounted over those, or type 'continue' to boot without adding"
-			gmi_bad_msg "any filesystem to the UnionFS stack."
+			bad_msg "If some filesystems were already mounted sucessfully, add the ones you "
+			bad_msg "would like mounted over those, or type 'continue' to boot without adding"
+			bad_msg "any filesystem to the UnionFS stack."
 		fi
 		echo -n "real_root="
 		read REAL_ROOT
@@ -153,7 +153,7 @@ do
 
 	if [ "${REAL_ROOT}" = 'shell' ]
 	then
-		gmi_shell
+		shell
 		REAL_ROOT=''
 		got_good_root=no
 		continue
@@ -164,23 +164,23 @@ do
 		ldr="$( echo ${REAL_ROOT} | sed 's/^help *//g' )"
 		if [ -n "${ldr}" ]
 		then
-			gmi_good_msg "Help for '${ldr}':"
+			good_msg "Help for '${ldr}':"
 			if [ -x "${FSLOADERS}/${ldr}" ]
 			then
 				${FSLOADERS}/${ldr} --help
 			else
-				gmi_warn_msg "'${ldr}' is not a valid filesystem loader"
-				gmi_warn_msg "Type 'help' for more information"
+				warn_msg "'${ldr}' is not a valid filesystem loader"
+				warn_msg "Type 'help' for more information"
 			fi
 		else
-			gmi_good_msg "List of root filesystem loaders and their parameters:"
+			good_msg "List of root filesystem loaders and their parameters:"
 			for ldr in ${FSLOADERS}/*
 			do
 				_ldr=$( basename ${ldr} )
 				echo -en "   :: ${BOLD}${_ldr}${NORMAL}:"
 				${FSLOADERS}/${_ldr} --parameters | sed 's/ /:/g'
 			done
-			gmi_good_msg "Type 'help <fsloader>' for more information (example: real_root=help livecd)"
+			good_msg "Type 'help <fsloader>' for more information (example: real_root=help livecd)"
 		fi
 		REAL_ROOT=''
 		got_good_root=no
@@ -196,11 +196,11 @@ do
 	# If unionfs is needed by a ';' stacking, enable it.
 	if echo ${REAL_ROOT} | grep ";" > /dev/null
 	then
-		gmi_setup_unionfs
+		setup_unionfs
 	fi
 
-	gmi_dbg_msg "REAL_ROOT=${REAL_ROOT}"
-	gmi_good_msg "Mounting filesystems"
+	dbg_msg "REAL_ROOT=${REAL_ROOT}"
+	good_msg "Mounting filesystems"
 	for rootfs in $( echo "${REAL_ROOT}"  | sed 's/;/ /g' )
 	do
 		# If rootfs is starting with /, assume it is a block device
@@ -210,7 +210,7 @@ do
 		fs_loader="$( echo ${rootfs} | cut -f1 -d: )"
 		if [ ! -x ${FSLOADERS}/${fs_loader} ]
 		then
-			gmi_bad_msg "Unknown filesystem loader '${fs_loader}'"
+			bad_msg "Unknown filesystem loader '${fs_loader}'"
 			got_good_root="no"
 			REAL_ROOT=''
 			break
@@ -225,8 +225,8 @@ do
 			fs_args="$( echo ${rootfs} | sed 's/::/:NONE:/g' | cut -f2- -d: | sed 's/:/ /g'; )"
 		fi
 
-		mountpoint=$( gmi_mkumntpoint )
-		gmi_good_msg "\t${rootfs}"
+		mountpoint=$( mkumntpoint )
+		good_msg "\t${rootfs}"
 		${FSLOADERS}/${fs_loader} --do-mount ${mountpoint} ${fs_args}
 		retval=$?
 
@@ -240,20 +240,20 @@ do
 
 			if [ "${USE_UNIONFS}" = "yes" ]
 			then
-				gmi_dbg_msg "Recorded ${mountpoint} as a union, will insert later"
+				dbg_msg "Recorded ${mountpoint} as a union, will insert later"
 			else
-				gmi_dbg_msg "Moving ${mountpoint} to ${ROOTFS}"
+				dbg_msg "Moving ${mountpoint} to ${ROOTFS}"
 				mount -o move ${mountpoint} ${ROOTFS}
-				gmi_dbg_res
+				dbg_res
 				break
 			fi
 		else
 			rm -rf ${mountpoint}
-			gmi_bad_msg "Mounting of '${rootfs}' failed"
-			gmi_bad_msg "Help for the '${fs_loader}' filesystem loader:"
+			bad_msg "Mounting of '${rootfs}' failed"
+			bad_msg "Help for the '${fs_loader}' filesystem loader:"
 			${FSLOADERS}/${fs_loader} --help
-			gmi_bad_msg "Try passing the 'debug' option on the kernel command-line for more"
-			gmi_bad_msg "information before filing a bug report."
+			bad_msg "Try passing the 'debug' option on the kernel command-line for more"
+			bad_msg "information before filing a bug report."
 			got_good_root=no
 			REAL_ROOT=''
 			break
@@ -265,32 +265,32 @@ done
 if [ "${USE_UNIONFS}" = "yes" ]
 then
 	got_one_broken_union="no"
-	gmi_good_msg "Adding unions to the root filesystem"
+	good_msg "Adding unions to the root filesystem"
 	for rootfs in ${UNIONS}/*
 	do
-		gmi_dbg_msg "Inserting for rootfs ${rootfs}"
+		dbg_msg "Inserting for rootfs ${rootfs}"
 		# get the mode from the underlying fs' mode
 		mode="rw"
-		gmi_has "ro" "$( cat /proc/mounts | grep "${rootfs} " |  cut -f4 -d' ' )" && mode="ro"
+		has "ro" "$( cat /proc/mounts | grep "${rootfs} " |  cut -f4 -d' ' )" && mode="ro"
 
-		gmi_good_msg "\t$( cat /proc/mounts | grep "${rootfs} " | cut -f1 -d' ' ) (${mode})"
+		good_msg "\t$( cat /proc/mounts | grep "${rootfs} " | cut -f1 -d' ' ) (${mode})"
 		/sbin/unionctl ${ROOTFS} --add --after 0 --mode ${mode} ${rootfs} 2> /dev/null
 		if [ "$?" != "0" ]
 		then
-			gmi_warn_msg "\t\tfailed, but continuing"
+			warn_msg "\t\tfailed, but continuing"
 			got_one_broken_union="yes"
 		fi
 	done
 
 	if [ "${got_one_broken_union}" = "yes" ]
 	then
-		gmi_warn_msg "One of the unions was not added successfully."
-		gmi_warn_msg "GMI will try to continue, but you may experience problems."
-		gmi_warn_msg ""
-		gmi_warn_msg "Try passing the 'debug' option on the kernel command-line for more"
-		gmi_warn_msg "information before filing a bug report."
-		gmi_warn_msg ""
-		gmi_warn_msg "(Waiting 10 seconds...  CTRL-ALT-DEL to reboot now.)"
+		warn_msg "One of the unions was not added successfully."
+		warn_msg "GMI will try to continue, but you may experience problems."
+		warn_msg ""
+		warn_msg "Try passing the 'debug' option on the kernel command-line for more"
+		warn_msg "information before filing a bug report."
+		warn_msg ""
+		warn_msg "(Waiting 10 seconds...  CTRL-ALT-DEL to reboot now.)"
 		sleep 10
 	fi
 
@@ -308,13 +308,13 @@ then
 	then
 		mount -o move ${GMIMNT} ${ROOTFS}/.gmi
 	else
-		gmi_warn_msg "Could not move the mountpoints inside the root filesystem."
-		gmi_warn_msg "GMI will try to continue, but you may experience problems."
-		gmi_warn_msg ""
-		gmi_warn_msg "Make sure your real_root parameter yields a read-write root filesystem"
-		gmi_warn_msg "or that the '/.gmi' directory exists."
-		gmi_warn_msg ""
-		gmi_warn_msg "(Waiting 10 seconds...  CTRL-ALT-DEL to reboot now.)"
+		warn_msg "Could not move the mountpoints inside the root filesystem."
+		warn_msg "GMI will try to continue, but you may experience problems."
+		warn_msg ""
+		warn_msg "Make sure your real_root parameter yields a read-write root filesystem"
+		warn_msg "or that the '/.gmi' directory exists."
+		warn_msg ""
+		warn_msg "(Waiting 10 seconds...  CTRL-ALT-DEL to reboot now.)"
 		sleep 10
 	fi
 else
@@ -328,22 +328,22 @@ then
 	# Remove any trailing ';' (a habit of C coders...)
 	UNPACK=$( echo ${UNPACK} | sed 's/;$//g' )
 
-	gmi_good_msg "Unpacking"
+	good_msg "Unpacking"
 	for pkg in $( echo ${UNPACK} | sed 's/;/ /g' )
 	do
 		if [ -d ${ROOTFS}${pkg} ]
 		then
-			gmi_good_msg "\t${pkg}"
+			good_msg "\t${pkg}"
 			for pkgfile in ${ROOTFS}${pkg}/*
 			do
-				gmi_good_msg "\t\t$( basename ${pkgfile} )"
-				gmi_unpack ${pkgfile} ${ROOTFS}
-				[ "$?" != "0" ] && gmi_warn_msg "\t\t\tfailed, but continuing"
+				good_msg "\t\t$( basename ${pkgfile} )"
+				unpack ${pkgfile} ${ROOTFS}
+				[ "$?" != "0" ] && warn_msg "\t\t\tfailed, but continuing"
 			done
 		else
-			gmi_good_msg "\t${pkg}"
-			gmi_unpack ${ROOTFS}${pkg} ${ROOTFS}
-			[ "$?" != "0" ] && gmi_warn_msg "\t\tfailed, but continuing"
+			good_msg "\t${pkg}"
+			unpack ${ROOTFS}${pkg} ${ROOTFS}
+			[ "$?" != "0" ] && warn_msg "\t\tfailed, but continuing"
 		fi
 	done
 fi
@@ -351,7 +351,7 @@ fi
 
 ### TODO: splash stuff...
 # Required for gensplash to work.  Not an issue with the initrd as this device isnt created there and is not needed.
-[ -n "$DEBUG" ] && gmi_shell
+[ -n "$DEBUG" ] && shell
 if [ -e /dev/tty1 -a ! -e ${ROOTFS}/dev/tty1 ]
 then
 	mv /dev/tty1 ${ROOTFS}/dev
@@ -361,11 +361,11 @@ fi
 unset DEBUG
 unset USE_UNIONFS
 
-gmi_verbose_kmsg 
+verbose_kmsg 
 
 # Make sure we are in the root before the switch_root command is called
 cd /
-gmi_good_msg "Transferring control to ${INIT} ..."
+good_msg "Transferring control to ${INIT} ..."
 umount /sys
 umount /proc
 if [ -n "${CONSOLE}" ]

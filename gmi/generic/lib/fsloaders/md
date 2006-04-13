@@ -40,11 +40,11 @@ setup_device() {
 	if [ ! -e /dev/md${MD_NUMBER} ]
 	then
 		mknod /dev/md${MD_NUMBER} b 9 ${MD_NUMBER} >/dev/null 2>&1
-		gmi_assert "$?" "Creation of '/dev/md${MD_NUMBER}' failed" || return 1
+		assert "$?" "Creation of '/dev/md${MD_NUMBER}' failed" || return 1
 	fi
 
 	mdstart /dev/md${MD_NUMBER}
-	gmi_assert "$?" "Starting of '/dev/md${MD_NUMBER}' failed" || return 1
+	assert "$?" "Starting of '/dev/md${MD_NUMBER}' failed" || return 1
 }
 
 
@@ -56,13 +56,13 @@ do_mount() {
 	local dmraid_opts="${4}"
 	local _mount_opts
 
-	gmi_is_set ${mount_opts} && _mount_opts="-o ${mount_opts}"
+	is_set ${mount_opts} && _mount_opts="-o ${mount_opts}"
 
 	setup_device "${device}"
 
-	gmi_dbg_msg "mount ${_mount_opts} ${device} ${mountpoint}"
+	dbg_msg "mount ${_mount_opts} ${device} ${mountpoint}"
 	mount ${_mount_opts} ${device} ${mountpoint}
-	gmi_assert "Could not mount MD device '${device}'" || return 1
+	assert "Could not mount MD device '${device}'" || return 1
 }
 
 

@@ -40,16 +40,16 @@ do_mount() {
 	local mount_opts="${3}"
 	local _mount_opts
 
-	gmi_is_set ${mount_opts} && _mount_opts="-o ${mount_opts}"
+	is_set ${mount_opts} && _mount_opts="-o ${mount_opts}"
 
 	if [ -e '/sbin/evms_activate' ]
 	then
-		gmi_dbg_msg "Activating EVMS"
+		dbg_msg "Activating EVMS"
 		evms_activate
 
-		gmi_dbg_msg "mount ${_mount_opts} ${device} ${mountpoint}"
+		dbg_msg "mount ${_mount_opts} ${device} ${mountpoint}"
 		mount ${_mount_opts} ${device} ${mountpoint}
-		gmi_assert "$?" "Could not mount EVMS2 device '${device}'" || return 1
+		assert "$?" "Could not mount EVMS2 device '${device}'" || return 1
         else
 		return 1
 	fi
