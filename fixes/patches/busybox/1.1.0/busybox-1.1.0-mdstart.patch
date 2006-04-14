@@ -1,0 +1,117 @@
+diff -Nur busybox-1.1.0/include/applets.h busybox-1.1.0-plasmaroo/include/applets.h
+--- busybox-1.1.0/include/applets.h	2006-01-11 05:44:14.000000000 +0000
++++ busybox-1.1.0-plasmaroo/include/applets.h	2006-04-14 03:34:00.000000000 +0100
+@@ -417,6 +417,9 @@
+ #ifdef CONFIG_MDEV
+ 	APPLET(mdev, mdev_main, _BB_DIR_SBIN, _BB_SUID_NEVER)
+ #endif
++#ifdef CONFIG_MDSTART
++	APPLET(mdstart, mdstart_main, _BB_DIR_SBIN, _BB_SUID_NEVER)
++#endif
+ #ifdef CONFIG_MESG
+ 	APPLET(mesg, mesg_main, _BB_DIR_USR_BIN, _BB_SUID_NEVER)
+ #endif
+diff -Nur busybox-1.1.0/include/usage.h busybox-1.1.0-plasmaroo/include/usage.h
+--- busybox-1.1.0/include/usage.h	2006-01-11 05:44:14.000000000 +0000
++++ busybox-1.1.0-plasmaroo/include/usage.h	2006-04-14 03:34:00.000000000 +0100
+@@ -1861,6 +1861,9 @@
+ 	"the last line match .* to override this.)\n\n"
+ #endif
+ 
++#define mdstart_trivial_usage \
++	"{[PARTITION] MD-NODE}..."
++	
+ #define mesg_trivial_usage \
+ 	"[y|n]"
+ #define mesg_full_usage \
+diff -Nur busybox-1.1.0/util-linux/Config.in busybox-1.1.0-plasmaroo/util-linux/Config.in
+--- busybox-1.1.0/util-linux/Config.in	2006-01-11 05:44:22.000000000 +0000
++++ busybox-1.1.0-plasmaroo/util-linux/Config.in	2006-04-14 03:36:13.000000000 +0100
+@@ -275,6 +275,13 @@
+ 	  entry is matched, devices are created with default 0:0 660.  (Make
+ 	  the last line match .* to override this.)
+ 
++config CONFIG_MDSTART
++	bool "mdstart"
++	default n
++	help
++	  Allows you to autostart /dev/md devices if using an initramfs to
++	  boot.
++
+ config CONFIG_MKSWAP
+ 	bool "mkswap"
+ 	default n
+diff -Nur busybox-1.1.0/util-linux/Makefile.in busybox-1.1.0-plasmaroo/util-linux/Makefile.in
+--- busybox-1.1.0/util-linux/Makefile.in	2006-01-11 05:44:22.000000000 +0000
++++ busybox-1.1.0-plasmaroo/util-linux/Makefile.in	2006-04-14 03:34:00.000000000 +0100
+@@ -24,6 +24,7 @@
+ UTILLINUX-$(CONFIG_IPCRM)         +=ipcrm.o
+ UTILLINUX-$(CONFIG_IPCS)          +=ipcs.o
+ UTILLINUX-$(CONFIG_LOSETUP)       +=losetup.o
++UTILLINUX-$(CONFIG_MDSTART)       +=mdStart.o
+ UTILLINUX-$(CONFIG_MDEV)          +=mdev.o
+ UTILLINUX-$(CONFIG_MKFS_MINIX)    +=mkfs_minix.o
+ UTILLINUX-$(CONFIG_MKSWAP)        +=mkswap.o
+diff -Nur busybox-1.1.0/util-linux/mdStart.c busybox-1.1.0-plasmaroo/util-linux/mdStart.c
+--- busybox-1.1.0/util-linux/mdStart.c	1970-01-01 01:00:00.000000000 +0100
++++ busybox-1.1.0-plasmaroo/util-linux/mdStart.c	2006-04-14 03:34:00.000000000 +0100
+@@ -0,0 +1,59 @@
++/*
++ * Linux 2.6(+) RAID Autostarter
++ *
++ * Copyright (C) 2005 by Tim Yamin <plasmaroo@gentoo.org> <plasm@roo.me.uk>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
++ * General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
++ *
++ */
++
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <fcntl.h>
++#include <sys/ioctl.h>
++#include <linux/major.h>
++#include <linux/raid/md_u.h>
++
++extern int
++mdstart_main(int argc, char *argv[])
++{
++	int i, fd, part = 0, retval = 0;
++
++	if(argc < 2)
++	{
++		bb_show_usage();
++	}
++
++	for(i = 1; i < argc; i++)
++	{
++		if(sscanf(argv[i], "%d", &part) == 1)
++			continue;
++
++		fd = open(argv[i], 0, 0);
++		if (fd >= 0)
++		{
++			ioctl(fd, RAID_AUTORUN, part);
++			close(fd);
++		} else
++		{
++			printf("Error: Failed to open %s!\n", argv[i]);
++			retval=1;
++		}
++
++		part = 0;
++	}
++
++	return retval;
++}
