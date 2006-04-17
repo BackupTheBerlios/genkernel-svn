@@ -17,39 +17,52 @@
 setup_networking() {
 	if [ -n "${IP}" ]
 	then
-		#ip=<client-ip>:<server-ip>:<gw-ip>:<netmask>:<hostname>:<device>:<autoconf>
-		if [ "${IP}" = "dhcp" ]
+		# From /usr/src/linux/Documentation/nfsroot.txt
+		# ip=<client-ip>:<server-ip>:<gw-ip>:<netmask>:<hostname>:<device>:<autoconf>
+
+		local client_ip=$(  echo ${IP} | cut -d':' -f1 )
+		local server_ip=$(  echo ${IP} | cut -d':' -f2 )
+		local gw_ip=$(      echo ${IP} | cut -d':' -f3 )
+		local netmask=$(    echo ${IP} | cut -d':' -f4 )
+		local hostname=$(   echo ${IP} | cut -d':' -f5 )
+		local ethdev=$(     echo ${IP} | cut -d':' -f6 )
+		local autoconf=$(   echo ${IP} | cut -d':' -f7 )
+
+		# default device is eth0
+		[ -z "${ethdev}" ] && ethdev="eth0"
+
+		# if last param is dhcp, get the interface from <device>
+		# and use udhcpc on it		
+		if [ "${autoconf}" = "dhcp" ]
 		then
+			# Only 'dhcp' was on the line, the user did not
+			# use the full '::::::dhcp'.  Must correct 'ethdev'
+			[ "${ethdev}" = "dhcp" ] && ethdev="eth0"
+
 			if [ -e /sbin/udhcpc ]
 			then
-				good_msg "Setting up networking (${IP})"
-				/sbin/udhcpc --now -s ${LIBGMI}/udhcp.sh > /dev/null
-				assert "$?" "\t${IP} setup failed" || return 1
+				good_msg "Setting up networking on ${ethdev} (${autoconf})"
+				/sbin/udhcpc --now -i ${ethdev} -s ${LIBGMI}/udhcp.sh > /dev/null
+				assert "$?" "\t'ip=${IP}' setup failed" || return 1
 			fi
 
-		elif [ "${IP}" = "bootp" -o "${IP}" = "rarp" ]
+		elif [ "${autoconf}" = "bootp" -o "${autoconf}" = "rarp" ]
 		then
-			good_msg "Using kernel IP configuration (${IP})"
+			good_msg "Using kernel IP configuration (${autoconf})"
+
 		else
 			good_msg "Setting up networking (manual config)"
-			CLIENT_IP=$(echo ${IP}|cut -d : -f 1)
-			SERVER_IP=$(echo ${IP}|cut -d : -f 2)
-			GW_IP=$(echo ${IP}|cut -d : -f 3)
-			NETMASK=$(echo ${IP}|cut -d : -f 4)
-			HOSTNAME=$(echo ${IP}|cut -d : -f 5)
-			ETH_DEVICE=$(echo ${IP}|cut -d : -f 6)
 
-			[ -n "${ETH_DEVICE}" ] && IFCONFIG_ETH_DEVICE="${ETH_DEVICE}" || IFCONFIG_ETH_DEVICE="eth0"
 			# busybox ifconfig crashes if we dont bring up the device first	
-			ifconfig ${IFCONFIG_ETH_DEVICE} up > /dev/null 2>&1
-			[ -n "${NETMASK}" ] && IFCONFIG_ARGS="${IFCONFIG_ARGS} ${NETMASK}"
-			
-			# busybox ifconfig crashes if we dont bring up the device first	
-			ifconfig ${IFCONFIG_ETH_DEVICE} ${CLIENT_IP} ${IFCONFIG_ARGS} up > /dev/null 2>&1
+			# ifconfig ${ethdev} up > /dev/null 2>&1
 
-			if [ -n "${GW_IP}" ]
+			ifconfig ${ethdev} ${client_ip} ${netmask:-} up > /dev/null 2>&1
+			assert "$?" "\t'ip=${IP}' setup failed" || return 1
+
+			if [ -n "${gw_ip}" ]
 			then
-				route add default gw ${GW_IP} > /dev/null 2>&1
+				route add default gw ${gw_ip} > /dev/null 2>&1
+				assert "$?" "\tDefault gateway '${gw_ip}' setup failed"
 			fi
 		fi
 
@@ -68,4 +81,3 @@ setup_networking() {
 		return 0
 	fi
 }
-

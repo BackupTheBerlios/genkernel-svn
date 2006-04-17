@@ -82,15 +82,17 @@ do
 	if ! assert "$?" "Unable to setup networking."
 	then
 		bad_msg 
-		bad_msg "The possible IP parameters are:"
-		bad_msg "\t'ip=dhcp' for automatic setup using DHCP"
-		bad_msg "\t'ip=<client-ip>::<gw-ip>:<netmask>:<hostname>:<device>'"
-		bad_msg "\t\tyou may leave <netmask>,<hostname> and <device>"
+		bad_msg "The IP parameter format is:"
+		bad_msg "\t'ip=<client-ip>::<gw-ip>:<netmask>:<hostname>:<device>:<autoconf>'"
+		bad_msg "\t\tyou may leave <netmask>, <hostname>, <device> and <autoconf>"
 		bad_msg "\t\tempty to use defaults (you can remove trailing ':')"
 		bad_msg "Examples:"
 		bad_msg "\tip=10.0.0.22::10.0.0.1:255.0.0.0:localhost:eth0"
 		bad_msg "\tip=10.0.0.22::10.0.0.1:::eth0"
 		bad_msg "\tip=10.0.0.22::10.0.0.1"
+		bad_msg "\tip=:::::eth1:bootp"
+		bad_msg "\tip=:::::eth5:dhcp"
+		bad_msg "\tip=dhcp  is a shortcut to use dhcp on eth0"
 		bad_msg 
 		bad_msg "You may add 'nameserver=w.x.y.z' to setup domain name resolution."
 		bad_msg "Example: ip=10.0.0.22:10.0.0.1 nameserver=10.0.0.2"
@@ -106,8 +108,7 @@ do
 		# Get the nameserver param if there is one
 		if echo "${ip}" | grep 'nameserver=' > /dev/null
 		then
-			nameserver=$( echo "${ip}" | cut -f2 -d' ' )
-			NAMESERVER=${x#nameserver=}
+			NAMESERVER=$( echo "${ip}" | cut -f2 -d' ' | cut -f2 -d'=' )
 		fi
 
 		# Make sure there is no garbage 
@@ -136,7 +137,7 @@ do
 			# We already started unionizing... shall we add something else?
 			bad_msg "If some filesystems were already mounted sucessfully, add the ones you "
 			bad_msg "would like mounted over those, or type 'continue' to boot without adding"
-			bad_msg "any filesystem to the UnionFS stack."
+			bad_msg "any more filesystem to the UnionFS stack."
 		fi
 		echo -n "real_root="
 		read REAL_ROOT
