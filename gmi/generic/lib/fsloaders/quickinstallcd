@@ -61,8 +61,8 @@ do_mount() {
 		dbg_msg "Arch detection result : ${arch}"
 	fi
 
-	dbg_msg "Lauching livecd+http root fs loader"
-	${FSLOADERS}/livecd+http --do-mount ${mountpoint} "http://bouncer.gentoo.org/?product=gentoo-2006.0-minimal&os=${arch}"
+	dbg_msg "Lauching livecd+url root fs loader"
+	${FSLOADERS}/livecd+url --do-mount ${mountpoint} "http://bouncer.gentoo.org/?product=gentoo-2006.0-minimal&os=${arch}"
 	return $?
 }
 

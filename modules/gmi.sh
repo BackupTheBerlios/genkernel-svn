@@ -72,6 +72,7 @@ gmi::()
 		cp -a "${GMI_DIR}/${ARCH}/lib" "${TEMP}/initramfs-base-temp/usr/lib/genkernel" 2> /dev/null
 	done
 	chmod +x ${TEMP}/initramfs-base-temp/usr/lib/genkernel/fsloaders/*
+	chmod +x ${TEMP}/initramfs-base-temp/usr/lib/genkernel/udhcp.sh
 
 	echo -n 'HWOPTS="$HWOPTS ' >> "${TEMP}/initramfs-base-temp/etc/initrd.defaults"	
 	for group_modules in ${!MODULES_*}; do

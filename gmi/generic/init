@@ -1,10 +1,8 @@
 #!/bin/busybox sh
+# Copyright 2006 Eric Edgar <rocket@gentoo.org>, 
+#                Tim Yamin <plasmaroo@gentoo.org> and 
+#                Jean-Francois Richard <jean-francois@richard.name> 
 # Distributed under the terms of the GNU General Public License v2
-#
-# Authors:
-#  - Eric Edgar <rocket@gentoo.org>, 2006
-#  - Jean-Francois Richard <jean-francois@richard.name>, 2006
-#  - Tim Yamin <plasmaroo@gentoo.org>, 2006
 #
 # Initialization script called by kernel at boot.
 #
