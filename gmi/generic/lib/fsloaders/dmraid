@@ -59,6 +59,7 @@ do_mount() {
 		mount ${_mount_opts} ${device} ${mountpoint}
 		assert "$?" "Could not mount DMRAID device '${device}'" || return 1
 	else
+		bad_msg "/sbin/dmraid not found: skipping DMRAID volume group activation!"
 		return 1
 	fi
 }
