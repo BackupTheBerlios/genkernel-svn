@@ -26,8 +26,8 @@ parameters() {
 help() {
 cat << EOHELP
 usage: lvm2+md:<lvmdevice>:<mddevices>[:mount_opts] 
-example: 'real_root=lvm2+md:/dev/vg/root:/dev/md0'
-         'real_root=lvm2+md:/dev/volgroup/vol1:/dev/md1,/dev/md2:ro,noatime'
+example: 'root=lvm2+md:/dev/vg/root:/dev/md0'
+         'root=lvm2+md:/dev/volgroup/vol1:/dev/md1,/dev/md2:ro,noatime'
 parameters are
 <lvmdevice>    device containing the filesystem
 <mddevices>    list of md devices to setup before scanning for LVM2 devices

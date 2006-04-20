@@ -21,9 +21,9 @@ parameters() {
 
 help() {
 cat << EOHELP
-usage: livecd+nfs:<ip>:<cdfilepath>[:livecd_opts]]
-example: 'real_root=livecd+nfs:192.168.0.1:/mnt/livecds/2006.1.iso'
-         'real_root=livecd+nfs:192.168.0.1:/mnt/livecds/2006.1.iso:docache'
+usage: livecd+nfs:<ip>:<cdfilepath>[:livecd_opts]
+example: 'root=livecd+nfs:192.168.0.1:/mnt/livecds/2006.1.iso'
+         'root=livecd+nfs:192.168.0.1:/mnt/livecds/2006.1.iso:docache'
 parameters are 
 <ip>           IP address of the NFS server
 <cdfilepath>   full path of the ISO file

@@ -24,9 +24,9 @@ parameters() {
 help() {
 cat << EOHELP
 usage: dmraid:<device>[:mount_opts[:dmraidopts]]
-example: 'real_root=dmraid:/dev/TODO'
-         'real_root=dmraid:/dev/TODO:ro,noatime:TODO'
-         'real_root=dmraid:/dev/TODO::TODO'
+example: 'root=dmraid:/dev/TODO'
+         'root=dmraid:/dev/TODO:ro,noatime:TODO'
+         'root=dmraid:/dev/TODO::TODO'
 parameters are
 <device>       device containing the filesystem
 [mount_opts]   parameters to pass at mounting of the filesystem

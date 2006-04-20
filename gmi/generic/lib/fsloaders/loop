@@ -24,7 +24,7 @@ parameters() {
 help() {
 cat << EOHELP
 usage: loop:<loopfilepath>
-example: 'real_root=loop:/some/place.squashfs'
+example: 'root=loop:/some/place.squashfs'
 parameters are
 <loopfilepath> full path of a loop file
 EOHELP

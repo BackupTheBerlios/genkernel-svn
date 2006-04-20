@@ -22,8 +22,8 @@ parameters() {
 help() {
 cat << EOHELP
 usage: nfs:<ip>:<dir>[:mount_opts] 
-example: 'real_root=nfs:192.168.0.1:/mnt/rootfs'
-         'real_root=nfs:10.0.0.2:/mnt/system1:ro,nolock'
+example: 'root=nfs:192.168.0.1:/mnt/rootfs'
+         'root=nfs:10.0.0.2:/mnt/system1:ro,nolock'
 parameters are
 <ip>           IP address of the NFS server
 <dir>          directory to mount

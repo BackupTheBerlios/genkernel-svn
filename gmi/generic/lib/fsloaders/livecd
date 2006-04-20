@@ -25,9 +25,9 @@ parameters() {
 help() {
 cat << EOHELP
 usage: livecd[:device[:opts]]
-example: 'real_root=livecd'
-         'real_root=livecd:/dev/hdc:docache'
-         'real_root=livecd::docache'
+example: 'root=livecd'
+         'root=livecd:/dev/hdc:docache'
+         'root=livecd::docache'
 parameters are 
 [device]       device containing the LiveCD medium
 [opts]         can be 'docache' to cache the LiveCD image

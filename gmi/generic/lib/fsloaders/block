@@ -24,8 +24,8 @@ parameters() {
 help() {
 cat << EOHELP
 usage: block:<device>[:mount_opts]
-example: 'real_root=block:/dev/hda2'
-         'real_root=block:/dev/hda2:ro,noatime'
+example: 'root=block:/dev/hda2'
+         'root=block:/dev/hda2:ro,noatime'
 parameters are
 <device>       device containing the filesystem
 [mount_opts]   parameters to pass at mounting of the filesystem

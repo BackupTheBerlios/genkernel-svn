@@ -24,8 +24,8 @@ parameters() {
 help() {
 cat << EOHELP
 usage: luks+block:<device>[:mount_opts]
-example: 'real_root=luks+block:/dev/hda2'
-         'real_root=luks+block:/dev/hda2:ro,noatime'
+example: 'root=luks+block:/dev/hda2'
+         'root=luks+block:/dev/hda2:ro,noatime'
 parameters are
 <device>       device containing the filesystem
 [mount_opts]   parameters to pass at mounting of the filesystem
@@ -43,12 +43,12 @@ do_mount() {
 	if [ -e /sbin/cryptsetup ]
 	then
 		cryptsetup isLuks ${device}
-		assert "$?" "Not a LUKS device: '${device}' || return 1
+		assert "$?" "Not a LUKS device: '${device}'" || return 1
 
 		# need to have unique id for the device to be unionfs-isable
 		id=$( counter )
 		cryptsetup luksOpen ${device} root${id}
-		assert "$?" "Unable to open LUKS device '${device}' || return 1
+		assert "$?" "Unable to open LUKS device '${device}'" || return 1
 
 		${LIBGMI}/fsloaders/block --do-mount ${mountpoint} /dev/mapper/root${id} ${mount_opts}
 		return "$?"

@@ -22,8 +22,8 @@ parameters() {
 help() {
 cat << EOHELP
 usage: lvm2:<device>[:mount_opts]
-example: 'real_root=lvm2:/dev/vg/root'
-         'real_root=lvm2:/dev/volgroup/vol1:ro,noatime'
+example: 'root=lvm2:/dev/vg/root'
+         'root=lvm2:/dev/volgroup/vol1:ro,noatime'
 parameters are
 <device>       device containing the filesystem
 [mount_opts]   parameters to pass at mounting of the filesystem

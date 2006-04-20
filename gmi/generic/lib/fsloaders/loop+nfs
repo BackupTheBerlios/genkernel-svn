@@ -22,8 +22,8 @@ parameters() {
 help() {
 cat << EOHELP
 usage: loop+nfs:<ip>:<path>
-example: 'real_root=loop+nfs:10.0.0.1:/mnt/modules'
-         'real_root=loop+nfs:10.0.0.9:/mnt/images/image.squashfs'
+example: 'root=loop+nfs:10.0.0.1:/mnt/modules'
+         'root=loop+nfs:10.0.0.9:/mnt/images/image.squashfs'
 parameters are
 <ip>           IP address of the NFS server
 <path>         directory containing images OR a single image's full path

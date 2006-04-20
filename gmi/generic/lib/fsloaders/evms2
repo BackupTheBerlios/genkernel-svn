@@ -24,8 +24,8 @@ parameters() {
 help() {
 cat << EOHELP
 usage: evms2:<device>[:mount_opts]
-example: 'real_root=evms2:/dev/TODO'
-         'real_root=evms2:/dev/TODO:ro,noatime'
+example: 'root=evms2:/dev/TODO'
+         'root=evms2:/dev/TODO:ro,noatime'
 parameters are
 <device>       device containing the filesystem
 [mount_opts]   parameters to pass at mounting of the filesystem

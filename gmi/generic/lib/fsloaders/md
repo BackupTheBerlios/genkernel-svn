@@ -22,8 +22,8 @@ parameters() {
 help() {
 cat << EOHELP
 usage: md:<device>[:mount_opts] 
-example: 'real_root=md:/dev/md0'
-         'real_root=md:/dev/md1:ro,noatime'
+example: 'root=md:/dev/md0'
+         'root=md:/dev/md1:ro,noatime'
 parameters are
 <device>       device containing the filesystem
 [mount_opts]   parameters to pass at mounting of the filesystem

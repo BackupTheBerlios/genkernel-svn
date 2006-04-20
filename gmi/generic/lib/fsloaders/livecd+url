@@ -22,7 +22,7 @@ parameters() {
 help() {
 cat << EOHELP
 usage: livecd+url:<url>[:livecdopts]
-example: 'real_root=livecd+url:http://gentoo.org/2006.1.iso'
+example: 'root=livecd+url:http://gentoo.org/2006.1.iso'
 parameters are 
 <url>          HTTP or FTP address of an ISO LiveCD medium
 [livecdopts]   can be 'docache' to cache the LiveCD image (not very useful...)

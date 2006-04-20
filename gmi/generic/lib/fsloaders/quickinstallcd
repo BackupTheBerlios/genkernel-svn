@@ -24,8 +24,8 @@ parameters() {
 help() {
 cat << EOHELP
 usage: quickinstallcd[:arch] 
-example: 'real_root=quickinstallcd'
-         'real_root=quickinstallcd:x86'
+example: 'root=quickinstallcd'
+         'root=quickinstallcd:x86'
 parameters are
 [arch]         architecture of the system (by default, the architecture is 
                automatically determined)

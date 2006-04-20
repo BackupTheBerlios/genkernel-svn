@@ -24,8 +24,8 @@ parameters() {
 help() {
 cat << EOHELP
 usage: tmpfs[:mount_opts] 
-example: 'real_root=tmpfs'
-         'real_root=tmpfs:ro'
+example: 'root=tmpfs'
+         'root=tmpfs:ro'
 parameters are
 [mount_opts]   parameters to pass at mounting of the filesystem
 EOHELP
