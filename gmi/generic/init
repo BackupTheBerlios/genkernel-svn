@@ -57,6 +57,7 @@ parse_cmdline
 # load the kernel modules
 load_modules
 
+detect_sbp2_devices
 
 # Make needed directories
 mkdir /tmp
