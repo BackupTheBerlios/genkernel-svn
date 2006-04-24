@@ -130,7 +130,6 @@ Cross Compiling
 `--utils-cross-compile=<...>`::
               Specifies the cross compiler to use for utilities.
 
-
 Kernel Configuration
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -334,7 +333,6 @@ bootloader, which the initramfs scripts would recognize.
 `unpack=<...>`::
               Unpacks packages over the root filesystem (optional).
 
-
 Root device types
 ~~~~~~~~~~~~~~~~~
 
@@ -359,13 +357,12 @@ setting up a given device.
 
 `\dmraid:<device>[:mount_opts[:dmraidopts]]`::
               Specifies a DM RAID deivce to mount, with [dmraidopts]
-              as options given as options to the `dmraid` binary.
-              Make sure the initramfs was built with the `--dmraid`
-              option.  Examples:
+              as options given to the `dmraid` binary.  Make sure the
+              initramfs was built with the `--dmraid` option.
+              Examples:
               - `root=dmraid:/dev/TODO`
               - `root=dmraid:/dev/TODO:ro,noatime:TODO`
               - `root=dmraid:/dev/TODO::TODO`
-
 
 `\evms2:<device>[:mount_opts]`::
               Specifies an EVMS2 device to mount.  Make sure the
@@ -390,7 +387,6 @@ setting up a given device.
               - `root=livecd+nfs:192.168.0.1:/mnt/livecds/2006.1.iso`
               - `root=livecd+nfs:192.168.0.1:/mnt/livecds/2006.1.iso:docache`
 
-
 `livecd+\url:<url>[:livecdopts]`::
               Downloads (to RAM) a Gentoo LiveCD from a given FTP or
               HTTP URL, and mounts it.  Make sure the kernel supports
@@ -410,7 +406,6 @@ setting up a given device.
               - `root=loop+nfs:10.0.0.1:/mnt/modules`
               - `root=loop+nfs:10.0.0.9:/mnt/images/image.squashfs`
 
-
 `luks+\block:<device>[:mount_opts]`::
               Specifies the mounting of a LUKS encrypted block device.
               Examples:
@@ -420,8 +415,7 @@ setting up a given device.
 `\lvm2:<device>[:mount_opts]`::
               Specifies the mounting of an LVM2 volume.
 	      Make sure the initramfs was built with the `--lvm2`
-	      option.
-	      Examples:
+	      option. Examples:
               - `root=lvm2:/dev/vg/root`
               - `root=lvm2:/dev/volgroup/vol1:ro,noatime`
 
@@ -534,26 +528,35 @@ Test system::
               without modifying your system.  You can use the same
               normal root filesystem, but mount it read-only, and put
               a tmpfs overlay into which you can install and test your
-              software:
+              software.  It will not affect the base system and the
+              changes will be gone when you reboot the system.
 	      - `root=block:/dev/sda1:ro;tmpfs`
 
 LiveCD with NFS state storage::
               You may mount a LiveCD and store each changes made to
-              the filesystem on an NFS share.  Example:
+              the filesystem on an NFS share.  If you reboot using the
+              same kernel parameters, you will find back all the
+              changes made. Example:
               - `root=livecd:docache;nfs:10.0.0.1:/mnt/livecd_state`
 
-NFS diskless client with memory state storage::
+NFS diskless client with state storage in memory::
               To use an NFS root diskless client which will be
-              completely read-write, you can use such a `root=`
-              declaration:
+              completely read-write but based on another read-only
+              filesystem, you can use such a `root=` declaration:
 	      - `root=nfs:192.168.1.1:/mnt/node1:ro;tmpfs`
 
 NFS diskless dlient with NFS state storage::
               To use an NFS root diskless client which will be
               completely read-write but based on another read-only
-              root filesystem, you can use such a `root=` declaration:
+              root filesystem, you can use such a `root=` declaration.
+              A reboot with the same kernel parameters will give back
+              the system in the state you left it:
 	      - `root=nfs:192.168.1.1:/mnt/node1:ro;nfs:10.0.0.1:/mnt/state:rw`
 
+If you find other interesting and original usage scenarios, please
+send a message to the authors describing how you use genkernel, it
+will be added to the next release's manual page so that everybody can
+learn from your experience.
 
 REPORTING BUGS
 --------------
