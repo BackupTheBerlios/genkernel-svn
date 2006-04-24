@@ -29,6 +29,7 @@ filesystem, and preserve state throughout reboots of the nodes.
 
 We will explain how to setup all of those in the following sections.
 
+
 NFS Server
 ----------
 
@@ -41,9 +42,10 @@ You then have to have such a `/etc/exports` file :
 # /etc/exports: NFS file systems being exported.  See exports(5).
 
 # The server's root 
-/ node01(ro,sync,no_root_squash)
+/  node01(ro,sync,no_root_squash)
+
 # The diff-overlay
-/var/state/systems/node01 node01(rw,sync,no_root_squash)
+/var/state/systems/node01  node01(rw,sync,no_root_squash)
 -----------------------------------------------------------------
 
 Here, we tell the server to export the whole `/` to SSI nodes (here
@@ -60,7 +62,7 @@ The 'diff-overlay' directory
 
 Since each system, even though they all boot from the same root, needs
 some particular configuration directives and temporary storage, we use
-UnionFS to build a two-layer filesystem on the SSI nodes that solves
+UnionFS to build a two-layers filesystem on the SSI nodes that solves
 these issues.
 
 The bottom-most system is the exact root filesystem we find on the
@@ -75,13 +77,14 @@ that need to 'override' the ones that would be found on the server's
 root.
 
 For example, the `/etc/fstab` file will be present on the bottom-most
-layer (eg the server's root), but we want the node to see something
-else instead.  Using UnionFS, the top-most layer, if it contains the
-same file, will take priority.  The applications on the node will only
-see that top-most one.
+layer (eg the server's root), but we want the node to see a custom
+file content instead, since it will not mount the same filesystems.
+Using UnionFS, the top-most layer, if it contains the same file, will
+take priority.  The applications on the node will only see that
+top-most one.
 
 So how to we mask the bottom-most layer?  Simply by creating a
-/etc/fstab file in the 'diff-overlay' (which will be, in our
+`/etc/fstab` file in the 'diff-overlay' (which will be, in our
 nomenclature, `/var/state/systems/node01/etc/fstab`).
 
 This scheme is the same for every file that needs to be different than
@@ -147,13 +150,13 @@ prompt 0
 label node
         kernel /kernel
         append initrd=/initramfs ip=dhcp \
-               root=10.0.0.1:/:ro;10.0.0.1:/var/state/systems/node01;rw
+               root=10.0.0.1:/:ro;10.0.0.1:/var/state/systems/node01:rw
 -----------------------------------------------------------------------
 
 As you may have noticed, we tell the initramfs to mount two NFS shares
 (separated by the `;`).  This will trigger UnionFS support, which will
 have the first share as the bottom-most filesystem and the right one
-the top-most.
+as the top-most.
 
 
 Using runlevels to customize node behavior
@@ -183,8 +186,8 @@ http://www.gentoo.org/doc/en/diskless-howto.xml[Diskless Nodes with
 Gentoo] guide for more information.
 
 
-Notes
------
+Notes, ideas
+------------
 
 Single kernel and initramfs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -209,14 +212,62 @@ You may also use more than one NFS overlay, or even mix and match the
 NFS root with other types of overlays, such as a read-write tmpfs, to
 test software without modifying the original state of the nodes.
 
-For example, you could well have such a line in
-`pxelinux.cfg/default`:
+For example, you could well have such a line in `pxelinux.cfg/default`
+to boot the nodes:
 
 -----------------------------------------------------------------------------
 append initrd=/initramfs ip=dhcp softlevel=computenode \
-               root=10.0.0.1:/:ro;10.0.0.1:/var/state/systems/node01;ro;tmpfs
+               root=10.0.0.1:/:ro;10.0.0.1:/var/state/systems/node01:ro;tmpfs
 -----------------------------------------------------------------------------
 
 It will boot the system just as it did in the previous example, but
 all changes to the root filesystem will be stored in memory and thrown
 away at next reboot.
+
+
+Multiple architectures
+~~~~~~~~~~~~~~~~~~~~~~
+
+The setup described here supposes that you have a homogeneous group of
+systems that share the same architecture (or that you build the server
+system with the 'lowest common architecture flags' of all your
+systems).
+
+If you need to optimize or use another architecture for some of the
+diskless nodes, you can still use a similar setup, but you will need
+to:
+
+- Build a complete system in a subdirectory on the server, such as
+  `/srv/diskless/arch` (use `chroot` or other means);
+- Export that NFS share to the nodes;
+- Have the nodes mount it as their root filesystem.
+
+It simply means having a similar `/etc/exports` file on the server
+system:
+
+-----------------------------------------------------------------
+# /etc/exports: NFS file systems being exported.  See exports(5).
+
+# The given arch's root
+/diskless/arch  node01(ro,sync,no_root_squash)
+
+# The diff-overlay
+/var/state/systems/node01  node01(rw,sync,no_root_squash)
+-----------------------------------------------------------------
+
+and having such a PXELINUX kernel parameter line to boot the nodes:
+
+----------------------------------------------------------------------------------------
+append initrd=/initramfs ip=dhcp softlevel=computenode \
+               root=10.0.0.1:/srv/diskless/arch:ro;10.0.0.1:/var/state/systems/node01:rw
+----------------------------------------------------------------------------------------
+
+
+Multiple servers
+~~~~~~~~~~~~~~~~
+
+Throughout this guide, we use `10.0.0.1` as the NFS server for
+everything, but you may well export the base read-only system from one
+server and have the state stored on another.  It may have an impact on
+filesystem performance (good or bad, it is up the the user to
+benchmark the networking and filesystem performances).
