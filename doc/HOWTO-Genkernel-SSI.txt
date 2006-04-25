@@ -7,7 +7,7 @@ Very drafty, my english needs some review...
 /////////////////////////////////////////////
 
 Single System Image (SSI) setups are, put simply, the sharing of a
-single root (`/`) filesystem throughout multiple systems.
+single root (`/`) filesystem by multiple systems.
 
 This kind of system has the advantage of being very easily
 maintainable, since you must only have one set of packages to install,
@@ -27,7 +27,7 @@ TFTP and PXE, and NFS mounting of the server's `/`, overlayed by an
 UnionFS-added directory that will contain local differences in the
 filesystem, and preserve state throughout reboots of the nodes.
 
-We will explain how to setup all of those in the following sections.
+We will explain how to set up all of those in the following sections.
 
 
 NFS Server
@@ -53,7 +53,7 @@ only `node01`).  Also, we have a special directory (the
 'diff-overlay'), `/var/state/systems/node01` that will contain all
 node-specific files, so that the configuration of nodes can be
 slightly different than the one from the server (think of `/etc/fstab`
-for example).  We will explain how to setup those differences in a
+for example).  We will explain how to set up those differences in a
 following section.
 
 
@@ -66,8 +66,8 @@ UnionFS to build a two-layers filesystem on the SSI nodes that solves
 these issues.
 
 The bottom-most system is the exact root filesystem we find on the
-server.  It needs to be mounted read-only by nodes to prevent any
-harmful modifications to it.
+server.  It needs to be exported read-only (and thus mounted read-only
+by the SSI nodes) to prevent any harmful modifications to it.
 
 The top-most filesystem is what we call the 'diff-overlay'.  It is
 essentially a read-write NFS system mounted from the server (we
@@ -77,7 +77,7 @@ that need to 'override' the ones that would be found on the server's
 root.
 
 For example, the `/etc/fstab` file will be present on the bottom-most
-layer (eg the server's root), but we want the node to see a custom
+layer (e.g. the server's root), but we want the node to see a custom
 file content instead, since it will not mount the same filesystems.
 Using UnionFS, the top-most layer, if it contains the same file, will
 take priority.  The applications on the node will only see that
@@ -127,8 +127,8 @@ initramfs with genkernel, using the following options :
 # genkernel --unionfs [otheropts] initramfs::
 ---------------------------------------------
 
-We suggest building an initramfs with DNS support built-in if you want
-to resolve the hostname of the NFS servers.  If you don't, you can
+We suggest building an initramfs with DNS support built-in so you can
+resolve the hostnames of the NFS servers.  If you don't, you can
 simply use direct IP addresses.  To have DNS support, you will need to
 include uClibc in the initramfs (which takes longer to compile and
 gives a bigger initramfs).  Use the following genkernel options:
@@ -137,8 +137,8 @@ gives a bigger initramfs).  Use the following genkernel options:
 # genkernel --unionfs --internal-uclibc [otheropts] initramfs::
 ---------------------------------------------------------------
 
-Now that the initramfs is built, you need to tell PXELINUX to use it,
-and to use a `root=` directive that will union-mount the server's `/`
+Now that the initramfs is built, you need to tell PXELINUX to load it,
+and to pass a `root=` directive that will union-mount the server's `/`
 and the 'diff-overlay'.  For example, you may have such a
 `pxelinux.cfg/default` file (refer to
 http://www.gentoo.org/doc/en/diskless-howto.xml[Diskless Nodes with
@@ -154,9 +154,9 @@ label node
 -----------------------------------------------------------------------
 
 As you may have noticed, we tell the initramfs to mount two NFS shares
-(separated by the `;`).  This will trigger UnionFS support, which will
-have the first share as the bottom-most filesystem and the right one
-as the top-most.
+(separated by the "`;`").  This will trigger UnionFS support, which
+will have the first share as the bottom-most filesystem and the right
+one as the top-most.
 
 
 Using runlevels to customize node behavior
@@ -167,7 +167,7 @@ the Gentoo Init Scripts, which are described in the
 http://www.gentoo.org/doc/en/handbook/[Gentoo Handbook].
 
 For example, one may well create a `computenode` runlevel, in which
-some of the SSI nodes will boot, using such a kernel line in
+some of the SSI nodes will boot, using such parameters in
 `pxelinux.cfg/default` :
 
 -----------------------------------------------------------------------
@@ -183,8 +183,13 @@ To have different systems booting in different runlevels, you will
 need to have different PXELINUX configuration files for each of these.
 Refer again to the
 http://www.gentoo.org/doc/en/diskless-howto.xml[Diskless Nodes with
-Gentoo] guide for more information.
+Gentoo] guide for more information on how to use a specific
+configuration file for a given client IP or hardware (MAC) address.
 
+You can also tell the node which PXELINUX configuration file to
+request by using the `option pxelinux.configfile "myconf"` option in
+the DHCP setup.  See the http://syslinux.zytor.com/pxe.php[PXELINUX
+homepage] for more information.
 
 Notes, ideas
 ------------
@@ -194,8 +199,8 @@ Single kernel and initramfs
 
 You may well use the same kernel and initramfs for both booting the
 server and the nodes.  The only things that needs to be different are
-the boot parameters.  Given that, you may well simply issue the
-following command to build the kernel and initramfs in a single step:
+the boot parameters.  Given that, you can simply issue the following
+command to build the kernel and initramfs in a single step:
 
 ----------------------------------------------------------------------
 # genkernel --unionfs --internal-uclibc --menuconfig [otheropts] all::
@@ -220,9 +225,9 @@ append initrd=/initramfs ip=dhcp softlevel=computenode \
                root=10.0.0.1:/:ro;10.0.0.1:/var/state/systems/node01:ro;tmpfs
 -----------------------------------------------------------------------------
 
-It will boot the system just as it did in the previous example, but
-all changes to the root filesystem will be stored in memory and thrown
-away at next reboot.
+It will boot the system just as it would normally do, but all changes
+to the root filesystem will be stored in memory and thrown away at
+next reboot.
 
 
 Multiple architectures
@@ -238,7 +243,7 @@ diskless nodes, you can still use a similar setup, but you will need
 to:
 
 - Build a complete system in a subdirectory on the server, such as
-  `/srv/diskless/arch` (use `chroot` or other means);
+  `/srv/diskless/arch` (use `chroot` or other means to achieve that);
 - Export that NFS share to the nodes;
 - Have the nodes mount it as their root filesystem.
 
