@@ -1,4 +1,4 @@
-#require kernel_modules_compile
+require kernel_modules_compile
 
 kernel_modules_install::()
 {

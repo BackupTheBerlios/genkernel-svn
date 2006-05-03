@@ -71,12 +71,12 @@ busybox_compile::()
 	then
 		print_info 1 "Setting cross compiler to $(profile_get_key utils-cross-compile)"
 		config_set ".config" "USING_CROSS_COMPILER" "y"
-		config_set_string ".config" "CROSS_COMPILER_PREFIX" "$(profile_get_key cross-compile)"
+		config_set_string ".config" "CROSS_COMPILER_PREFIX" "$(profile_get_key cross-compile)-"
     elif [ "$(profile_get_key utils-cross-compile)" != "" ]
 	then
 		print_info 1 "Setting cross compiler to $(profile_get_key utils-cross-compile)"
 		config_set ".config" "USING_CROSS_COMPILER" "y"
-		config_set_string ".config" "CROSS_COMPILER_PREFIX" "$(profile_get_key utils-cross-compile)"
+		config_set_string ".config" "CROSS_COMPILER_PREFIX" "$(profile_get_key utils-cross-compile)-"
 	else
 		config_unset ".config" "USING_CROSS_COMPILER"
 		config_unset ".config" "CROSS_COMPILER_PREFIX"

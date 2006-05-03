@@ -1,10 +1,9 @@
-require @pkg_gcc-stage2-${GCC_VER}:null:gcc_stage2_compile
-
-gcc::()
+require @pkg_gcc-stage1-${GCC_VER}:null:gcc_stage1_compile
+gcc_stage1::()
 {
 	mkdir -p ${TEMP}/staging
 	cd ${TEMP}/staging
-	genkernel_extract_package "gcc-stage2-${GCC_VER}"
+	genkernel_extract_package "gcc-stage1-${GCC_VER}"
 
 	GCC_TARGET_ARCH=$(echo ${ARCH} | sed -e s'/-.*//' \
 		-e 's/x86$/i386/' \

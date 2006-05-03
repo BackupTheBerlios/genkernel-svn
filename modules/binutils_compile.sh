@@ -1,4 +1,4 @@
-#require uclibc
+require uclibc_stage1
 binutils_compile::()
 {
 	local	BINUTILS_SRCTAR="${SRCPKG_DIR}/binutils-${BINUTILS_VER}.tar.bz2" BINUTILS_DIR="binutils-${BINUTILS_VER}" 
@@ -16,8 +16,8 @@ binutils_compile::()
 	print_info 1 'binutils: >> Configuring...'
 	
 	BINUTILS_TARGET_ARCH=$(echo ${ARCH} | sed -e s'/-.*//' \
-		-e 's/x86/i386/' \
-		-e 's/i.86/i386/' \
+		-e 's/x86$/i386/' \
+		-e 's/i.86$/i386/' \
 		-e 's/sparc.*/sparc/' \
 		-e 's/arm.*/arm/g' \
 		-e 's/m68k.*/m68k/' \
@@ -30,9 +30,9 @@ binutils_compile::()
 		-e 's/nios2.*/nios2/' \
 	)
 
-
+	CC="gcc" \
 	configure_generic \
-		--prefix=${TEMP}/binutils-output \
+	--prefix=${TEMP}/binutils-staging \
         --build=${BINUTILS_TARGET_ARCH}-pc-linux-gnu \
         --host=${BINUTILS_TARGET_ARCH}-pc-linux-gnu \
         --target=${BINUTILS_TARGET_ARCH}-linux-uclibc \
@@ -65,16 +65,14 @@ binutils_compile::()
 	compile_generic all
 	
 	
-	[ -e "${TEMP}/binutils-output" ] && rm -r ${TEMP}/binutils-output
-	mkdir ${TEMP}/binutils-output
+	mkdir ${TEMP}/binutils-staging
 	
 	compile_generic install
 	
-	cd ${TEMP}/binutils-output
+	cd ${TEMP}/binutils-staging
 	genkernel_generate_package "binutils-${BINUTILS_VER}" "."
-
 
 	cd "${TEMP}"
 	rm -rf "${BINUTILS_DIR}" > /dev/null
-	rm -rf "${TEMP}/binutils-output" > /dev/null
+	rm -rf ${TEMP}/binutils-staging > /dev/null
 }

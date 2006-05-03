@@ -1,6 +1,8 @@
-uclibc_compile::()
+require gcc_stage1
+uclibc_stage2_compile::()
 {
-	local	UCLIBC_SRCTAR="${SRCPKG_DIR}/uClibc-${UCLIBC_VER}.tar.bz2" UCLIBC_DIR="uClibc-${UCLIBC_VER}" 
+	local	UCLIBC_SRCTAR="${SRCPKG_DIR}/uClibc-${UCLIBC_VER}.tar.bz2" 
+	local   UCLIBC_DIR="uClibc-${UCLIBC_VER}" 
 	[ -f "${UCLIBC_SRCTAR}" ] || die "Could not find uclibc source tarball: ${UCLIBC_SRCTAR}!"
 
 	cd "${TEMP}"
@@ -13,7 +15,24 @@ uclibc_compile::()
 	print_info 1 'uClibc: >> Configuring...'
 
 	compile_generic defconfig
-	
+
+    GCC_TARGET_ARCH=$(echo ${ARCH} | sed -e s'/-.*//' \
+        -e 's/x86$/i386/' \
+        -e 's/i.86$/i386/' \
+        -e 's/sparc.*/sparc/' \
+        -e 's/arm.*/arm/g' \
+        -e 's/m68k.*/m68k/' \
+        -e 's/ppc/powerpc/g' \
+        -e 's/v850.*/v850/g' \
+        -e 's/sh[234].*/sh/' \
+        -e 's/mips.*/mips/' \
+        -e 's/mipsel.*/mips/' \
+        -e 's/cris.*/cris/' \
+        -e 's/nios2.*/nios2/' \
+    )
+
+	profile_set_key utils-cross-compile "${TEMP}/staging/bin/${GCC_TARGET_ARCH}-linux-uclibc-"
+
 	# turn on/off the cross compiler
 	if [ -n "$(profile_get_key cross-compile)" ]
 	then
@@ -63,9 +82,11 @@ uclibc_compile::()
 
 	config_set .config TARGET_${UCLIBC_TARGET_ARCH} "y"
 	config_set_string .config TARGET_ARCH "${UCLIBC_TARGET_ARCH}"
-	config_set .config UCLIBC_HAS_RPC "y"
 	config_set .config UCLIBC_HAS_FULL_RPC "y"
-	config_set_string .config KERNEL_SOURCE "/usr"
+	config_set_string .config KERNEL_SOURCE "${TEMP}/staging/usr/${UCLIBC_TARGET_ARCH}-linux-uclibc/usr/"
+	for def in MALLOC_GLIBC_COMPAT DO_C99_MATH UCLIBC_HAS_{RPC,CTYPE_CHECKED,WCHAR,HEXADECIMAL_FLOATS,GLIBC_CUSTOM_PRINTF,FOPEN_EXCLUSIVE_MODE,GLIBC_CUSTOM_STREAMS,PRINTF_M_SPEC,FTW} ; do
+		config_set .config ${def} "y"
+	done
 	
 	if [ -n "${UCLIBC_TARGET_ENDIAN}" ]
 	then
@@ -77,15 +98,14 @@ uclibc_compile::()
 
 	
 	print_info 1 'uClibc: >> Compiling...'
-	compile_generic all
+	compile_generic prefix= devel_prefix=/ runtime_prefix=/ hostcc=gcc all
 	
-	[ -e "${TEMP}/uclibc-compile" ] && rm -r ${TEMP}/uclibc-compile
-	compile_generic PREFIX="${TEMP}/uclibc-compile" install
+	compile_generic DEVEL_PREFIX="${TEMP}/staging/" RUNTIME_PREFIX="${TEMP}/staging/" install_runtime install_dev
 	
-	cd ${TEMP}/uclibc-compile
-	genkernel_generate_package "uClibc-${UCLIBC_VER}" "."
+	cd ${TEMP}/staging
+	genkernel_generate_package "uClibc-stage2-${UCLIBC_VER}" "."
 
 	cd "${TEMP}"
 	rm -rf "${UCLIBC_DIR}" > /dev/null
-	rm -rf "${TEMP}/uclibc-compile" > /dev/null
+	rm -rf "${TEMP}/staging" > /dev/null
 }

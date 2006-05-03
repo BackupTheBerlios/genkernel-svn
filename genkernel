@@ -97,12 +97,12 @@ if [ ! -w ${CACHE_DIR} ]
 then
 	if [ ! -w $(dirname ${CACHE_DIR}) ]
    	then
-		echo "CACHE_DIR: ${BOLD}${CACHE_DIR} ${NORMAL}is not writeable attempting to use ${TEMP}/genkernel_cache"
+		echo "CACHE_DIR: ${BOLD}${CACHE_DIR} ${NORMAL}is not writeable attempting to use ${TEMP}/genkernel_cache/${ARCH}"
 		if [ ! -w ${TEMP} ]
 		then
-			die "Could not write to ${TEMP}/genkernel_cache.  Set CACHE_DIR in genkernel.conf to use a writeable cache directory."
+			die "Could not write to ${TEMP}/genkernel_cache/${ARCH}.  Set CACHE_DIR in genkernel.conf to use a writeable cache directory."
 		fi
-		CACHE_DIR="${TEMP}/genkernel_cache"
+		CACHE_DIR="${TEMP}/genkernel_cache/${ARCH}/"
 	fi
 		
 	# Make the cache directory if it doesnt exist

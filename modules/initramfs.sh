@@ -5,14 +5,10 @@ else
 	require initramfs_create
 fi
 
-kernel_cmdline_register 'root=$DEVTYPE:$ROOT'
+kernel_cmdline_register 'root=/dev/ram0 real_root=/dev/$ROOT init=/linuxrc'
 kernel_cmdline_register ''
-kernel_cmdline_register '    Where $DEVTYPE is the type of the device containing your root'
-kernel_cmdline_register '    filesystem and $ROOT is the device containing your root filesystem'
-kernel_cmdline_register '    (see "man genkernel" for available device types and parameters).'
-kernel_cmdline_register ''
-kernel_cmdline_register '    Examples: root=block:/dev/sda1'
-kernel_cmdline_register '              root=lvm2:/dev/volgroup/vol01'
+kernel_cmdline_register '    Where $ROOT is the device node for your root partition as the'
+kernel_cmdline_register '    one specified in /etc/fstab'
 kernel_cmdline_register ''
 
 if ! logicTrue $(profile_get_key internal-initramfs)

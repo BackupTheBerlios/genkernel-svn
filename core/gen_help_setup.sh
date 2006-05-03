@@ -75,6 +75,7 @@ __register_config_option 'Initramfs' 'e2fsprogs' 'false' 'true' 'Include e2fspro
 __register_config_option 'Initramfs' 'disklabel' 'false' 'true' 'Include disk label and uuid support in your initramfs.'
 __register_config_option 'Initramfs' 'portmap' 'false' 'true' 'Include portmap inside the initramfs.'
 __register_config_option 'Initramfs' 'unionfs' 'false' 'true' 'Include unionfs inside the initramfs.'
+__register_config_option 'Initramfs' 'open-iscsi' 'false' 'true' 'Include open-iscsi inside the initramfs.'
 
 __register_config_option 'Initramfs' 'kernel-modules'   'true!m' 'false' 'Add or subtract kernel modules from the initramfs. --kernel-module="GROUP:module -module"' 'cmdline_modules_register'
 __register_config_option 'Initramfs' 'kernel-modules-cpio' 'false' 'true' 'Add kernel modules to the initramfs'

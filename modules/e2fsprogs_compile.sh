@@ -13,27 +13,40 @@ e2fsprogs_compile::() {
 	[ -d "${E2FSPROGS_DIR}" ] || die "e2fsprogs directory ${E2FSPROGS_DIR} invalid"
 	cd "${E2FSPROGS_DIR}"
 
-	# turn on/off the cross compiler
-	if [ -n "$(profile_get_key cross-compile)" ]
-	then
-		ARGS="${ARGS} CC=$(profile_get_key cross-compile)gcc"
+    # turn on/off the cross compiler
+    if [ -n "$(profile_get_key cross-compile)" ]
+    then
+		TARGET=$(profile_get_key cross-compile)
+        ARGS="${ARGS} --host=$(profile_get_key cross-compile)"
+    elif [ -n "$(profile_get_key utils-cross-compile)" ]
+    then
+		TARGET=$(profile_get_key utils-cross-compile)
+        ARGS="${ARGS} --host=$(profile_get_key utils-cross-compile)"
 	else
-		[ -n "$(profile_get_key utils-cross-compile)" ] && \
-			ARGS="${ARGS} CC=$(profile_get_key utils-cross-compile)gcc"
-	fi
+		TARGET=$(gcc -dumpmachine)
+		
+    fi
 
 	print_info 1 'e2fsprogs: >> Configuring...'
-	configure_generic  --with-ldopts=-static ${ARGS}
+	
+	CC=${TARGET}-gcc \
+	CXX=${TARGET}-g++ \
+	configure_generic  --with-ldopts=-static --prefix=${TEMP}/e2fsprogs-out ${ARGS}
 
 	print_info 1 'e2fsprogs: >> Compiling...'
-	compile_generic ${ARGS} # Run make
+	
+	CC=${TARGET}-gcc \
+	CXX=${TARGET}-g++ \
+	compile_generic V=1 # Run make
+	
+	compile_generic install
+	compile_generic install-libs 
 
-	print_info 1 'blkid: >> Copying to cache...'
-	[ -f "${TEMP}/${E2FSPROGS_DIR}/misc/blkid" ] || die 'Blkid executable does not exist!'
-	strip "${TEMP}/${E2FSPROGS_DIR}/misc/blkid" || die 'Could not strip blkid binary!'
+	print_info 1 'e2fsprogs: >> Copying to cache...'
 
-	cd misc
-	genkernel_generate_package "e2fsprogs-${E2FSPROGS_VER}-blkid" "./blkid" || die 'Could not generate blkid binary package!'
+	cd "${TEMP}/e2fsprogs-out"
+	genkernel_generate_package "e2fsprogs-${E2FSPROGS_VER}" "." || die 'Could not generate e2fsprogs binary package!'
 	cd "${TEMP}"
 	rm -rf "${E2FSPROGS_DIR}" > /dev/null
+	rm -rf "${TEMP}/e2fsprogs-out" > /dev/null
 }

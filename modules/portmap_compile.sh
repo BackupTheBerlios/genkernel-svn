@@ -15,10 +15,10 @@ portmap_compile::()
 	# turn on/off the cross compiler
 	if [ -n "$(profile_get_key cross-compile)" ]
 	then
-		ARGS="${ARGS} CC=$(profile_get_key cross-compile)gcc"
+		ARGS="${ARGS} CC=$(profile_get_key cross-compile)-gcc"
     else
 		[ -n "$(profile_get_key utils-cross-compile)" ] && \
-			ARGS="${ARGS} CC=$(profile_get_key utils-cross-compile)gcc"
+			ARGS="${ARGS} CC=$(profile_get_key utils-cross-compile)-gcc"
 	fi
 
 	print_info 1 'portmap: >> Compiling...'

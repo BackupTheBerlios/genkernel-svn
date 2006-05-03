@@ -359,6 +359,7 @@ has() {
 
 logicTrue() {
 	[ "$*" = 'true' ] && return 0
+	[ "$*" = '1' ] && return 0
 	return 1
 }
 
@@ -543,7 +544,7 @@ gen_patch() {
 
 	if [ -d $patchdir ]
 	then	
-	    for i in $(find ${patchdir} -type f -iname \*.patch)
+	    for i in $(find ${patchdir} -type f -iname \*.patch|sort)
 	    do
     		case "$i" in
     		    *.gz)

@@ -1,5 +1,4 @@
-#logicTrue $(profile_get_key internal-uclibc) && require gcc
-#Broken
+logicTrue $(profile_get_key internal-uclibc) && require gcc
 device_mapper_compile::()
 {
 	local DEVICE_MAPPER_SRCTAR="${SRCPKG_DIR}/device-mapper.${DEVICE_MAPPER_VER}.tgz" DEVICE_MAPPER_DIR="device-mapper.${DEVICE_MAPPER_VER}"
@@ -11,22 +10,29 @@ device_mapper_compile::()
 	[ ! -d "${DEVICE_MAPPER_DIR}" ] && die "device-mapper directory ${DEVICE_MAPPER_DIR} invalid"
 
 	cd "${DEVICE_MAPPER_DIR}"
+	cp /usr/share/gnuconfig/* autoconf
 
 	# turn on/off the cross compiler
 	if [ -n "$(profile_get_key cross-compile)" ]
 	then
-		ARGS="${ARGS} CC=$(profile_get_key cross-compile)gcc"
-    else
-		[ -n "$(profile_get_key utils-cross-compile)" ] && \
-			ARGS="${ARGS} CC=$(profile_get_key utils-cross-compile)gcc"
+		TARGET=$(profile_get_key cross-compile)
+		ARGS="${ARGS} --host=$(gcc -dumpmachine) --target=${TARGET}"
+	elif [ -n "$(profile_get_key utils-cross-compile)" ]
+	then
+		TARGET=$(profile_get_key utils-cross-compile)
+		ARGS="${ARGS} --host=$(gcc -dumpmachine) --target=${TARGET}"
+	else
+		TARGET=$(gcc -dumpmachine)
 	fi
-
+	CC=${TARGET}-gcc \
+	CXX=${TARGET}-g++ \
+	ac_cv_func_malloc_0_nonnull=yes \
 	configure_generic  --prefix=${TEMP}/device-mapper --enable-static_link ${ARGS}
 	
 	print_info 1 'device-mapper: >> Compiling...'
-	
-	compile_generic ${ARGS} # Compile
-	compile_generic ${ARGS} install
+
+	compile_generic # Compile
+	compile_generic install
 
 	
 

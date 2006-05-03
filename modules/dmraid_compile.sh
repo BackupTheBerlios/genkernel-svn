@@ -11,20 +11,28 @@ dmraid_compile::() {
 	[ -d "${DMRAID_DIR}" ] || die "dmraid directory ${DMRAID_DIR} invalid!"
 
 	cd "${DMRAID_DIR}"
-	
+	cp /usr/share/gnuconfig/* autoconf
+
 	print_info 1 'dmraid: >> Configuring...'
 	# turn on/off the cross compiler
 	if [ -n "$(profile_get_key cross-compile)" ]
 	then
-		ARGS="${ARGS} CC=$(profile_get_key cross-compile)gcc"
+		TARGET=$(profile_get_key cross-compile)
+		ARGS="${ARGS} --host=$(gcc -dumpmachine) --target=${TARGET}"
+	elif [ -n "$(profile_get_key utils-cross-compile)" ]
+	then
+		TARGET=$(profile_get_key utils-cross-compile)	
+		ARGS="${ARGS} --host=$(gcc -dumpmachine) --target=${TARGET}"
 	else
-		[ -n "$(profile_get_key utils-cross-compile)" ] && \
-			ARGS="${ARGS} CC=$(profile_get_key utils-cross-compile)gcc"
+		TARGET=$(gcc -dumpmachine)
 	fi
-	ARGS="${ARGS} LDFLAGS=-L${DEVICE_MAPPER}/lib"
-	ARGS="${ARGS} CFLAGS=-I${DEVICE_MAPPER}/include" 
-	ARGS="${ARGS} CPPFLAGS=-I${DEVICE_MAPPER}/include" 
 	
+	
+	CC=${TARGET}-gcc \
+	CXX=${TARGET}-g++ \
+	LDFLAGS="-L${DEVICE_MAPPER}/lib" \
+	CFLAGS="-I${DEVICE_MAPPER}/include" \
+	CPPFLAGS="-I${DEVICE_MAPPER}/include" \
 	configure_generic --enable-static_link --prefix=${TEMP}/dmraid ${ARGS}
 	
 	mkdir -p "${TEMP}/dmraid"
@@ -32,7 +40,12 @@ dmraid_compile::() {
 
 	print_info 1 'dmraid: >> Compiling...'
 	
-	compile_generic ${ARGS} # Compile
+	CC=${TARGET}-gcc \
+	CXX=${TARGET}-g++ \
+	LDFLAGS="-L${DEVICE_MAPPER}/lib" \
+	CFLAGS="-I${DEVICE_MAPPER}/include" \
+	CPPFLAGS="-I${DEVICE_MAPPER}/include" \
+	compile_generic
 
 	mkdir "${TEMP}/dmraid/sbin"
 	install -m 0755 -s tools/dmraid "${TEMP}/dmraid/sbin/dmraid"

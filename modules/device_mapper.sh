@@ -7,5 +7,5 @@ device_mapper::()
 	genkernel_extract_package "device-mapper.${DEVICE_MAPPER_VER}"
 
 	# Export device-mapper for dependents
-	DEVICE_MAPPER="${TEMP}/device-mapper"
+	export DEVICE_MAPPER="${TEMP}/device-mapper"
 }

@@ -1,8 +1,9 @@
-require uclibc binutils
+require binutils
 
-gcc_compile::()
+gcc_stage1_compile::()
 {
-	local GCC_SRCTAR="${SRCPKG_DIR}/gcc-${GCC_VER}.tar.bz2" GCC_DIR="gcc-${GCC_VER}" 
+	local GCC_SRCTAR="${SRCPKG_DIR}/gcc-${GCC_VER}.tar.bz2"
+	local GCC_DIR="gcc-${GCC_VER}"
 	local GCC_BUILD_DIR="gcc-${GCC_VER}-build"
 	[ -f "${GCC_SRCTAR}" ] || die "Could not find gcc source tarball: ${GCC_SRCTAR}!"
 
@@ -21,8 +22,8 @@ gcc_compile::()
     print_info 1 'gcc: >> Configuring...'
 
 	GCC_TARGET_ARCH=$(echo ${ARCH} | sed -e s'/-.*//' \
-		-e 's/x86/i386/' \
-		-e 's/i.86/i386/' \
+		-e 's/x86$/i386/' \
+		-e 's/i.86$/i386/' \
 		-e 's/sparc.*/sparc/' \
 		-e 's/arm.*/arm/g' \
 		-e 's/m68k.*/m68k/' \
@@ -35,23 +36,24 @@ gcc_compile::()
 		-e 's/nios2.*/nios2/' \
 	)
 
-
-
 	# binutils ... 
-	LOCAL_PATH="${TEMP}/binutils-output/bin"
+	LOCAL_PATH="${TEMP}/staging/bin"
 
 	# Cant use configure_generic here as we are running configure from a different directory
 	# new funcion gcc_configure defined below
+	
+	STAGING_DIR=${TEMP}/staging/
+
 	PATH="${LOCAL_PATH}:/bin:/sbin:/usr/bin:/usr/sbin" \
 	CC="gcc" \
 	gcc_configure \
-		--prefix=${TEMP}/gcc-output \
+		--prefix=${STAGING_DIR} \
 		--build=${GCC_TARGET_ARCH}-pc-linux-gnu \
 		--host=${GCC_TARGET_ARCH}-pc-linux-gnu \
 		--target=${GCC_TARGET_ARCH}-linux-uclibc \
 		--enable-languages=c \
 		--disable-shared \
-		--with-sysroot=${TEMP}/uclibc-output/usr/${GCC_TARGET_ARCH}-linux-uclibc/ \
+		--with-sysroot=$(STAGING_DIR) \
 		--disable-__cxa_atexit \
 		--enable-target-optspace \
 		--with-gnu-ld \
@@ -100,13 +102,15 @@ gcc_compile::()
 	#mkdir ${TEMP}/busybox-compile
 	
 	#cp busybox ${BUSYBOX_CONFIG} ${TEMP}/busybox-compile
-	cd ${TEMP}/gcc-output
+	cd ${TEMP}/staging
 	#ls -laR ${TEMP}/uclibc-compile|more
-	genkernel_generate_package "gcc-${GCC_VER}" "."
+	genkernel_generate_package "gcc-stage1-${GCC_VER}" "."
 
-	#cd "${TEMP}"
+	cd "${TEMP}"
 	#rm -rf "${UCLIBC_DIR}" > /dev/null
-	#rm -rf "${TEMP}/uclibc-compile" > /dev/null
+	rm -rf "${TEMP}/${GCC_DIR}" > /dev/null
+	rm -rf "${TEMP}/${GCC_BUILD_DIR}" > /dev/null
+	rm -rf "${TEMP}/staging" > /dev/null
 }
 
 gcc_configure() {

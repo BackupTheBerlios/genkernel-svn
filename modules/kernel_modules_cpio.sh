@@ -62,8 +62,8 @@ kernel_modules_cpio::()
 		# Generate CPIO
 		cd "${TEMP}/initramfs-modules-${KV_FULL}-temp/"
 		
-		genkernel_generate_cpio_path kernel-modules .
-		initramfs_register_cpio kernel-modules
+		genkernel_generate_cpio_path kernel-modules-${KV_FULL} .
+		initramfs_register_cpio kernel-modules-${KV_FULL}
 	fi
 }
 

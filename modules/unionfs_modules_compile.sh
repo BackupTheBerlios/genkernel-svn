@@ -1,7 +1,7 @@
-require kernel_config
+require kernel_config e2fsprogs
 #logicTrue $(profile_get_key internal-uclibc) && require gcc
 
-unionfs_compile::()
+unionfs_modules_compile::()
 {
 	local UNIONFS_SRCTAR="${SRCPKG_DIR}/unionfs-${UNIONFS_VER}.tar.gz" UNIONFS_DIR="unionfs-${UNIONFS_VER}"	
 	if kernel_config_is_not_set "MODULES"
@@ -33,8 +33,9 @@ unionfs_compile::()
 		
 		echo "ARCH=${UNIONFS_TARGET_ARCH}" > fistdev.mk
 		echo "PREFIX=${TEMP}/unionfs-build" >> fistdev.mk
-		echo "EXTRAUCFLAGS=-static" >> fistdev.mk
-		
+		echo "EXTRAUCFLAGS=-static -I${E2FSPROGS_STAGING}/include -L${E2FSPROGS_STAGING}/lib" >> fistdev.mk
+		echo "EXTRACFLAGS=-DUNIONFS_UNSUPPORTED" >> fistdev.mk
+
 		if [ ! "$(profile_get_key kbuild-output)" == "$(profile_get_key kernel-tree)" ]
 		then
 			echo "KBUILD_OUTPUT=$(profile_get_key kbuild-output)" >> fistdev.mk
@@ -44,34 +45,36 @@ unionfs_compile::()
 		if [ "$(profile_get_key cross-compile)" != "" ]
 		then
 			echo "KERNEL_CROSS_COMPILE=$(profile_get_key cross-compile)" >> fistdev.mk
-			echo "UTILS_CROSS_COMPILE=$(profile_get_key cross-compile)" >> fistdev.mk
+			echo "UTILS_CROSS_COMPILE=$(profile_get_key cross-compile)-" >> fistdev.mk
 		else
 			if [ "$(profile_get_key utils-cross-compile)" != "" ]
 			then
-				echo "UTILS_CROSS_COMPILE=$(profile_get_key cross-compile)" >> fistdev.mk
+				echo "UTILS_CROSS_COMPILE=$(profile_get_key utils-cross-compile)-" >> fistdev.mk
     		fi
 		fi
 
 		print_info 1 "Compiling unionfs kernel module"
+
 		compile_generic unionfs.ko
-
-		print_info 1 "Compiling unionfs utilities"
-		compile_generic utils
-
-		[ -e ${TEMP}/unionfs-output ] && rm -r ${TEMP}/unionfs-output
+		[ -e ${TEMP}/unionfs-output ] && rm -rf ${TEMP}/unionfs-output
 		mkdir -p ${TEMP}/unionfs-output/sbin
-		mkdir -p ${TEMP}/unionfs-output/lib/modules
-		cp unionfs.ko ${TEMP}/unionfs-output/lib/modules
-		
+		mkdir -p ${TEMP}/unionfs-output/lib/modules/${KV_FULL}/extra
+		cp unionfs.ko ${TEMP}/unionfs-output/lib/modules/${KV_FULL}/extra
+
+#		print_info 1 "Compiling unionfs utilities"
+
+#		compile_generic utils
+
 		#cp unionimap ${TEMP}/unionfs-output/sbin
-		cp unionctl ${TEMP}/unionfs-output/sbin
+#		cp unionctl ${TEMP}/unionfs-output/sbin
 		#cp uniondbg ${TEMP}/unionfs-output/sbin
 		#strip ${TEMP}/unionfs-output/sbin/unionimap
-		strip ${TEMP}/unionfs-output/sbin/unionctl
+#		strip ${TEMP}/unionfs-output/sbin/unionctl
 		#strip ${TEMP}/unionfs-output/sbin/uniondbg
 		
 		cd ${TEMP}/unionfs-output
-		genkernel_generate_package "unionfs-${UNIONFS_VER}-kernel-${KV_FULL}" "."
+
+		genkernel_generate_package "unionfs-${UNIONFS_VER}-modules-${KV_FULL}" "."
 		#genkernel_generate_cpio_path "unionfs-${UNIONFS_VER}" .
 		#initramfs_register_cpio "unionfs-${UNIONFS_VER}"
 

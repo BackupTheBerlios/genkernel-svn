@@ -8,6 +8,6 @@ cfg_register "BLK_DEV_DM_BBR" "Recommended for a fully functional lvm"
 lvm2::()
 {
 	genkernel_convert_tar_to_cpio "lvm2" "${LVM2_VER}"
-	kernel_cmdline_register 'use root=lvm2:<device> for lvm2 support'
+	kernel_cmdline_register 'add "dolvm2" for lvm2 support'
 
 }
