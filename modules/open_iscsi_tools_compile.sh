@@ -62,7 +62,7 @@ open_iscsi_tools_compile::()
 
     compile_generic DESTDIR=${TEMP}/open-iscsi-tools install_programs
     compile_generic DESTDIR=${TEMP}/open-iscsi-tools install_etc
-    
+	cp usr/iscsistart ${TEMP}/open-iscsi-tools/usr/sbin    
 	cd ${TEMP}/open-iscsi-tools
 
     genkernel_generate_package "open-iscsi-${OPENISCSI_VER}-tools" "."
