@@ -7,6 +7,7 @@
 # License: GPLv2
 
 die() {
+	dump_trace
 	echo "${BAD}Error${NORMAL}: $1"
 	exit 1
 }
@@ -575,4 +576,24 @@ gen_patch() {
     		fi
 	    done
 	fi
+}
+
+# Originally From Portage
+# usage- first arg is the number of funcs on the stack to ignore.
+# defaults to 1 (ignoring dump_trace)
+dump_trace() {
+	local funcname="" sourcefile="" lineno="" p n e s="yes"
+	declare -i strip=1
+
+	if [[ -n $1 ]]; then
+		strip=$(( $1 ))
+	fi
+	
+	echo "Call stack:"
+	for (( n = ${#FUNCNAME[@]} - 1, p = ${#BASH_ARGV[@]} ; n > $strip ; n-- )) ; do
+		funcname=${FUNCNAME[${n} - 1]}
+		sourcefile=$(basename ${BASH_SOURCE[${n}]})
+		lineno=${BASH_LINENO[${n} - 1]}
+		echo "  ${sourcefile}, line ${lineno}:   Called ${funcname}${args:+ ${args}}"
+	done
 }

@@ -177,7 +177,10 @@ kernel_config::()
 	then
 		yes '' 2>/dev/null | compile_generic ${KERNEL_ARGS} oldconfig
 	fi
-	compile_generic ${KERNEL_ARGS} modules_prepare
+
+	if [ "$(kernel_config_get "MODULES")" = 'yes' ]; then
+		compile_generic ${KERNEL_ARGS} modules_prepare
+	fi
 
 	# if modules capable compile_generic ${KERNEL_ARGS} modules_prepare
 	# Set or unset any config option
