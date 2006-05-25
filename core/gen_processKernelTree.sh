@@ -18,7 +18,7 @@ get_KV() {
 		KBUILD_OUTPUT=${KERNEL_DIR}
 	fi
 
-	if [ ! -w $(dirname ${KBUILD_OUTPUT}) ]
+	if [ ! -w ${KBUILD_OUTPUT} ]
 	then
 		print_info 1 "${KBUILD_OUTPUT} not writeable; attempting to use ${TEMP}/kbuild_output"
 		KBUILD_OUTPUT="${TEMP}/kbuild_output"
