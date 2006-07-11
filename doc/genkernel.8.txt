@@ -52,18 +52,18 @@ USEFUL MODULES
 
 The following useful modules are listed here for convenience.
 
-'all::':: 
+`all::`:: 
               This is a metamodule which mimics the 'all'
               functionality of genkernel-3.3; producing a kernel,
               initramfs (if needed) and running any extra steps such
               as the installation and bootloader configuration of the
               kernel.
-'kernel::'::
+`kernel::`::
               Build only the kernel and the modules.
-'initramfs::'::
+`initramfs::`::
               Build only the initramfs.
 
-For other modules see the contents of the /usr/share/genkernel
+For other modules see the contents of the `/usr/share/genkernel/modules`
 directory.
 
 OPTIONS
@@ -71,7 +71,7 @@ OPTIONS
 
 Genkernel supports the following options which alter its behaviour.
 Most options have "`--no-`" variants which do the opposite
-thing which can be useful for inversions if you use a genkernel
+thing and can be useful for inversions if you use a genkernel
 configuration profile. You can specify your options in any order.
 
 Debugging Options
@@ -84,8 +84,8 @@ Debugging Options
 
 `--debugfile=<outfile>`::
               This outputs full debugging data; regardless of
-              --debuglevel to the file <outfile>. By default this is
-              /var/log/genkernel.log.
+              `--debuglevel` to the file `<outfile>`. By default this is
+              `/var/log/genkernel.log`.
 
 Internals
 ~~~~~~~~~
@@ -146,36 +146,36 @@ Kernel Configuration
               configuration. This option is off by default.
 
 `--[no-]menuconfig`::
-              Runs, or does not run "make menuconfig" after running
-              "make oldconfig".
+              Runs, or does not run "`make menuconfig`" after running
+              "`make oldconfig`".
 
 `--[no-]save-config`::
               Saves, or does not save the kernel configuration to
-              /etc/kernels if the kernel is successfully compiled.
+              `/etc/kernels` if the kernel is successfully compiled.
 
 `--[no-]oldconfig`::
-              Run, or do not run "make oldconfig". The default is to
+              Run, or do not run "`make oldconfig`". The default is to
               have the option enabled; it is also implied if the
               --clean option is enabled.
 
 `--[no-]config`::
-              Run "make config" to configure the kernel.
+              Run "`make config`" to configure the kernel.
 
 `--[no-]gconfig`::
-              Run "make gconfig" to configure the kernel.
+              Run "`make gconfig`" to configure the kernel.
 
 `--[no-]xconfig`::
-              Run "make xconfig" to configure the kernel.
+              Run "`make xconfig`" to configure the kernel.
 
 `--[no-]mrproper`::
-              Runs, or does not run, "make mrproper" before
-              compilation - this erases both any compiled object files
+              Runs, or does not run, "`make mrproper`" before
+              compilation -- this erases both any compiled object files
               in the kernel source tree as well as the kernel
               configuration. This option is implied if Kbuild output
               is used.
 
 `--[no-]clean`::
-              Runs, or does not run, "make clean" before compilation -
+              Runs, or does not run, "`make clean`" before compilation --
               this erases any compiled object files in the kernel
               source tree but does not have an impact on the kernel
               configuration.
@@ -186,7 +186,7 @@ Kernel Configuration
 
 `--kernel-tree=<dir>`::
               This specifies the location of the kernel sources; the
-              default is /usr/src/linux.
+              default is `/usr/src/linux`.
 
 `--kbuild-output=<dir>`::
               This enables Kbuild output and specifies the directory
@@ -207,9 +207,13 @@ initramfs:: target
 
 `--[no-]gmi`::
               Disable genkernel's initramfs scripts allowing you to
-              use an overlay of your own.  --[no-]busybox Enable or
-              disable busybox in the initramfs. By default, busybox is
-              included.
+              use an overlay of your own.
+
+`--[no-]busybox`::
+              Enable or disable busybox in the initramfs. By default,
+              busybox is included. You don't want to use this option
+              unless you're using custom initramfs boot scripts that
+              do not require busybox.
 
 `--busybox-config=<file>`::
               Busybox configuration file to use when compiling
@@ -303,9 +307,11 @@ all:: target
 `--[no-]setgroup`::
               If enabled this option modifies the grub.conf settings
               to reflect the newly installed kernel and initramfs
-              images.  --[no-]mountboot If enabled /boot will be
-              automatically mounted if needed to install the kernel
-              and initramfs images.
+              images.
+
+`--[no-]mountboot`::
+              If enabled `/boot` will be automatically mounted if
+              needed to install the kernel and initramfs images.
 
 INITRAMFS OPTIONS
 -----------------
@@ -339,11 +345,11 @@ Root device types
 The following root device types can be used with the `root=` option to
 mount the root filesystem.
 
+If you do not know the exact root device type to use, try the `block`
+one first.
+
 If you simply use `root=/dev/xyz`, the block root device type loader
 will be used to mount the device.
-
-If you do not know the exact root device type to use, try the `block`
-one.
 
 Throughout the list, <device> is the device node (for example,
 '/dev/sda1') and [mount_opts] is the options given to mount when
@@ -558,6 +564,35 @@ send a message to the authors describing how you use genkernel, it
 will be added to the next release's manual page so that everybody can
 learn from your experience.
 
+PROFILES
+--------
+
+genkernel has support for configuration profiles which are useful if you
+end up making repeated customized builds: place all your configuration
+parameters in a profile and then run genkernel with
+`--profile=<path-to-profile` to utilize the profile.
+
+If you want to create a profile from a set of config options then use:
+
+............................................................
+# genkernel --option1 --option2 ... --optionN --profile-dump
+............................................................
+
+Profile syntax is as follows; profiles must not split instructions
+across newlines: if your line is too long use a combination of
+`option := ...` and `option += ...` instructions as required.
+
+`option := "foo"`::
+	This sets `option` to 'foo'. Any previous value from an earlier
+        profile or the system profiles is discarded.
+`option -= "foo bar"`::
+	This subtracts from `option` the values `foo` and `bar` (they
+	do not have to be in that specific order in `option`) if they
+	exist.
+`option += "foo bar"`::
+	This adds to `option` the values `foo` and `bar` in the order
+	specified.
+
 REPORTING BUGS
 --------------
 
@@ -567,7 +602,7 @@ We cannot assist you with kernel compilation failures unless they are
 caused by a genkernel bug.
 
 Kernel issues for Gentoo-supported kernels, including compilation
-failures should go to http://bugs.gentoo.org. Please check if an
+failures should go to http://bugs.gentoo.org[]. Please check if an
 existing bug documents the same issue before opening a new bug.
 
 SEE ALSO
