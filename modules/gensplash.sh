@@ -1,5 +1,5 @@
 gensplash::() {
-	if [ -x /sbin/splash ]
+	if [ -x /sbin/splash_geninitramfs ]
 	then
 		[ -z "$(profile_get_key gensplash-theme)" ] && [ -e /etc/conf.d/splash ] && source /etc/conf.d/splash
 		[ -z "$(profile_get_key gensplash-theme)" ] && GENSPLASH_THEME=default

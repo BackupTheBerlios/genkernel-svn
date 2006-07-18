@@ -15,8 +15,8 @@ Things to fix:
 
 * --list-module-groups for gmi
 
-gmi: read -t fix
-gmi: mdboot backportey
+gmi: We need modules in the sense that you can just add an overlay and the
+     initramfs scripts will pick up the .sh and run it.
 
 busybox: fix config (add --busybox-networking opt or something)
 
