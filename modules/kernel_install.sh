@@ -6,7 +6,7 @@ kernel_install::()
 	# Set the destination path for the kernel
 	if [ -z "$(profile_get_key install-path)" ]
 	then
-		profile_set_key install-path "/boot"
+		profile_set_key install-path "$(profile_get_key bootdir)"
 	fi
 
 	if [ -w $(dirname $(profile_get_key install-path)) ]

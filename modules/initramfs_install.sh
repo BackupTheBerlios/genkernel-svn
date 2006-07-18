@@ -7,7 +7,7 @@ initramfs_install::() {
 	then
 		if [ -z "$(profile_get_key install-initramfs-path)" ]
 		then
-	    		profile_set_key install-initramfs-path "/boot"
+	    		profile_set_key install-initramfs-path "$(profile_get_key bootdir)"
 		fi
 
 		if [ -w $(dirname $(profile_get_key install-initramfs-path)) ]

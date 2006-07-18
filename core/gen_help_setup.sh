@@ -112,3 +112,6 @@ profile_set_key links false 'system'
 
 __register_config_option 'Install' 'mountboot' 'false' 'true' 'Mount /boot automatically.'
 profile_set_key mountboot true 'system'
+
+__register_config_option 'Install' 'bootdir' 'true' 'false' 'Location of the boot-directory; default /boot.'
+profile_set_key bootdir '/boot' 'system'

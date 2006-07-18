@@ -1,8 +1,9 @@
 #require kernel initramfs
 
 grub::() {
-	local GRUB_CONF GRUB_BOOTFS GRUB_ROOTFS ARGS INITRAMFS_PRESENT KNAME
+	local GRUB_CONF GRUB_BOOTFS GRUB_ROOTFS ARGS INITRAMFS_PRESENT KNAME BOOTDIR
 
+	BOOTDIR="$(profile_get_key bootdir)"
 	KNAME="$(profile_get_key kernel-name)"
 	
 	if logicTrue $(external_initramfs) 
@@ -14,20 +15,19 @@ grub::() {
 	then
 		GRUB_CONF="$(profile_get_key grub-conf)"
 	else
-		GRUB_CONF='/boot/grub/grub.conf'
+		GRUB_CONF="${BOOTDIR}/grub/grub.conf"
 	fi
 
 	# Create grub configuration directory and file if it doesn't exist.
-    [ ! -e `basename $GRUB_CONF` ] && mkdir -p `basename $GRUB_CONF`
-	
+	[ ! -e `basename $GRUB_CONF` ] && mkdir -p `basename $GRUB_CONF`
 	print_info 1 ">> Adding kernel to $GRUB_CONF..."
 	
 	if [ -n "$(profile_get_key grub-bootfs)" ]
 	then
 		GRUB_BOOTFS="$(profile_get_key grub-bootfs)"
 	else
-		GRUB_ROOTFS=$(awk '/[[:space:]]\/[[:space:]]/ { print $1 }' /etc/fstab)	
-		GRUB_BOOTFS=$(awk '/^[^#].+[[:space:]]\/boot[[:space:]]/ { print $1 }' /etc/fstab)
+		GRUB_ROOTFS=$(awk 'BEGIN{RS="((#[^\n]*)?\n)"}( $2 == "/" ) { print $1; exit }' /etc/fstab)
+		GRUB_BOOTFS=$(awk 'BEGIN{RS="((#[^\n]*)?\n)"}( $2 == "'${BOOTDIR}'") { print $1; exit }' /etc/fstab)
 		
 		# If /boot is not defined in /etc/fstab, it must be the same as /
 		[ "x$GRUB_BOOTFS" == 'x' ] && GRUB_BOOTFS=$GRUB_ROOTFS
@@ -98,4 +98,3 @@ EOF
 		$GRUB_CONF.bak > $GRUB_CONF
 	fi
 }
-

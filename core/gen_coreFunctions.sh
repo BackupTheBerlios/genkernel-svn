@@ -276,18 +276,6 @@ die_debugged() {
   	exit 1
 }
 
-isBootRO()
-{
-	for mo in `grep ' /boot ' /proc/mounts | cut -d ' ' -f 4 | sed -e 's/,/ /'`
-	do
-		if [ "x${mo}x" == "xrox" ]
-		then
-			return 0
-		fi
-	done
-	return 1
-}
-
 setup_cache_dir()
 {
 	[ ! -d "${CACHE_DIR}" ] && mkdir -p "${CACHE_DIR}"

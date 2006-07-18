@@ -1,51 +1,45 @@
-mount_boot::() {
-	
-	if ! egrep -q ' /boot ' /proc/mounts
+mount_boot::()
+{
+	local BOOTDIR
+	BOOTDIR="$(profile_get_key bootdir)"
+
+	if ! egrep -q "[[:space:]]${BOOTDIR}[[:space:]]" /proc/mounts
 	then
-		if egrep -q '^[^#].+/boot.+' /etc/fstab
+		if egrep -q "^[^#].+[[:space:]]${BOOTDIR}[[:space:]]" /etc/fstab
 		then
 			if [ "${UID}" == "0" ]
 			then
-				if ! mount /boot
+				if ! mount "${BOOTDIR}"
 				then
-					die "${BOLD}WARNING${NORMAL}: Failed to mount /boot!"
+					die "${BOLD}WARNING${NORMAL}: Failed to mount ${BOOTDIR}!"
 				else
-					print_info 1 'mount: /boot mounted successfully!'
+					print_info 1 "mount: ${BOOTDIR} mounted successfully!"
 				fi
 			else
-				print_warning 1 ">> Skipping mount of /boot.  Not running as root."
+				print_warning 1 ">> Skipping mount of ${BOOTDIR}. Not running as root."
 			fi
 
 		else
-			print_warning 1 "${BOLD}WARNING${NORMAL}: No mounted /boot partition detected!"
-			print_warning 1 '         Run ``mount /boot`` to mount it!'
+			print_warning 1 "${BOLD}WARNING${NORMAL}: No mounted ${BOOTDIR} mountpoint detected!"
 			echo
 		fi
 	elif isBootRO
 	then
 		if [ "${UID}" == "0" ]
 		then
-			if ! mount -o remount,rw /boot
+			if ! mount -o remount,rw "${BOOTDIR}"
 			then
-				die "${BOLD}WARNING${NORMAL}: Failed to remount /boot RW!"
+				die "${BOLD}WARNING${NORMAL}: Failed to remount ${BOOTDIR} RW!"
 			else
-				print_info 1 "mount: /boot remounted read/write successfully!"
+				print_info 1 "mount: ${BOOTDIR} remounted read/write successfully!"
 			fi
 		else
-			print_warning 1 ">> Skipping remount of /boot.  Not running as root."
+			print_warning 1 ">> Skipping remount of ${BOOTDIR}.  Not running as root."
 		fi
 	fi
 }
 
 isBootRO()
 {
-    for mo in `grep ' /boot ' /proc/mounts | cut -d ' ' -f 4 | sed -e 's/,/ /'`
-    do
-        if [ "x${mo}x" == "xrox" ]
-        then
-            return 0
-        fi
-    done
-    return 1
+	return $(awk '( $2 == "'${BOOTDIR}'" && $4 ~ /(^|,)ro(,|$)/){ I=1; exit }END{print !I }' /proc/mounts);
 }
-
