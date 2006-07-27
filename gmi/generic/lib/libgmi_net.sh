@@ -56,7 +56,10 @@ setup_networking() {
 			# busybox ifconfig crashes if we dont bring up the device first	
 			# ifconfig ${ethdev} up > /dev/null 2>&1
 
-			ifconfig ${ethdev} ${client_ip} ${netmask:-} up # > /dev/null 2>&1
+			# If netmask isn't empty then format things correctly:
+			[ -n "${netmask}" ] && netmask="netmask ${netmask}"
+
+			ifconfig ${ethdev} ${client_ip} ${netmask} up # > /dev/null 2>&1
 			assert "$?" "\t'ip=${IP}' setup failed" || return 1
 
 			if [ -n "${gw_ip}" ]
