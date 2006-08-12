@@ -144,14 +144,14 @@ and the 'diff-overlay'.  For example, you may have such a
 http://www.gentoo.org/doc/en/diskless-howto.xml[Diskless Nodes with
 Gentoo] guide).
 
------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 default node
 prompt 0
 label node
         kernel /kernel
         append initrd=/initramfs ip=dhcp \
-               root=10.0.0.1:/:ro;10.0.0.1:/var/state/systems/node01:rw
------------------------------------------------------------------------
+               root=nfs:10.0.0.1:/:ro;nfs:10.0.0.1:/var/state/systems/node01:rw
+-------------------------------------------------------------------------------
 
 As you may have noticed, we tell the initramfs to mount two NFS shares
 (separated by the "`;`").  This will trigger UnionFS support, which
@@ -170,14 +170,14 @@ For example, one may well create a `computenode` runlevel, in which
 some of the SSI nodes will boot, using such parameters in
 `pxelinux.cfg/default` :
 
------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 default node
 prompt 0
 label node
         kernel /kernel
         append initrd=/initramfs ip=dhcp softlevel=computenode \
-               root=10.0.0.1:/:ro;10.0.0.1:/var/state/systems/node01;rw
------------------------------------------------------------------------
+               root=nfs:10.0.0.1:/:ro;nfs:10.0.0.1:/var/state/systems/node01;rw
+-------------------------------------------------------------------------------
 
 To have different systems booting in different runlevels, you will
 need to have different PXELINUX configuration files for each of these.
@@ -220,10 +220,10 @@ test software without modifying the original state of the nodes.
 For example, you could well have such a line in `pxelinux.cfg/default`
 to boot the nodes:
 
------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------
 append initrd=/initramfs ip=dhcp softlevel=computenode \
-               root=10.0.0.1:/:ro;10.0.0.1:/var/state/systems/node01:ro;tmpfs
------------------------------------------------------------------------------
+               root=nfs:10.0.0.1:/:ro;nfs:10.0.0.1:/var/state/systems/node01:ro;tmpfs
+-------------------------------------------------------------------------------------
 
 It will boot the system just as it would normally do, but all changes
 to the root filesystem will be stored in memory and thrown away at
@@ -262,10 +262,10 @@ system:
 
 and having such a PXELINUX kernel parameter line to boot the nodes:
 
-----------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------
 append initrd=/initramfs ip=dhcp softlevel=computenode \
-               root=10.0.0.1:/srv/diskless/arch:ro;10.0.0.1:/var/state/systems/node01:rw
-----------------------------------------------------------------------------------------
+               root=nfs:10.0.0.1:/srv/diskless/arch:ro;nfs:10.0.0.1:/var/state/systems/node01:rw
+------------------------------------------------------------------------------------------------
 
 
 Multiple servers

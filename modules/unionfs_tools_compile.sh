@@ -68,7 +68,9 @@ unionfs_tools_compile::()
 		mkdir -p ${TEMP}/unionfs-output/sbin
 
 		#cp unionimap ${TEMP}/unionfs-output/sbin
-		cp unionctl ${TEMP}/unionfs-output/sbin
+
+		[ -x "utils/unionctl" ] && cp utils/unionctl ${TEMP}/unionfs-output/sbin
+		[ -x "unionctl" ] && cp unionctl ${TEMP}/unionfs-output/sbin
 		#cp uniondbg ${TEMP}/unionfs-output/sbin
 		#strip ${TEMP}/unionfs-output/sbin/unionimap
 		strip ${TEMP}/unionfs-output/sbin/unionctl
