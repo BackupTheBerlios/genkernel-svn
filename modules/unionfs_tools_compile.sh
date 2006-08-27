@@ -53,35 +53,24 @@ unionfs_tools_compile::()
     		fi
 		fi
 
-		#print_info 1 "Compiling unionfs kernel module"
-
-		#compile_generic unionfs.ko
-		#[ -e ${TEMP}/unionfs-output ] && rm -r ${TEMP}/unionfs-output
-		#mkdir -p ${TEMP}/unionfs-output/sbin
-		#mkdir -p ${TEMP}/unionfs-output/lib/modules
-		#cp unionfs.ko ${TEMP}/unionfs-output/lib/modules
-
 		print_info 1 "Compiling unionfs utilities"
 
 		compile_generic utils
 		[ -e ${TEMP}/unionfs-output ] && rm -rf ${TEMP}/unionfs-output
 		mkdir -p ${TEMP}/unionfs-output/sbin
 
-		#cp unionimap ${TEMP}/unionfs-output/sbin
-
 		[ -x "utils/unionctl" ] && cp utils/unionctl ${TEMP}/unionfs-output/sbin
 		[ -x "unionctl" ] && cp unionctl ${TEMP}/unionfs-output/sbin
+		strip ${TEMP}/unionfs-output/sbin/unionctl
+
+		#cp unionimap ${TEMP}/unionfs-output/sbin
 		#cp uniondbg ${TEMP}/unionfs-output/sbin
 		#strip ${TEMP}/unionfs-output/sbin/unionimap
-		strip ${TEMP}/unionfs-output/sbin/unionctl
 		#strip ${TEMP}/unionfs-output/sbin/uniondbg
 		
 		cd ${TEMP}/unionfs-output
 		genkernel_generate_package "unionfs-${UNIONFS_VER}-tools" "."
 		#genkernel_generate_cpio_path "unionfs-${UNIONFS_VER}" .
 		#initramfs_register_cpio "unionfs-${UNIONFS_VER}"
-
-		
-
 	fi
 }

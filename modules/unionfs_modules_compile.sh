@@ -6,7 +6,10 @@ unionfs_modules_compile::()
 	local UNIONFS_SRCTAR="${SRCPKG_DIR}/unionfs-${UNIONFS_VER}.tar.gz" UNIONFS_DIR="unionfs-${UNIONFS_VER}"	
 	if kernel_config_is_not_set "MODULES"
 	then
-		print_info 1 ">> Modules not enabled in .config .. skipping unionfs compile"
+		print_info 1 ">> Modules not enabled in .config ... skipping unionfs compile"
+	elif kernel_config_is_set "UNION_FS"
+	then
+		print_info 1 ">> unionfs enabled in kernel ... skipping unionfs compile"
 	else
 		# stolen from uclibc_compile.sh
 		UNIONFS_TARGET_ARCH=$(echo ${ARCH} | sed -e s'/-.*//' \

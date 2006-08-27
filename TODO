@@ -23,3 +23,5 @@ busybox: fix config (add --busybox-networking opt or something)
 general: "Failed to compile" errors need to produce backtrace & etc...
 
 makeopts work?
+
+* reduce --help indentation to make things more readable

@@ -85,10 +85,14 @@ load_modules() {
 setup_unionfs() {
 	if [ "${USE_UNIONFS}" != "yes" ]
 	then
-		if [ -r /lib/modules/unionfs.ko ]
+		local module_location
+		module_location=$(find /lib/modules -name unionfs.ko)
+		grep -qs 'unionfs' /proc/filesystems
+
+		if [ -n "${module_location}" -o "$?" = 0 ]
 		then
 			good_msg "Enabling UnionFS support"
-			insmod /lib/modules/unionfs.ko
+			[ -n "${module_location}" ] && insmod "${module_location}"
 			dbg_msg "Mounting the base tmpfs for unionfs"
 			mkdir ${UNIONS}/.base
 			mount -t tmpfs tmpfs ${UNIONS}/.base

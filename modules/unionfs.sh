@@ -4,6 +4,8 @@ require unionfs_modules_compile
 unionfs::()
 {
 	genkernel_convert_tar_to_cpio "unionfs" "${UNIONFS_VER}-tools"
-	genkernel_convert_tar_to_cpio "unionfs" "${UNIONFS_VER}-modules-${KV_FULL}"
-
+	if kernel_config_is_not_set "UNION_FS"
+	then
+		genkernel_convert_tar_to_cpio "unionfs" "${UNIONFS_VER}-modules-${KV_FULL}"
+	fi
 }
