@@ -86,7 +86,7 @@ setup_unionfs() {
 	if [ "${USE_UNIONFS}" != "yes" ]
 	then
 		local module_location
-		module_location=$(find /lib/modules -name unionfs.ko)
+		[ -d /lib/modules ] && module_location=$(find /lib/modules -name unionfs.ko)
 		grep -qs 'unionfs' /proc/filesystems
 
 		if [ -n "${module_location}" -o "$?" = 0 ]
