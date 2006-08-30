@@ -41,7 +41,12 @@ get_KV() {
 
 	if [ "${version_string}" != "-${KNAME}-${ARCH}" ]
 	then
-		echo "-${KNAME}-${ARCH}" > "$(profile_get_key kbuild-output)/localversion-genkernel" || die "No permissions to write to $(profile_get_key kbuild-output)/localversion-genkernel"
+		if [ "${KNAME}" != 'do-not-set' ]
+		then
+			echo "-${KNAME}-${ARCH}" > "$(profile_get_key kbuild-output)/localversion-genkernel" || die "No permissions to write to $(profile_get_key kbuild-output)/localversion-genkernel"
+		else
+			rm "$(profile_get_key kbuild-output)/localversion-genkernel" 2>/dev/null
+		fi
 	fi
 	
 	# Configure the kernel

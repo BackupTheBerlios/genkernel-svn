@@ -249,7 +249,7 @@ parse_cmdline() {
 				NODETECT=1
 				;;
 		
-			CONSOLE\=*)
+			console\=*)
 				CONSOLE=${x#console=}
 				exec >${CONSOLE} <${CONSOLE} 2>&1
 				;;
