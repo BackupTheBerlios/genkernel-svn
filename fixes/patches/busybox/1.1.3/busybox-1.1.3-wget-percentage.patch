@@ -1,0 +1,68 @@
+diff -ur busybox-1.1.3/networking/wget.c busybox-1.1.3.plasmaroo/networking/wget.c
+--- busybox-1.1.3/networking/wget.c	2006-03-22 21:16:19.000000000 +0000
++++ busybox-1.1.3.plasmaroo/networking/wget.c	2006-09-22 17:32:31.000000000 +0100
+@@ -51,6 +51,7 @@
+ static volatile unsigned long statbytes = 0; /* Number of bytes transferred so far. */
+ /* For progressmeter() -- number of seconds before xfer considered "stalled" */
+ static const int STALLTIME = 5;
++int print_progress_flag = FALSE; /* Print progress as a %age for parsing */
+ #endif
+ 
+ static void close_and_delete_outfile(FILE* output, char *fname_out, int do_continue)
+@@ -146,6 +147,7 @@
+ #define WGET_OPT_HEADER	16
+ #define WGET_OPT_PREFIX	32
+ #define WGET_OPT_PROXY	64
++#define WGET_OPT_PRINT_PROGRESS 128
+ 
+ static const struct option wget_long_options[] = {
+ 	{ "continue",        0, NULL, 'c' },
+@@ -155,6 +157,7 @@
+ 	{ "header",	         1, NULL, 131 },
+ 	{ "directory-prefix",1, NULL, 'P' },
+ 	{ "proxy",           1, NULL, 'Y' },
++	{ "print-progress",  0, NULL, 'g' },
+ 	{ 0,                 0, 0, 0 }
+ };
+ 
+@@ -190,7 +193,7 @@
+ 	 */
+ 	bb_opt_complementally = "-1:\203::";
+ 	bb_applet_long_options = wget_long_options;
+-	opt = bb_getopt_ulflags(argc, argv, "cq\213O:\203:P:Y:",
++	opt = bb_getopt_ulflags(argc, argv, "cq\213O:\203:P:Y:g",
+ 					&fname_out, &headers_llist,
+ 					&dir_prefix, &proxy_flag);
+ 	if (opt & WGET_OPT_CONTINUE) {
+@@ -199,6 +202,11 @@
+ 	if (opt & WGET_OPT_QUIET) {
+ 		quiet_flag = TRUE;
+ 	}
++#ifdef CONFIG_FEATURE_WGET_STATUSBAR
++	if (opt & WGET_OPT_PRINT_PROGRESS) {
++		print_progress_flag = TRUE;
++	}
++#endif
+ 	if (strcmp(proxy_flag, "off") == 0) {
+ 		/* Use the proxy if necessary. */
+ 		use_proxy = 0;
+@@ -746,6 +754,7 @@
+ 	} else
+ 		ratio = 100;
+ 
++	if(print_progress_flag == FALSE) {
+ 	snprintf(buf, sizeof(buf), "\r%-20.20s %3d%% ", curfile, ratio);
+ 
+ 	barlength = getttywidth() - 51;
+@@ -799,6 +808,11 @@
+ 		snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf),
+ 			 "%02d:%02d ETA", i / 60, i % 60);
+ 	}
++
++	/* print_progress_flag */
++	} else {
++		snprintf(buf, sizeof(buf), "%3d%%\n", ratio);
++	}
+ 	write(STDERR_FILENO, buf, strlen(buf));
+ 
+ 	if (flag == -1) {
