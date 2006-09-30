@@ -259,6 +259,9 @@ parse_cmdline() {
 			ip\=*)
 				IP=${x#ip=}
 				;;
+			ip_nofail)
+				IP_NOFAIL='yes'
+				;;
 			nameserver\=*)
 				NAMESERVER=${x#nameserver=}
 				;;

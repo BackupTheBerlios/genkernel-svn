@@ -80,7 +80,7 @@ do
 
 	setup_networking
 
-	if ! assert "$?" "Unable to setup networking."
+	if ! assert "$?" "Unable to setup networking." && [ "${IP_NOFAIL}" != 'yes' ]
 	then
 		bad_msg 
 		bad_msg "The IP parameter format is:"
@@ -101,9 +101,9 @@ do
 		bad_msg "Please provide a valid ip parameter or 'continue' to boot without"
 		bad_msg "setting up networking ..."
 		echo -n "ip="
+
 		### TODO : have a proper read -t, if user does not provide info in, say, 10secs, 
 		### break out of the while loop.
-
 		read ip
 
 		# Get the nameserver param if there is one
@@ -114,7 +114,6 @@ do
 
 		# Make sure there is no garbage 
 		IP=$( echo "${ip}" | cut -f1 -d' ' )
-
 	else
 		got_good_net="yes"
 	fi
