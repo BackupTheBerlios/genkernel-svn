@@ -21,7 +21,8 @@ gmi: We need modules in the sense that you can just add an overlay and the
 busybox: fix config (add --busybox-networking opt or something)
 
 general: "Failed to compile" errors need to produce backtrace & etc...
-
 makeopts work?
 
 * reduce --help indentation to make things more readable
+* --help should go to stderr
+* udhcp.sh should print out IP address received and such
