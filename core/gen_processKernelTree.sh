@@ -88,7 +88,11 @@ get_KV() {
 	
 	KV_LOCAL="${KV_LOCAL// /}"
 	
-	if [ -f ${KBUILD_OUTPUT}/include/linux/version.h ]
+	if [ -f ${KBUILD_OUTPUT}/include/linux/utsrelease.h ]
+	then
+		UTS_RELEASE=`grep UTS_RELEASE ${KBUILD_OUTPUT}/include/linux/utsrelease.h | sed -e 's/#define UTS_RELEASE "\(.*\)"/\1/'`
+		KV_LOCAL=`echo ${UTS_RELEASE}|sed -e "s/${KV_MAJOR}.${KV_MINOR}.${KV_PATCH}${KV_EXTRA}//"`
+	elif [ -f ${KBUILD_OUTPUT}/include/linux/version.h ]
 	then
 		UTS_RELEASE=`grep UTS_RELEASE ${KBUILD_OUTPUT}/include/linux/version.h | sed -e 's/#define UTS_RELEASE "\(.*\)"/\1/'`
 		KV_LOCAL=`echo ${UTS_RELEASE}|sed -e "s/${KV_MAJOR}.${KV_MINOR}.${KV_PATCH}${KV_EXTRA}//"`

@@ -72,7 +72,7 @@ busybox_compile::()
 		print_info 1 "Setting cross compiler to $(profile_get_key utils-cross-compile)"
 		config_set ".config" "USING_CROSS_COMPILER" "y"
 		config_set_string ".config" "CROSS_COMPILER_PREFIX" "$(profile_get_key cross-compile)-"
-    elif [ "$(profile_get_key utils-cross-compile)" != "" ]
+	elif [ "$(profile_get_key utils-cross-compile)" != "" ]
 	then
 		print_info 1 "Setting cross compiler to $(profile_get_key utils-cross-compile)"
 		config_set ".config" "USING_CROSS_COMPILER" "y"
@@ -86,7 +86,6 @@ busybox_compile::()
 	
 	print_info 1 'busybox: >> Compiling...'
 	compile_generic all
-
 	
 	[ -f "busybox" ] || die 'Busybox executable does not exist!'
 	strip "busybox" || die 'Could not strip busybox binary!'

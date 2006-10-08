@@ -47,7 +47,7 @@ do_mount() {
 	is_set ${mount_opts} && _mount_opts="-o ${mount_opts}"
 
 	if ! is_set ${server_ip} && ! is_set ${dir}; then
-		# Obtain server_ip
+		# First try: use info from kernel DHCP
 		options=`busybox dmesg | grep rootserver | sed -e "s/,/ /g"`
 		for option in $options
 		do
@@ -55,7 +55,6 @@ do_mount() {
 				server_ip=`echo $option | sed -e "s/=/ /g" | cut -d " " -f 2`;
 			fi
 		done
-		# Obtain dir
 		options=`busybox dmesg | grep rootpath | sed -e "s/,/ /g"`
 		for option in $options
 		do
@@ -63,6 +62,16 @@ do_mount() {
 				dir=`echo $option | sed -e "s/=/ /g" | cut -d " " -f 2`;
 			fi
 		done
+
+		# Second try: use info from udhcp, stored in /etc/initrd.defaults
+		if [ -n "$nfsserver" ]
+		then
+			server_ip="$nfsserver"
+		fi
+		if [ -n "$nfspath" ]
+		then
+			dir="$nfspath"
+		fi
 	fi
 
 	dbg_msg "mount -t nfs ${_mount_opts} ${server_ip}:${dir} ${mountpoint}"
