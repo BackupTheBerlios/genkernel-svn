@@ -251,9 +251,14 @@ parse_cmdline() {
 		
 			console\=*)
 				CONSOLE=${x#console=}
+
+				# This may either be ttyX, or /dev/ttyX. The kernel doesn't
+				# like the /dev type and this will die, so let's adjust
+				# CONSOLE accordingly...
+
+				[ "${CONSOLE#/dev/}" == "${CONSOLE}" ] && CONSOLE="/dev/${CONSOLE}"
 				exec >${CONSOLE} <${CONSOLE} 2>&1
 				;;
-
 
 			# NETWORKING
 			ip\=*)

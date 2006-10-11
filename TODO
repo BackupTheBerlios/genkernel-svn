@@ -26,3 +26,4 @@ makeopts work?
 * reduce --help indentation to make things more readable
 * --help should go to stderr
 * udhcp.sh should print out IP address received and such
+* console=ttyS0,9600 goes kaboom
