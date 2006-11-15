@@ -70,8 +70,8 @@ uclibc_stage1_compile::()
 	config_set .config UCLIBC_HAS_FULL_RPC "y"
 	config_set_string .config KERNEL_SOURCE "${TEMP}/staging/usr/${UCLIBC_TARGET_ARCH}-linux-uclibc/usr/"
 	config_unset .config RUNTIME_PREFIX
-	config_set_string DEVEL_PREFIX "/usr/"
-	config_set_string SHARED_LIB_LOADER_PREFIX "/lib/"
+	config_set_string .config DEVEL_PREFIX "/usr/"
+	config_set_string .config SHARED_LIB_LOADER_PREFIX "/lib/"
     for def in MALLOC_GLIBC_COMPAT DO_C99_MATH UCLIBC_HAS_{RPC,CTYPE_CHECKED,WCHAR,HEXADECIMAL_FLOATS,GLIBC_CUSTOM_PRINTF,FOPEN_EXCLUSIVE_MODE,GLIBC_CUSTOM_STREAMS,PRINTF_M_SPEC,FTW} ; do
 		config_set .config ${def} "y"
     done
