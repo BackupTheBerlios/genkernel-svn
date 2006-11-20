@@ -21,6 +21,5 @@ gcc::()
 		-e 's/nios2.*/nios2/' \
 	)
 
-	profile_set_key utils-cross-compile "${TEMP}/staging/bin/${GCC_TARGET_ARCH}-linux-uclibc-"
-
+	profile_set_key utils-cross-compile "${TEMP}/staging/bin/${GCC_TARGET_ARCH}-linux-uclibc"
 }

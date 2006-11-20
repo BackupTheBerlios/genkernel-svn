@@ -11,9 +11,9 @@ uclibc_stage2_compile::()
 	[ -d "${UCLIBC_DIR}" ] || die 'uclibc directory ${UCLIBC_DIR} is invalid!'
 
 	cd "${UCLIBC_DIR}"
+	gen_patch ${FIXES_PATCHES_DIR}/uclibc/${UCLIBC_VER} .
    
 	print_info 1 'uClibc: >> Configuring...'
-
 	compile_generic defconfig
 
     GCC_TARGET_ARCH=$(echo ${ARCH} | sed -e s'/-.*//' \
@@ -88,6 +88,13 @@ uclibc_stage2_compile::()
 		config_set .config ${def} "y"
 	done
 	
+	# If headers are a quickpkg of linux-headers then move them into the right place...
+	if [ -e "${TEMP}/staging/usr/include" ]
+	then
+		mkdir "${TEMP}/staging/usr/${UCLIBC_TARGET_ARCH}-linux-uclibc/usr" -p
+		mv "${TEMP}/staging/usr/include" "${TEMP}/staging/usr/${UCLIBC_TARGET_ARCH}-linux-uclibc/usr"
+	fi
+
 	if [ -n "${UCLIBC_TARGET_ENDIAN}" ]
 	then
 		config_set .config ARCH_${UCLIBC_TARGET_ENDIAN}_ENDIAN "y"
@@ -99,8 +106,11 @@ uclibc_stage2_compile::()
 	
 	print_info 1 'uClibc: >> Compiling...'
 	compile_generic prefix= devel_prefix=/ runtime_prefix=/ hostcc=gcc all
-	
 	compile_generic DEVEL_PREFIX="${TEMP}/staging/" RUNTIME_PREFIX="${TEMP}/staging/" install_runtime install_dev
+
+	# Move includes so gcc can find them
+	cp -r "${TEMP}/staging/include" "${TEMP}/staging/usr"
+	mv "${TEMP}/staging/include" "${TEMP}/staging/${UCLIBC_TARGET_ARCH}-linux-uclibc"
 	
 	cd ${TEMP}/staging
 	genkernel_generate_package "uClibc-stage2-${UCLIBC_VER}" "."

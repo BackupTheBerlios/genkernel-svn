@@ -14,14 +14,12 @@ gcc_stage2_compile::()
 	cd "${GCC_DIR}"
 	gen_patch ${FIXES_PATCHES_DIR}/gcc/${GCC_VER} .
 
-	
 	cd "${TEMP}"
 	[ -e "${GCC_BUILD_DIR}" ] && rm -rf "${GCC_BUILD_DIR}"
 	mkdir -p "${GCC_BUILD_DIR}"
 	cd "${GCC_BUILD_DIR}"
 
-    print_info 1 'gcc: >> Configuring...'
-
+	print_info 1 'gcc: >> Configuring...'
 	GCC_TARGET_ARCH=$(echo ${ARCH} | sed -e s'/-.*//' \
 		-e 's/x86/i386/' \
 		-e 's/i.86/i386/' \
@@ -36,8 +34,6 @@ gcc_stage2_compile::()
 		-e 's/cris.*/cris/' \
 		-e 's/nios2.*/nios2/' \
 	)
-
-
 
 	# binutils ... 
 	LOCAL_PATH="${TEMP}/staging/bin"
@@ -55,7 +51,7 @@ gcc_stage2_compile::()
 		--target=${GCC_TARGET_ARCH}-linux-uclibc \
 		--disable-altivec \
 		--enable-nls \
-		--enable-languages=c,c++,f95 \
+		--enable-languages=c,c++ \
 		--disable-shared \
 		--with-sysroot=${STAGING_DIR} \
 		--disable-__cxa_atexit \

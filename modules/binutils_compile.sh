@@ -38,8 +38,8 @@ binutils_compile::()
         --target=${BINUTILS_TARGET_ARCH}-linux-uclibc \
         --disable-nls \
         --enable-multilib \
-        --disable-werror
-
+        --disable-werror \
+        --with-sysroot="${TEMP}/staging/"
 
 	# turn on/off the cross compiler
 	#if [ -n "$(profile_get_key cross-compile)" ]

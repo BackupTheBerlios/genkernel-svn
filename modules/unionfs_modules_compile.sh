@@ -1,4 +1,4 @@
-require kernel_config e2fsprogs
+require kernel_config
 #logicTrue $(profile_get_key internal-uclibc) && require gcc
 
 unionfs_modules_compile::()

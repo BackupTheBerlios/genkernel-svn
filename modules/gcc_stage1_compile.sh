@@ -53,7 +53,7 @@ gcc_stage1_compile::()
 		--target=${GCC_TARGET_ARCH}-linux-uclibc \
 		--enable-languages=c \
 		--disable-shared \
-		--with-sysroot=$(STAGING_DIR) \
+		--with-sysroot=${STAGING_DIR} \
 		--disable-__cxa_atexit \
 		--enable-target-optspace \
 		--with-gnu-ld \

@@ -12,16 +12,17 @@ uclibc_stage1_compile::()
 	[ -d "${UCLIBC_DIR}" ] || die 'uclibc directory ${UCLIBC_DIR} is invalid!'
 
 	cd "${UCLIBC_DIR}"
+	pwd
+	gen_patch ${FIXES_PATCHES_DIR}/uclibc/${UCLIBC_VER} .
    
 	print_info 1 'uClibc: >> Configuring...'
-
 	compile_generic defconfig
 	
 	# turn on/off the cross compiler
 	if [ -n "$(profile_get_key cross-compile)" ]
 	then
     	config_set_string ".config" "CROSS_COMPILER_PREFIX" "$(profile_get_key cross-compile)"
-    elif [ -n "$(profile_get_key utils-cross-compile)" ]
+	elif [ -n "$(profile_get_key utils-cross-compile)" ]
 	then
     	config_set_string ".config" "CROSS_COMPILER_PREFIX" "$(profile_get_key utils-cross-compile)"
 	else
@@ -78,7 +79,12 @@ uclibc_stage1_compile::()
     echo "UCLIBC_HAS_FULL_RPC=y" >> .config
     echo "PTHREADS_DEBUG_SUPPORT=y" >> .config
 
-
+	# If headers are a quickpkg of linux-headers then move them into the right place...
+	if [ -e "${TEMP}/staging/usr/include" ]
+	then
+		mkdir "${TEMP}/staging/usr/${UCLIBC_TARGET_ARCH}-linux-uclibc/usr" -p
+		mv "${TEMP}/staging/usr/include" "${TEMP}/staging/usr/${UCLIBC_TARGET_ARCH}-linux-uclibc/usr"
+	fi
 	
 	if [ -n "${UCLIBC_TARGET_ENDIAN}" ]
 	then
