@@ -222,10 +222,6 @@ initramfs:: target
 `--[no-]busybox-menuconfig`::
               Run busybox's menuconfig before compiling busybox.
 
-`--[no-]udev`::
-              Enable or disable udev in the initramfs. By default,
-              udev is included.
-
 `--[no-]dmraid`::
               Enable or disable dmraid in the initramfs.  By default,
               this option is not included. Be sure to enable the

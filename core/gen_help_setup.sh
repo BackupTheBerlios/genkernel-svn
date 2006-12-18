@@ -65,9 +65,6 @@ profile_set_key busybox true 'system'
 __register_config_option 'Initramfs' 'busybox-config' 'true' 'false' 'busybox config file to use'
 __register_config_option 'Initramfs' 'busybox-menuconfig' 'false' 'true' 'Run menuconfig on busybox config file'
 
-__register_config_option 'Initramfs' 'udev' 'false' 'true' 'Add udev to the initramfs'
-profile_set_key udev true 'system'
-
 __register_config_option 'Initramfs' 'dmraid' 'false' 'true' 'Include DMRAID support.'
 __register_config_option 'Initramfs' 'evms2' 'false' 'true' 'Include EVMS2 support.'
 __register_config_option 'Initramfs' 'lvm2' 'false' 'true' 'Include LVM2 support.'

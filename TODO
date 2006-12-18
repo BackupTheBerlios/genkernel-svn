@@ -2,9 +2,7 @@ Things to fix:
 
 * cmdline kernel config parameter changing
 
-* fix linuxrc
-
-* epatch function
+* delete unused stuff in gmi/
 
 * make some functions more generic .. ( not necessary right away but would be nice to get done )
 
