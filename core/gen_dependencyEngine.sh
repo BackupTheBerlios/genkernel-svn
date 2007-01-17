@@ -148,17 +148,7 @@ require () {
 	done
 
 	# For $myCaller deps are $myDeps
-
-	# We ignore adding anything for 'genkernel' since this is a special
-	# target which is the root dependency node, and having it in the tree
-	# is a bit redundant. If you change where your dependency tree is
-	# invoked from then be sure to change this step or else you'll get
-	# an extra module...
-
-	if [ "${myCaller}" != 'genkernel' ]
-	then
-		require_set "${myCaller}" "${myDeps}"
-	fi
+	require_set "${myCaller}" "${myDeps}"
 
 	for i in ${myDeps}; do
 		if ! $(has "${i}" "${__INTERNAL__MODULES_LOADED}")
