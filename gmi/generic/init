@@ -132,7 +132,7 @@ do
 	then
 		echo
 		bad_msg "Please specify a valid real_root parameter to boot, 'help' or 'shell' ..."
-		if [ "${USE_UNIONFS}" = "yes" ]
+		if [ "${USE_UNIONFSALIKE}" = "yes" ]
 		then
 			# We already started unionizing... shall we add something else?
 			bad_msg "If some filesystems were already mounted sucessfully, add the ones you "
@@ -195,7 +195,7 @@ do
 	# If unionfs is needed by a ';' stacking, enable it.
 	if echo ${REAL_ROOT} | grep ";" > /dev/null
 	then
-		setup_unionfs
+		setup_unionfsalike
 	fi
 
 	dbg_msg "REAL_ROOT=${REAL_ROOT}"
@@ -237,7 +237,7 @@ do
 
 			got_good_root="yes"
 
-			if [ "${USE_UNIONFS}" = "yes" ]
+			if [ "${USE_UNIONFSALIKE}" = "yes" ]
 			then
 				dbg_msg "Recorded ${mountpoint} as a union, will insert later"
 			else
@@ -260,14 +260,13 @@ do
 	done
 done
 
-
 if [ "${USE_UNIONFS}" = "yes" ]
 then
 	got_one_broken_union="no"
-	good_msg "Adding unions to the root filesystem"
+	good_msg "(unionfs) Adding unions to the root filesystem"
 	for rootfs in ${UNIONS}/*
 	do
-		dbg_msg "Inserting for rootfs ${rootfs}"
+		dbg_msg "Inserting ${rootfs}"
 		# get the mode from the underlying fs' mode
 		mode="rw"
 		has "ro" "$( cat /proc/mounts | grep "${rootfs} " |  cut -f4 -d' ' )" && mode="ro"
@@ -296,6 +295,41 @@ then
 	# Remove the unionfs base
 	unionctl ${ROOTFS} --remove ${UNIONS}/.base
 	umount ${UNIONS}/.base
+elif [ "${USE_AUFS}" = "yes" ]
+then
+	good_msg "(aufs) Adding unions to the root filesystem"
+	got_one_broken_union=""
+	mountopt=""
+
+	for rootfs in ${UNIONS}/*
+	do
+		dbg_msg "Inserting ${rootfs}"
+		# get the mode from the underlying fs' mode
+		mode="rw"
+		has "ro" "$( cat /proc/mounts | grep "${rootfs} " |  cut -f4 -d' ' )" && mode="ro"
+
+		good_msg "\t$( cat /proc/mounts | grep "${rootfs} " | cut -f1 -d' ' ) (${mode})"
+		mount -t aufs -o "${mountopt},prepend:${rootfs}=${mode}" none ${ROOTFS}
+		if [ "$?" != "0" ]
+		then
+			warn_msg "\t\tfailed, but continuing"
+			got_one_broken_union="yes"
+		fi
+
+		mountopt="remount,"
+	done
+
+	if [ "${got_one_broken_union}" = "yes" ]
+	then
+		warn_msg "One of the unions was not added successfully."
+		warn_msg "GMI will try to continue, but you may experience problems."
+		warn_msg ""
+		warn_msg "Try passing the 'debug' option on the kernel command-line for more"
+		warn_msg "information before filing a bug report."
+		warn_msg ""
+		warn_msg "(Waiting 10 seconds...  CTRL-ALT-DEL to reboot now.)"
+		sleep 10
+	fi
 fi
 
 # If there are any mounts _under_ GMIMNT, we try to move these into 
@@ -359,7 +393,6 @@ fi
 # Clean up env
 unset DEBUG
 unset USE_UNIONFS
-
 verbose_kmsg 
 
 # Make sure we are in the root before the switch_root command is called

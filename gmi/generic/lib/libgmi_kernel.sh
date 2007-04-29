@@ -97,13 +97,26 @@ setup_unionfs() {
 			mkdir ${UNIONS}/.base
 			mount -t tmpfs tmpfs ${UNIONS}/.base
 			mount -t unionfs -o dirs=${UNIONS}/.base=rw unionfs ${ROOTFS}
-			export USE_UNIONFS="yes"
+			USE_UNIONFS="yes"
+			USE_UNIONFSALIKE="yes"
 		else
 			dbg_msg "The unionfs.ko module does not exist, unionfs disabled."
 		fi
 	fi
 }
 
+setup_unionfsalike() {
+	# Use aufs if available; otherwise let's try unionfs
+	grep -qs 'aufs' /proc/filesystems
+	if [ "$?" -eq 0 ]
+	then
+		good_msg "Enabling aufs support"
+		USE_AUFS="yes"
+		USE_UNIONFSALIKE="yes"
+	else
+		setup_unionfs
+	fi
+}
 
 # Detect SBP-2 devices
 #
