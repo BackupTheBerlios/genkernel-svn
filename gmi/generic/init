@@ -121,8 +121,15 @@ done
 
 
 [ "${FORCED_UNIONFS}" = "yes" ] && setup_unionfs
-
 [ -n "$DEBUG" ] && shell
+
+if [ -n "${REAL_ROOT_DETECT}" ]
+then
+	REAL_ROOT_DETECT="$(echo ${REAL_ROOT_DETECT} | sed -e 's/:/ /g')"
+
+	dbg_msg "Running ${FSLOADERS}/${REAL_ROOT_DETECT}..."
+	REAL_ROOT="$(${FSLOADERS}/${REAL_ROOT_DETECT})"
+fi
 
 got_good_root=no
 while [ "${got_good_root}" != "yes" ]

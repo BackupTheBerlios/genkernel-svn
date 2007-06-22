@@ -1,13 +1,11 @@
 Things to fix:
 
+* We should make an attempt at autodetecting GENKERNEL_HOME if it's not set
+* CACHE_DIR should be created automatically if it does not exist
+
 * cmdline kernel config parameter changing
-
-* delete unused stuff in gmi/
-
 * make some functions more generic .. ( not necessary right away but would be nice to get done )
-
 * kbuild output writeable check
-
 * make critical variables (arch, etc) bombproof and readonly so modules can't b0rk things
   up
 
@@ -17,10 +15,8 @@ gmi: We need modules in the sense that you can just add an overlay and the
      initramfs scripts will pick up the .sh and run it.
 
 busybox: fix config (add --busybox-networking opt or something)
-
 general: "Failed to compile" errors need to produce backtrace & etc...
 makeopts work?
-
 
 * reduce --help indentation to make things more readable
 * --help should go to stderr

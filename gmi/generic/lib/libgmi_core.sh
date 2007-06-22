@@ -207,6 +207,9 @@ parse_cmdline() {
 			real_init\=*)
 				INIT=${x#real_init=}
 				;;
+			real_root_detect\=*)
+				REAL_ROOT_DETECT=${x#real_root_detect=}
+				;;
 			init\=*)
 				INIT=${x#init=}
 				;;
