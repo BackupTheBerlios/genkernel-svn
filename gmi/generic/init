@@ -13,17 +13,12 @@
 ### TODO: splash stuff...
 [ -e /etc/initrd.splash ] && . /etc/initrd.splash
 
-/bin/busybox mount -o remount,rw /
-/bin/busybox mount -t proc proc /proc
-/bin/busybox mount -t sysfs /sys /sys
+/bin/busybox mount -o remount,rw / 2>/dev/null
+/bin/busybox mount -t proc proc /proc 2>/dev/null
+/bin/busybox mount -t sysfs /sys /sys 2>/dev/null
 
 # Setup the busybox applets
 /bin/busybox --install -s
-
-# Artwork is always good :)
-echo
-echo -e "   ${GOOD}GMI${NORMAL}${BOLD} starting ...${NORMAL}"
-echo
 
 if [ "$$" != '1' ]
 then
@@ -50,6 +45,11 @@ echo /sbin/mdev > /proc/sys/kernel/hotplug
 # Read the cmdline settings
 CMDLINE=$(cat /proc/cmdline)
 parse_cmdline
+
+# Artwork is always good :)
+echo
+echo -e "   ${GOOD}GMI${NORMAL}${BOLD} starting ...${NORMAL}"
+echo
 
 # Must export it for external scripts
 [ -n "${DEBUG}" ] && export DEBUG="yes"
