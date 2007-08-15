@@ -18,8 +18,12 @@ busybox: fix config (add --busybox-networking opt or something)
 general: "Failed to compile" errors need to produce backtrace & etc...
 makeopts work?
 
+kernel modules --no doesnt work
+
 * reduce --help indentation to make things more readable
 * --help should go to stderr
 * udhcp.sh should print out IP address received and such
 * console=ttyS0,9600 goes kaboom
 
+when you don't have a kernel driver and you ip=dhcp <-- it should say no
+such device or so.
