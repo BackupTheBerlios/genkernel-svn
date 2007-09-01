@@ -152,7 +152,6 @@ setup_cache_dir
 
 # If we have a callback set require the callback module
 [ -n "$(profile_get_key callback)" ] && require callback
-
 for i in $(buildDepTreeSolution)
 do
 	[ "${i}" == "genkernel" ] && continue

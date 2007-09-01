@@ -197,21 +197,21 @@ profile_get_key() {
 					equal_found="true"	
 					positive_list=()
 					negative_list=()
-				elif [ "${i:0:1}" == "-" ]
+				elif [ "${i:0:3}" == "%%-" ]
 				then
-					if has "${i#-}"  "${positive_list}"
+					if has "${i#%%-}"  "${positive_list}"
 					then
-						positive_list=$(subtract_from_list "${i#-}"  "${positive_list}")
+						positive_list=$(subtract_from_list "${i#%%-}"  "${positive_list}")
 					else
-						if ! has "-${i}" "${negative_list}"
+						if ! has "%%-${i}" "${negative_list}"
 						then
 							negative_list="${negative_list} ${i}"
 						fi
 					fi	
 				else 	
-					if has "-${i}" "${negative_list}"
+					if has "%%-${i}" "${negative_list}"
 					then
-						negative_list=$(subtract_from_list "-${i}"  "${negative_list}")
+						negative_list=$(subtract_from_list "%%-${i}"  "${negative_list}")
 					else
 						if ! has "${i}" "${positive_list}"
 						then
@@ -328,12 +328,12 @@ config_profile_read() {
 		# Strip out inline comments
 		i="${i/[ 	]\#*/}"
 
-		if [[ "${i}" =~ '^[a-z0-9-]+ [-\+:]= ".*"' ]]
+		if [[ ${i} =~ ^[a-z0-9-]+\ [-\+:]=\ .* ]]
 		then
-			if [[ "${i}" =~ '^[a-z0-9\-]+ :' ]]
+			if [[ ${i} =~ ^[a-z0-9\-]+\ : ]]
 			then
 				operator=':'
-			elif [[ "${i}" =~ '^[a-z0-9\-]+ -' ]] 
+			elif [[ ${i} =~ ^[a-z0-9\-]+\ - ]] 
 			then
 				operator='-'
 			else
@@ -351,7 +351,7 @@ config_profile_read() {
 				'-')
 					for j in ${data}
 					do
-						newdata="-${j} ${newdata}"
+						newdata="%%-${j} ${newdata}"
 					done
 					profile_append_key "${identifier}" "${newdata}" "${profile}"
 				;;

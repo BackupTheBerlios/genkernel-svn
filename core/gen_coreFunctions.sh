@@ -334,10 +334,10 @@ has() {
 	shift
 	local items=$@
 
-	[[ "$items" =~ "^$test$" ]] && return 0
-	[[ "$items" =~ "^$test .*" ]] && return 0
-	[[ "$items" =~ ".* $test .*" ]] && return 0
-	[[ "$items" =~ ".* $test$" ]] && return 0
+	[[ $items =~ ^$test$ ]] && return 0
+	[[ $items =~ ^$test\ .* ]] && return 0
+	[[ $items =~ .*\ $test\ .* ]] && return 0
+	[[ $items =~ .*\ $test$ ]] && return 0
 	#echo "has \"$test\" \"$items\""
 	#for item in $@; do
 	#	

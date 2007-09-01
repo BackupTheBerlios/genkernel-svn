@@ -16,7 +16,9 @@ gmi: We need modules in the sense that you can just add an overlay and the
 
 busybox: fix config (add --busybox-networking opt or something)
 general: "Failed to compile" errors need to produce backtrace & etc...
-makeopts work?
+
+
+makeopts work? .. fix profiles .. -j3 .. shows up as ""
 
 kernel modules --no doesnt work
 
@@ -27,3 +29,5 @@ kernel modules --no doesnt work
 
 when you don't have a kernel driver and you ip=dhcp <-- it should say no
 such device or so.
+
+http://dieter.plaetinck.be/emulating_two-dimensional_(or_even_multi-dimensional)_arrays_in_bash
