@@ -558,10 +558,16 @@ gen_patch() {
     		esac
 
 		print_info 1 "patch-o-matic: ${i}"
-    		${uncomp} ${i} | patch -p1 -E -d ${targetdir}
-    		if [ $? != 0 ] ; then
-        	    echo "Patch failed! Please fix $i!"
-    		    return 1
+		    if [ "$(profile_get_key debuglevel)" -gt "1" ]
+		    then
+    		    ${uncomp} ${i} | patch -p1 -E -d ${targetdir} 2>&1 | tee -a ${DEBUGFILE}
+                RET=${PIPESTATUS[1]}
+            else
+    		    ${uncomp} ${i} | patch -p1 -s -E -d ${targetdir} 2>&1 | tee -a ${DEBUGFILE}
+                RET=${PIPESTATUS[1]}
+            fi
+    		if [ $RET != 0 ] ; then
+        	    die "Patch failed! Please fix $i!"
     		fi
 	    done
 	fi
