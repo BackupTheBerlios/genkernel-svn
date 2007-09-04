@@ -357,7 +357,7 @@ logicTrue() {
 compile_generic() {
 	local RET myAction
 
-	if [ "$1" = 'runtask' ]
+	if [ "$1" == 'runtask' ]
 	then
 		myAction="$1"
 		shift
@@ -368,6 +368,7 @@ compile_generic() {
 	OPTS=$@
 	if [ "${myAction}" == 'runtask' ]
 	then
+        MAKEOPTS=$(profile_get_key makeopts)
 		print_info 2 "COMMAND: ${MAKE} ${MAKEOPTS/-j?/j1} ${OPTS}" 1 0 1
 		make -s "$@"
 		RET=$?
@@ -375,13 +376,13 @@ compile_generic() {
 		if [ "$(profile_get_key debuglevel)" -gt "1" ]
 		then
 			# Output to stdout and debugfile
-			print_info 2 "COMMAND: make ${MAKEOPTS} ${OPTS}" 1 0 1
+			print_info 2 "COMMAND: make $(profile_get_key makeopts) ${OPTS}" 1 0 1
 
 			make $(profile_get_key makeopts) "$@" 2>&1 | tee -a ${DEBUGFILE}
 			RET=${PIPESTATUS[0]}
 		else
 			# Output to debugfile only
-			print_info 2 "COMMAND: make ${MAKEOPTS} ${OPTS}" 1 0 1
+			print_info 2 "COMMAND: make $(profile_get_key makeopts) ${OPTS}" 1 0 1
 			make $(profile_get_key makeopts) "$@" >> ${DEBUGFILE} 2>&1
 			RET=$?
 		fi
