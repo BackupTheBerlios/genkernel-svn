@@ -261,7 +261,7 @@ parse_cmdline() {
 	then
 		show_usage
 		echo
-		echo "Configuration parsing error: Invalid request '${myRequest}'."
+		print_info 1 "Configuration parsing error: Invalid request '${myRequest}'."
 		__INTERNAL__CONFIG_PARSING_FAILED=true
 		return 1
 	fi

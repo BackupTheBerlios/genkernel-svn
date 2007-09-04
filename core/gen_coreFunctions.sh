@@ -8,7 +8,12 @@
 
 die() {
 	dump_trace
-	echo "${BAD}Error${NORMAL}: $1"
+    if [ -w ${DEBUGFILE} ]
+    then
+      echo "${BAD}Error${NORMAL}: $1" |tee -a ${DEBUGFILE}
+    else
+      echo "${BAD}Error${NORMAL}: $1"
+    fi
 	exit 1
 }
 
@@ -112,10 +117,15 @@ print_info() {
 
 	# PRINT TO SCREEN ONLY IF PASSED DEBUGLEVEL IS HIGHER THAN
 	# OR EQUAL TO SET DEBUG LEVEL
-	if [ "$1" -lt "$(profile_get_key debuglevel)" -o "$1" -eq "$(profile_get_key debuglevel)" ]
-	then
-		SCRPRINT='1'
-	fi
+    if [ -n "$(profile_get_key debuglevel)" ]
+    then
+	    if [ "$1" -lt "$(profile_get_key debuglevel)" -o "$1" -eq "$(profile_get_key debuglevel)" ]
+	    then
+		    SCRPRINT='1'
+	    fi
+    else
+		SCRPRINT='0'
+    fi
 
 	# RETURN IF NOT OUTPUTTING ANYWHERE
 	if [ "${SCRPRINT}" != '1' -a "${FORCEFILE}" != '1' ]
@@ -168,7 +178,12 @@ print_info() {
 			if logicTrue "${TODEBUGCACHE}" ; then
 				DEBUGCACHE="${DEBUGCACHE}${STR}"$'\n'
 			else
-				echo "${STR}" >> ${DEBUGFILE}
+                if [ -w ${DEBUGFILE} ]
+                then
+				    echo "${STR}" >> ${DEBUGFILE}
+                else
+				    echo "${STR}"
+                fi
 			fi
 		fi
 	fi
@@ -584,11 +599,11 @@ dump_trace() {
 		strip=$(( $1 ))
 	fi
 	
-	echo "Call stack:"
+	print_info 1 "Call stack:"
 	for (( n = ${#FUNCNAME[@]} - 1, p = ${#BASH_ARGV[@]} ; n > $strip ; n-- )) ; do
 		funcname=${FUNCNAME[${n} - 1]}
 		sourcefile=$(basename ${BASH_SOURCE[${n}]})
 		lineno=${BASH_LINENO[${n} - 1]}
-		echo "  ${sourcefile}, line ${lineno}:   Called ${funcname}${args:+ ${args}}"
+		print_info 1 "  ${sourcefile}, line ${lineno}:   Called ${funcname}${args:+ ${args}}"
 	done
 }

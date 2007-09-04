@@ -26,3 +26,5 @@ kernel modules --no doesnt work
 
 when you don't have a kernel driver and you ip=dhcp <-- it should say no
 such device or so.
+
+missing file check .. before running a bunch of the program
