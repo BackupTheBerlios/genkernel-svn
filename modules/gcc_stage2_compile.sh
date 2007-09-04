@@ -1,4 +1,8 @@
 require kernel_headers uclibc_stage2
+
+# Check that these files exist if we are compiling"
+files_register "${SRCPKG_DIR}/gcc-${GCC_VER}.tar.bz2"
+
 gcc_stage2_compile::()
 {
 	local GCC_SRCTAR="${SRCPKG_DIR}/gcc-${GCC_VER}.tar.bz2" GCC_DIR="gcc-${GCC_VER}" 

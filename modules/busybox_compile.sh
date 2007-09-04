@@ -1,6 +1,10 @@
 # Output: binpackage { / -> "busybox" }
 # Placement: TBD
 logicTrue $(profile_get_key internal-uclibc) && require gcc
+
+# Check that these files exist"
+files_register "${SRCPKG_DIR}/busybox-${BUSYBOX_VER}.tar.bz2"
+
 busybox_compile::()
 {
 	local	BUSYBOX_SRCTAR="${SRCPKG_DIR}/busybox-${BUSYBOX_VER}.tar.bz2" BUSYBOX_DIR="busybox-${BUSYBOX_VER}" \

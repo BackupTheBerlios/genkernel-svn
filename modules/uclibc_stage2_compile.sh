@@ -1,4 +1,8 @@
 require gcc_stage1
+
+# Check that these files exist if we are compiling"
+files_register "${SRCPKG_DIR}/uClibc-${UCLIBC_VER}.tar.bz2"
+
 uclibc_stage2_compile::()
 {
 	local	UCLIBC_SRCTAR="${SRCPKG_DIR}/uClibc-${UCLIBC_VER}.tar.bz2" 

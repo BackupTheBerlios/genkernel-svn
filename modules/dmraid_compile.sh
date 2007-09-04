@@ -1,5 +1,9 @@
 logicTrue $(profile_get_key internal-uclibc) && require gcc
 require device_mapper
+
+# Check that these files exist if we are compiling"
+files_register "${SRCPKG_DIR}/dmraid-${DMRAID_VER}.tar.bz2"
+
 dmraid_compile::() {
 	local DMRAID_DIR="dmraid/${DMRAID_VER}" DMRAID_SRCTAR="${SRCPKG_DIR}/dmraid-${DMRAID_VER}.tar.bz2"
 	local ARGS

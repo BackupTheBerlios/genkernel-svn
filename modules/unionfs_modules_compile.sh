@@ -1,6 +1,9 @@
 require kernel_config
 #logicTrue $(profile_get_key internal-uclibc) && require gcc
 
+# Check that these files exist if we are compiling"
+files_register "${SRCPKG_DIR}/unionfs-${UNIONFS_VER}.tar.gz"
+
 unionfs_modules_compile::()
 {
 	local UNIONFS_SRCTAR="${SRCPKG_DIR}/unionfs-${UNIONFS_VER}.tar.gz" UNIONFS_DIR="unionfs-${UNIONFS_VER}"	

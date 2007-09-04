@@ -1,5 +1,8 @@
 require binutils
 
+# Check that these files exist if we are compiling"
+files_register "${SRCPKG_DIR}/gcc-${GCC_VER}.tar.bz2"
+
 gcc_stage1_compile::()
 {
 	local GCC_SRCTAR="${SRCPKG_DIR}/gcc-${GCC_VER}.tar.bz2"

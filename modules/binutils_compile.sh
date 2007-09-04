@@ -1,4 +1,8 @@
 require uclibc_stage1
+
+# Check that these files exist if we are compiling"
+files_register "${SRCPKG_DIR}/binutils-${BINUTILS_VER}.tar.bz2"
+
 binutils_compile::()
 {
 	local	BINUTILS_SRCTAR="${SRCPKG_DIR}/binutils-${BINUTILS_VER}.tar.bz2" BINUTILS_DIR="binutils-${BINUTILS_VER}" 

@@ -1,5 +1,9 @@
 require kernel_config db
 logicTrue $(profile_get_key internal-uclibc) && require gcc
+
+# Check that these files exist if we are compiling"
+files_register "${SRCPKG_DIR}/open-iscsi-${OPENISCSI_VER}.tar.gz"
+
 open_iscsi_tools_compile::()
 {
 	local OPENISCSI_SRCTAR="${SRCPKG_DIR}/open-iscsi-${OPENISCSI_VER}.tar.gz" 

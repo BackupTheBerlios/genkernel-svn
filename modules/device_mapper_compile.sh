@@ -1,4 +1,6 @@
 logicTrue $(profile_get_key internal-uclibc) && require gcc
+files_register "${SRCPKG_DIR}/device-mapper.${DEVICE_MAPPER_VER}.tgz"
+
 device_mapper_compile::()
 {
 	local DEVICE_MAPPER_SRCTAR="${SRCPKG_DIR}/device-mapper.${DEVICE_MAPPER_VER}.tgz" DEVICE_MAPPER_DIR="device-mapper.${DEVICE_MAPPER_VER}"

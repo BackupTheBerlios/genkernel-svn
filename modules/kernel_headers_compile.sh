@@ -1,3 +1,6 @@
+# Check that these files exist if we are compiling"
+files_register "${SRCPKG_DIR}/linux-headers-${KERNEL_HEADERS_VER}.tar.bz2"
+
 kernel_headers_compile::()
 {
 	local	KERNEL_HEADERS_SRCTAR="${SRCPKG_DIR}/linux-headers-${KERNEL_HEADERS_VER}.tar.bz2" 

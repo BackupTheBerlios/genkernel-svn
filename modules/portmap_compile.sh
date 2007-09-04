@@ -1,4 +1,8 @@
 logicTrue $(profile_get_key internal-uclibc) && require gcc
+
+# Check that these files exist if we are compiling"
+files_register "${SRCPKG_DIR}/portmap_${PORTMAP_VER}.tar.gz"
+
 portmap_compile::()
 {
 	local PORTMAP_SRCTAR="${SRCPKG_DIR}/portmap_${PORTMAP_VER}.tar.gz" PORTMAP_DIR="portmap_${PORTMAP_VER}"

@@ -25,6 +25,7 @@ source ${CORE_DIR}/gen_profile.sh || die "Failed to source gen_profile.sh"
 source ${CORE_DIR}/gen_help_setup.sh || die "Failed to source gen_help_setup.sh"
 source ${CORE_DIR}/gen_initialize.sh || die "Failed to source gen_initialize.sh"
 source ${CORE_DIR}/gen_initramfs.sh || die "Failed to source gen_initramfs.sh"
+source ${CORE_DIR}/gen_file_check.sh || die "Failed to source gen_file_check.sh"
 source ${CORE_DIR}/gen_cfg.sh || die "Failed to source gen_cfg.sh"
 
 #trap trap_cleanup SIGHUP SIGQUIT SIGINT SIGTERM SIGKILL
@@ -149,6 +150,9 @@ require "$(profile_get_key 'gk-run-modules')"
 
 # Create the cache dir if it doesn't exist
 setup_cache_dir
+
+# Die if we are missing required files
+files_register_read
 
 # If we have a callback set require the callback module
 [ -n "$(profile_get_key callback)" ] && require callback

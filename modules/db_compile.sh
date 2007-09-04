@@ -1,4 +1,7 @@
 #logicTrue $(profile_get_key internal-uclibc) && require gcc
+# Check that these files exist if we are compiling"
+files_register "${SRCPKG_DIR}/db-${DB_VER}.tar.gz"
+
 db_compile::() {
 	local DB_DIR="db-${DB_VER}" DB_SRCTAR="${SRCPKG_DIR}/db-${DB_VER}.tar.gz"
 	[ -f "${DB_SRCTAR}" ] || die "Could not find DB source tarball: ${DB_SRCTAR}!"

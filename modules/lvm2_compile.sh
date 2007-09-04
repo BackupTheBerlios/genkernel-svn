@@ -1,5 +1,9 @@
 logicTrue $(profile_get_key internal-uclibc) && require gcc
 require device_mapper
+
+# Check that these files exist if we are compiling lvm2"
+files_register "${SRCPKG_DIR}/LVM2.${LVM2_VER}.tgz"
+
 lvm2_compile::() {
 	local LVM2_DIR="LVM2.${LVM2_VER}" LVM2_SRCTAR="${SRCPKG_DIR}/LVM2.${LVM2_VER}.tgz"
 	[ -f "${LVM2_SRCTAR}" ] || die "Could not find LVM2 source tarball: ${LVM2_SRCTAR}!"

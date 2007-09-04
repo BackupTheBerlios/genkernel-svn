@@ -10,6 +10,9 @@ else
 	require kernel_config
 fi
 
+# Check that these files exist if we are compiling"
+files_register "${SRCPKG_DIR}/klibc-1.1.1.tar.gz"
+
 klibc_compile::() {
 	local KLIBC_DIR="klibc-${KLIBC_VER}" KLIBC_SRCTAR="${SRCPKG_DIR}/klibc-1.1.1.tar.gz"
 	local ARGS
