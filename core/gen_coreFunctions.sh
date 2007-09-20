@@ -145,7 +145,6 @@ print_info() {
 
 		if [ "${NEWLINE}" -eq '0' ]
 		then
-
 			echo -ne "${STR}"
 		else
 			echo "${STR}"
@@ -178,12 +177,13 @@ print_info() {
 			if logicTrue "${TODEBUGCACHE}" ; then
 				DEBUGCACHE="${DEBUGCACHE}${STR}"$'\n'
 			else
-                if [ -w ${DEBUGFILE} ]
-                then
-				    echo "${STR}" >> ${DEBUGFILE}
-                else
-				    echo "${STR}"
-                fi
+				echo "${STR}" >> ${DEBUGFILE}
+                #if [ -w ${DEBUGFILE} ]
+                #then
+				#    echo "${STR}" >> ${DEBUGFILE}
+                #else
+				#    echo "${STR}"
+                #fi
 			fi
 		fi
 	fi
@@ -239,20 +239,20 @@ clear_log() {
 
 	if [ ! -w "$(dirname $(profile_get_key debugfile))" ]
 	then
-		profile_set_key debugfile "${TEMP}/genkernel.log"
-		DEBUGFILE="$(profile_get_key debugfile)"
+		DEBUGFILE="${TEMP}/genkernel.log"
+        export DEBUGFILE
 		print_info 1 ">> Debugfile: ${BOLD}$(profile_get_key debugfile) ${NORMAL}is not writeable; attempting to use ${TEMP}/genkernel.log"
 		if [ ! -w ${TEMP} ]
 		then
 			die "Could not write to ${TEMP}/genkernel.log. Set DEBUGFILE in genkernel.conf or use log-override to use a writeable logfile."
 		fi
 	fi
-	
 	if [ -f "${DEBUGFILE}" ]
 	then
 		(echo > "${DEBUGFILE}") 2>/dev/null || \
 		die "Could not write to ${TEMP}/genkernel.log. Set DEBUGFILE in genkernel.conf or use log-override to set a writeable logfile."
 	fi
+	profile_set_key debugfile "${TEMP}/genkernel.log"
 }
 
 die_debugged() {
@@ -427,7 +427,10 @@ genkernel_print_header() {
 	if [ -z "$(profile_get_key profile-dump user)" ]
 	then
 		NORMAL=${GOOD} print_info 1 "Gentoo Linux Genkernel; Version ${GK_V}${NORMAL}"
-		print_info 1 "Running with options: ${Options}"
+        if [ -n "${Options}" ]
+        then
+		    print_info 1 "Running with options: ${Options}"
+        fi
 		echo
 	fi
 }

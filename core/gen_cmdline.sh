@@ -183,7 +183,7 @@ show_help() {
 }
 
 show_usage() {
-  echo "Gentoo Linux Genkernel ${GK_V}"
+  #echo "Gentoo Linux Genkernel ${GK_V}"
   echo "Usage: "
   echo "	genkernel [options] [module::]+"
   echo
