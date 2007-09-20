@@ -8,7 +8,7 @@ kernel_compile::()
 
 	# Compile the kernel image
 	print_info 1 '>> Compiling kernel ...'
-	compile_generic ${KERNEL_ARGS} ${KERNEL_MAKE_DIRECTIVE}
+	compile_generic ${KERNEL_ARGS} $(profile_get_key kernel-make-directive)
 	if [ "$?" == "0" ]
 	then
 		print_info 1 ''

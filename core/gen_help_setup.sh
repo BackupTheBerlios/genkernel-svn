@@ -54,6 +54,8 @@ __register_config_option 'Kernel Configuration' 'kernel-tree'   'true' 'false' '
 profile_set_key kernel-tree '/usr/src/linux'
 __register_config_option 'Kernel Configuration' 'kbuild-output'   'true' 'false' 'Location to use for Kbuild output.'
 __register_config_option 'Kernel Configuration' 'kernel-name' 'true' 'false' 'Tag the kernel and initramfs with a name; if not defined the option defaults to "genkernel".'
+__register_config_option 'Kernel Configuration' 'kernel-make-directive' 'true' 'false' 'Override the make directive used to build the kernel'
+__register_config_option 'Kernel Configuration' 'kernel-binary' 'true' 'false' 'Location of the kernel binary created inside the tree'
 profile_set_key kernel-name genkernel 'system'
 
 ## Initramfs options
