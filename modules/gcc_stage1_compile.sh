@@ -65,27 +65,6 @@ gcc_stage1_compile::()
 		--enable-multilib
 
 
-	# turn on/off the cross compiler
-	#if [ -n "$(profile_get_key cross-compile)" ]
-	#then
-	#	busybox_config_set ".config" "USING_CROSS_COMPILER" "y"
-	#	busybox_config_set ".config" "CROSS_COMPILER_PREFIX" "$(profile_get_key cross-compile)"
-    #elif [ -n "$(profile_get_key utils-cross-compile)" ]
-	#then
-	#	busybox_config_set ".config" "USING_CROSS_COMPILER" "y"
-	#	busybox_config_set ".config" "CROSS_COMPILER_PREFIX" "$(profile_get_key utils-cross-compile)"
-	#else
-	#	busybox_config_unset ".config" "USING_CROSS_COMPILER"
-	#	busybox_config_unset ".config" "CROSS_COMPILER_PREFIX"
-	#fi
-	#print_info 1 "${PRINT_PREFIX}>> Running uclibc menuconfig..."
-	#compile_generic runtask ${KERNEL_ARGS} menuconfig
-	#compile_generic defconfig
-
-	#uclibc_config_set_string .config KERNEL_SOURCE "/usr"
-	#yes '' 2>/dev/null | compile_generic oldconfig
-
-	
 	print_info 1 'gcc: >> Compiling...'
 	PATH="${LOCAL_PATH}:/bin:/sbin:/usr/bin:/usr/sbin" \
 	compile_generic all-gcc
@@ -95,22 +74,10 @@ gcc_stage1_compile::()
 	compile_generic install-gcc
 #		make install-gcc
 	
-	#[ -e "${TEMP}/uclibc-compile" ] && rm -r ${TEMP}/uclibc-compile
-	#compile_generic PREFIX="${TEMP}/uclibc-compile" install
-	
-	#[ -f "busybox" ] || die 'Busybox executable does not exist!'
-	#strip "busybox" || die 'Could not strip busybox binary!'
-	
-	#[ -e "${TEMP}/busybox-compile" ] && rm -r ${TEMP}/busybox-compile
-	#mkdir ${TEMP}/busybox-compile
-	
-	#cp busybox ${BUSYBOX_CONFIG} ${TEMP}/busybox-compile
 	cd ${TEMP}/staging
-	#ls -laR ${TEMP}/uclibc-compile|more
 	genkernel_generate_package "gcc-stage1-${GCC_VER}" "."
 
 	cd "${TEMP}"
-	#rm -rf "${UCLIBC_DIR}" > /dev/null
 	rm -rf "${TEMP}/${GCC_DIR}" > /dev/null
 	rm -rf "${TEMP}/${GCC_BUILD_DIR}" > /dev/null
 	rm -rf "${TEMP}/staging" > /dev/null
@@ -118,14 +85,15 @@ gcc_stage1_compile::()
 
 gcc_configure() {
 	local RET
+    print_info 2 "COMMAND: configure ${OPTS}" 1 0 1
 	if [ "$(profile_get_key debuglevel)" -gt "1" ]
 	then
 		# Output to stdout and debugfile
-		${TEMP}/${GCC_DIR}/configure $(profile_get_key makeopts) "$@" 2>&1 | tee -a ${DEBUGFILE}
+		${TEMP}/${GCC_DIR}/configure "$@" 2>&1 | tee -a ${DEBUGFILE}
 		RET=${PIPESTATUS[0]}
 	else
 		# Output to debugfile only
-		${TEMP}/${GCC_DIR}/configure $(profile_get_key makeopts) "$@" >> ${DEBUGFILE} 2>&1
+		${TEMP}/${GCC_DIR}/configure "$@" >> ${DEBUGFILE} 2>&1
 		RET=$?
 	fi
 	[ "${RET}" -eq '0' ] || die "Failed to configure ..."

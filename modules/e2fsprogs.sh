@@ -11,7 +11,7 @@ e2fsprogs::()
     [ -e ${TEMP}/e2fsprogs-blkid-cpiogen ] && rm -r ${TEMP}/e2fsprogs-blkid-cpiogen
     rm -rf ${TEMP}/e2fsprogs-blkid-cpiogen
     mkdir -p ${TEMP}/e2fsprogs-blkid-cpiogen/sbin
-    mv "${TEMP}/e2fsprogs-staging/sbin/blkid" "${TEMP}/e2fsprogs-blkid-cpiogen/sbin/blkid"
+    cp "${TEMP}/e2fsprogs-staging/sbin/blkid" "${TEMP}/e2fsprogs-blkid-cpiogen/sbin/blkid"
     cd ${TEMP}/e2fsprogs-blkid-cpiogen
     genkernel_generate_cpio_files "e2fsprogs-${E2FSPROGS_VER}-blkid" .
     initramfs_register_cpio "e2fsprogs-${E2FSPROGS_VER}-blkid"

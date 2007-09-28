@@ -10,13 +10,14 @@ profile_set_key debuglevel '1' 'system'
 __register_config_option 'Debug' 'debugfile'  'true' 'false' 'Output file for debug info'
 
 ## Internals
-__register_config_option 'Internals' 'arch-override' 'true' 'false' 'Force to arch instead of autodetecting.'
+__register_config_option 'Internals' 'arch' 'true' 'false' 'Force to arch instead of autodetecting.'
 __register_config_option 'Internals' 'callback'	'true' 'false' 'Run the specified arguments after the kernel and modules have been compiled.'
 __register_config_option 'Internals' 'cachedir' 'true' 'false' 'Override the default cache location.'
 __register_config_option 'Internals' 'tempdir' 'true' 'false' "Location of Genkernel's temporary directory."
 
 __register_config_option 'Internals' 'makeopts' 'true' 'false' 'Global make options.'
-__register_config_option 'Internals' 'profile' 'true!m' 'false' 'Use specified profile(s).' 'config_profile_read'
+__register_config_option 'Internals' 'profile' 'true' 'false' 'Use specified internal profile. eg (xen, um, x86)'
+__register_config_option 'Internals' 'profile-load' 'true!m' 'false' 'Use specified profile(s).' 'config_profile_read'
 __register_config_option 'Internals' 'profile-dump' 'false' 'false' 'Dump the current profile to the cmdline.'
 __register_config_option 'Internals' 'usecolor' 'false' 'true' 'Use colored output.'
 profile_set_key usecolor true 'system'
@@ -32,6 +33,7 @@ __register_config_option 'Cross compile' 'internal-uclibc' 'false' 'true' 'Build
 
 ## Kernel Config
 __register_config_option 'Kernel Configuration' 'kernel-config' 'true' 'false' 'Kernel configuration file to use for compilation.'
+__register_config_option 'Kernel Configuration' 'running-kernel-config' 'true' 'false' 'Use /proc/config.gz if found for the kernel config.'
 __register_config_option 'Kernel Configuration' 'force-config' 'false' 'true' 'Turn on any config options genkernel deems mandatory.'
 profile_set_key force-config false 'system'
 __register_config_option 'Kernel Configuration'	'menuconfig'	 'false' 'true'	 'Run menuconfig after oldconfig.'
@@ -73,8 +75,9 @@ __register_config_option 'Initramfs' 'lvm2' 'false' 'true' 'Include LVM2 support
 __register_config_option 'Initramfs' 'e2fsprogs' 'false' 'true' 'Include e2fsprogs blkid support.'
 __register_config_option 'Initramfs' 'disklabel' 'false' 'true' 'Include disk label and uuid support in your initramfs.'
 __register_config_option 'Initramfs' 'portmap' 'false' 'true' 'Include portmap inside the initramfs.'
-__register_config_option 'Initramfs' 'unionfs' 'false' 'true' 'Include unionfs inside the initramfs.'
+__register_config_option 'Initramfs' 'unionfs' 'false' 'true' 'Unionfs is deprecated use aufs instead.'
 __register_config_option 'Initramfs' 'open-iscsi' 'false' 'true' 'Include open-iscsi inside the initramfs.'
+__register_config_option 'Initramfs' 'aoetools' 'false' 'true' 'Include aoetools inside the initramfs.'
 
 __register_config_option 'Initramfs' 'kernel-modules'   'true!m' 'false' 'Add or subtract kernel modules from the initramfs. --kernel-module="GROUP:module -module"' 'cmdline_modules_register'
 __register_config_option 'Initramfs' 'kernel-modules-cpio' 'false' 'true' 'Add kernel modules to the initramfs'

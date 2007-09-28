@@ -15,13 +15,14 @@ initramfs_install::() {
 	    		mkdir -p $(profile_get_key install-initramfs-path) || \
 	       		die "Could not make $(profile_get_key install-initramfs-path).  Set $(profile_get_key install-initramfs-path) to a writeable directory or run as root"
 		else
-    		print_info 1 ">> Initramfs install path: ${BOLD}$(profile_get_key install-initramfs-path) ${NORMAL}is not writeable, attempting to use ${TEMP}/genkernel-output"
+    		print_info 1 ">> Initramfs install path:
+            ${BOLD}$(profile_get_key install-initramfs-path) ${NORMAL}is not writeable, attempting to use ${TEMP}/genkernel-output/boot"
     			if [ ! -w ${TEMP} ]
     			then
     		   	 	die "Could not write to ${TEMP}/genkernel-output.  Set install-initramfs-path to a writeable directory or run as root"
     			else
-        			mkdir -p ${TEMP}/genkernel-output || die "Could not make ${TEMP}/genkernel-output.  Set install-initramfs-path to a writeable directory or run as root"
-        			profile_set_key install-initramfs-path "${TEMP}/genkernel-output"
+        			mkdir -p ${TEMP}/genkernel-output/boot || die "Could not make ${TEMP}/genkernel-output/boot.  Set install-initramfs-path to a writeable directory or run as root"
+        			profile_set_key install-initramfs-path "${TEMP}/genkernel-output/boot"
     			fi
 		fi
 	fi

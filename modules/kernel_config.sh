@@ -5,18 +5,18 @@ kernel_config::()
 	setup_kernel_args
 
 	# Check that the asm-${ARCH} link is valid
-	if [ "${ARCH}" == "xen0" -o "${ARCH}" == "xenU" ]
-	then
-		check_asm_link_ok xen || die "Bad asm link.  The output directory has already been configured for a different arch"
-	elif [ "${ARCH}" == "x86" ]
-	then
-		check_asm_link_ok i386 || die "Bad asm link.  The output directory has already been configured for a different arch"
-	elif [ "${ARCH}" == "ppc64" ]
-	then
-		check_asm_link_ok powerpc || die "Bad asm link.  The output directory has already been configured for a different arch"
-	else
-		check_asm_link_ok ${ARCH} || die "Bad asm link.  The output directory has already been configured for a different arch"
-	fi
+	#if [ "${ARCH}" == "xen0" -o "${ARCH}" == "xenU" ]
+	#then
+	#	check_asm_link_ok xen || die "Bad asm link.  The output directory has already been configured for a different arch"
+	#elif [ "${ARCH}" == "x86" ]
+	#then
+	#	check_asm_link_ok i386 || die "Bad asm link.  The output directory has already been configured for a different arch"
+	#elif [ "${ARCH}" == "ppc64" ]
+	#then
+	#	check_asm_link_ok powerpc || die "Bad asm link.  The output directory has already been configured for a different arch"
+	#else
+	#	check_asm_link_ok ${ARCH} || die "Bad asm link.  The output directory has already been configured for a different arch"
+	#fi
 	
 	cd $(profile_get_key kernel-tree)
 	determine_config_file
@@ -29,12 +29,8 @@ kernel_config::()
 	# Source dir needs to be clean or kbuild complains
 	if [ ! "$(profile_get_key kbuild-output)" == "$(profile_get_key kernel-tree)" ]
 	then
-		if [ -w $(profile_get_key kernel-tree) ]
-		then
 			compile_generic mrproper
-		else
-			print_warning 1 ">> Unable clean the kernel source tree via make mrproper.  Run make mrproper manually if the kernel build fails."
-		fi
+			[ "$?" ] || die "The Kernel source tree is not clean. KBUILD_OUTPUT requires a clean tree."
 	fi
 	
 	logicTrue $(profile_get_key mrproper) && \
@@ -61,6 +57,18 @@ kernel_config::()
 			die 'Could not copy configuration file!'
 	fi
 
+	#use the running kernel config
+	if logicTrue $(profile_get_key running-kernel-config)
+	then
+		print_info 1 "${PRINT_PREFIX}>> Getting config from the running system..."
+        if [ -f "/proc/config.gz" ]
+        then
+		    zcat /proc/config.gz > "${KBUILD_OUTPUT}/.config"
+		    [ "$?" ] || die 'Error: running-kernel-config failed!'
+        else
+            die 'Error: /proc/config.gz is not found.  Running-kernel-config failed!'
+        fi
+	fi
 	# When to run oldconfig
 	if logicTrue $(profile_get_key oldconfig) || logicTrue $(profile_get_key clean)
 	then
@@ -178,6 +186,7 @@ kernel_config::()
 		yes '' 2>/dev/null | compile_generic ${KERNEL_ARGS} oldconfig
 	fi
 
+	compile_generic ${KERNEL_ARGS} prepare
 	if [ "$(kernel_config_get "MODULES")" = 'yes' ]; then
 		compile_generic ${KERNEL_ARGS} modules_prepare
 	fi

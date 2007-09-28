@@ -62,13 +62,11 @@ done
 profile_copy cmdline "user"
 
 genkernel_determine_arch
+determine_profile
 
 # We now know the arch so update CACHE_DIR and CONFIG_DIR
-CACHE_DIR="$(arch_replace ${CACHE_DIR})"
-CONFIG_DIR="$(arch_replace ${CONFIG_DIR})"
-
-# Failed to parse the cmdline properly, die so we can investigate...
-logicTrue ${__INTERNAL__CONFIG_PARSING_FAILED} && die 'Fatal error processing arguments; exiting...'
+CACHE_DIR="${CACHE_DIR}/$(profile_get_key profile)"
+CONFIG_DIR="${CONFIG_DIR}/$(profile_get_key profile)"
 
 # setup the systems profile and copy it into the running profile
 setup_system_profile
@@ -82,7 +80,27 @@ profile_copy "user"
 [ -n "$(profile_get_key tempdir)" ] && TEMP="$(profile_get_key tempdir)"
 
 set_color 
-logicTrue $(profile_get_key help user) && show_help && echo && exit 0 # --help
+
+# Failed to parse the cmdline properly, die so we can investigate...
+if logicTrue ${__INTERNAL__CONFIG_PARSING_FAILED}
+then
+    if logicTrue $(profile_get_key help)
+    then
+        echo 'Fatal error processing arguments...'
+        show_help
+        exit 1
+    fi
+    show_usage 
+    echo 'Fatal error processing arguments; exiting...'
+    exit 1
+else
+    if logicTrue $(profile_get_key help) 
+    then
+        show_help
+        exit 0
+    fi
+fi
+
 
 # Generate TEMP dir
 if [ ! -d "${TEMP}" ]
@@ -98,12 +116,12 @@ if [ ! -w ${CACHE_DIR} ]
 then
 	if [ ! -w $(dirname ${CACHE_DIR}) ]
    	then
-		echo "CACHE_DIR: ${BOLD}${CACHE_DIR} ${NORMAL}is not writeable attempting to use ${TEMP}/genkernel_cache/${ARCH}"
+		echo "CACHE_DIR: ${BOLD}${CACHE_DIR} ${NORMAL}is not writeable attempting to use ${TEMP}/genkernel_cache/$(profile_get_key profile)"
 		if [ ! -w ${TEMP} ]
 		then
-			die "Could not write to ${TEMP}/genkernel_cache/${ARCH}.  Set CACHE_DIR in genkernel.conf to use a writeable cache directory."
+			die "Could not write to ${TEMP}/genkernel_cache/$(profile_get_key profile).  Set CACHE_DIR in genkernel.conf to use a writeable cache directory."
 		fi
-		CACHE_DIR="${TEMP}/genkernel_cache/${ARCH}/"
+		CACHE_DIR="${TEMP}/genkernel_cache/$(profile_get_key profile)/"
 	fi
 		
 	# Make the cache directory if it doesnt exist

@@ -55,6 +55,11 @@ get_KV() {
 	KV_MINOR=`grep ^PATCHLEVEL\ \= ${KERNEL_DIR}/Makefile | awk '{ print $3 };'`
 	KV_PATCH=`grep ^SUBLEVEL\ \= ${KERNEL_DIR}/Makefile | awk '{ print $3 };'`
 
+    if [ -z "${KV_PATCH}" ]
+    then
+        die "Error in kernel tree.  Kernel Patch Level could not be found."
+    fi
+    
 	KV_CODE="$(linux_kv_to_code ${KV_MAJOR} ${KV_MINOR} ${KV_PATCH})"
 	KV_EXTRA=`grep ^EXTRAVERSION\ \= ${KERNEL_DIR}/Makefile | sed -e "s/EXTRAVERSION =//" -e "s/ //g" -e 's/\$([a-z]*)//gi'`
 	KV_LOCAL=""
@@ -317,23 +322,29 @@ kbuild_enabled() {
 
 setup_kernel_args() {
 	local KNAME
-	
+    KERNEL_ARGS=""
 	# Override the default arch being built
-	[ -n "$(profile_get_key arch-override)" ] && KERNEL_ARGS="${KERNEL_ARGS} ARCH=$(profile_get_key arch-override)"
+	[ -n "$(profile_get_key arch)" ] && KERNEL_ARGS="${KERNEL_ARGS} ARCH=$(profile_get_key arch)"
 
-	if [ "$(profile_get_key kbuild-output)" == "$(profile_get_key kernel-tree)" ]
-	then
-		if [ "$(profile_get_key arch-override)" == "um" \
-			-o "$(profile_get_key arch-override)" == "xen0" \
-			-o "$(profile_get_key arch-override)" == "xenU" ]
-		then
-			die "Compiling for ARCH=$(profile_get_key arch-override) requires kbuild_output to differ from the kernel-tree"
-		fi
-	else
-		KERNEL_ARGS="${KERNEL_ARGS} KBUILD_OUTPUT=$(profile_get_key kbuild-output)"		
-	fi
-
-	# Kernel cross compiling support
+	#if [ "$(profile_get_key kbuild-output)" == "$(profile_get_key kernel-tree)" ]
+	#then
+	#	if [ "$(profile_get_key arch-override)" == "um" \
+	#		-o "$(profile_get_key arch-override)" == "xen0" \
+	#		-o "$(profile_get_key arch-override)" == "xenU" ]
+	#	then
+	#		die "Compiling for ARCH=$(profile_get_key arch-override) requires kbuild_output to differ from the kernel-tree"
+	#	fi
+	#else
+	#	KERNEL_ARGS="${KERNEL_ARGS} KBUILD_OUTPUT=$(profile_get_key kbuild-output)"		
+	#fi
+	#KERNEL_ARGS="${KERNEL_ARGS} KBUILD_OUTPUT=$(profile_get_key kbuild-output)"		
+    
+    if [ "$(profile_get_key kbuild-output)" != "$(profile_get_key kernel-tree)" ]
+    then
+        KERNEL_ARGS="${KERNEL_ARGS} KBUILD_OUTPUT=$(profile_get_key kbuild-output)"
+    fi
+	
+    # Kernel cross compiling support
 	if [ -n "$(profile_get_key cross-compile)" ]
 	then
 		KERNEL_ARGS="${KERNEL_ARGS} CROSS_COMPILE=$(profile_get_key cross-compile)"

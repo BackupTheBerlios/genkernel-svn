@@ -179,11 +179,11 @@ show_help() {
 			fi
 		done
 	done
-	exit 0
+    echo
 }
 
 show_usage() {
-  #echo "Gentoo Linux Genkernel ${GK_V}"
+  echo "Gentoo Linux Genkernel ${GK_V}"
   echo "Usage: "
   echo "	genkernel [options] [module::]+"
   echo
@@ -256,12 +256,11 @@ parse_cmdline() {
 		fi
 
 	done
-	
-	if [ "${myMatched}" = 'false' ] 
+    if [ "${myMatched}" == 'false' ] 
 	then
-		show_usage
-		echo
-		print_info 1 "Configuration parsing error: Invalid request '${myRequest}'."
+		#show_usage
+		#echo
+		echo "Configuration parsing error: Invalid request '${myRequest}'."
 		__INTERNAL__CONFIG_PARSING_FAILED=true
 		return 1
 	fi

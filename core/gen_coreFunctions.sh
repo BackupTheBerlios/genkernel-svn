@@ -384,20 +384,25 @@ compile_generic() {
 	if [ "${myAction}" == 'runtask' ]
 	then
         MAKEOPTS=$(profile_get_key makeopts)
-		print_info 2 "COMMAND: ${MAKE} ${MAKEOPTS/-j?/j1} ${OPTS}" 1 0 1
-		make -s "$@"
-		RET=$?
+		print_info 2 "COMMAND: ${MAKE} ${OPTS}" 1 0 1
+		if [ "$(profile_get_key debuglevel)" -gt "1" ]
+        then
+		    make -s "$@" 2>&1 | tee -a ${DEBUGFILE}
+			RET=${PIPESTATUS[0]}
+		else
+			# Output to debugfile only
+			make "$@" >> ${DEBUGFILE} 2>&1
+			RET=$?
+		fi
 	else
+		print_info 2 "COMMAND: make $(profile_get_key makeopts) ${OPTS}" 1 0 1
 		if [ "$(profile_get_key debuglevel)" -gt "1" ]
 		then
 			# Output to stdout and debugfile
-			print_info 2 "COMMAND: make $(profile_get_key makeopts) ${OPTS}" 1 0 1
-
 			make $(profile_get_key makeopts) "$@" 2>&1 | tee -a ${DEBUGFILE}
 			RET=${PIPESTATUS[0]}
 		else
 			# Output to debugfile only
-			print_info 2 "COMMAND: make $(profile_get_key makeopts) ${OPTS}" 1 0 1
 			make $(profile_get_key makeopts) "$@" >> ${DEBUGFILE} 2>&1
 			RET=$?
 		fi
@@ -407,14 +412,15 @@ compile_generic() {
 
 configure_generic() {
 	local RET
+	print_info 2 "COMMAND: configure ${OPTS}" 1 0 1
 	if [ "$(profile_get_key debuglevel)" -gt "1" ]
 	then
 		# Output to stdout and debugfile
-		./configure $(profile_get_key makeopts) "$@" 2>&1 | tee -a ${DEBUGFILE}
+		./configure "$@" 2>&1 | tee -a ${DEBUGFILE}
 		RET=${PIPESTATUS[0]}
 	else
 		# Output to debugfile only
-		./configure $(profile_get_key makeopts) "$@" >> ${DEBUGFILE} 2>&1
+		./configure "$@" >> ${DEBUGFILE} 2>&1
 		RET=$?
 	fi
 	[ "${RET}" -eq '0' ] || die "Failed to configure ..."
@@ -434,9 +440,19 @@ genkernel_print_header() {
 		echo
 	fi
 }
+determine_profile() {
+	local myProfile=$(profile_get_key profile user)
+    echo $myProfile
+	if [ "${myProfile}" != '' ]
+	then
+	    profile_set_key "profile" "${myProfile}"
+	else
+	    profile_set_key "profile" "$(profile_get_key arch)"
+    fi
+}
 
 genkernel_determine_arch() {
-	local myArch=$(profile_get_key arch-override user)
+	local myArch=$(profile_get_key arch user)
 	if [ "${myArch}" != '' ]
 	then
 		ARCH=${myArch}

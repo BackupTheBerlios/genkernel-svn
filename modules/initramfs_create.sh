@@ -9,6 +9,7 @@ logicTrue $(profile_get_key portmap) && require portmap
 logicTrue $(profile_get_key unionfs) && require unionfs
 logicTrue $(profile_get_key dmraid) && require dmraid
 logicTrue $(profile_get_key open-iscsi) && require open_iscsi
+logicTrue $(profile_get_key aoetools) && require aoetools
 
 # Get kernel modules
 # Register a new cpio of the kernel modules

@@ -94,14 +94,15 @@ gcc_stage2_compile::()
 
 gcc_configure() {
 	local RET
+    print_info 2 "COMMAND: configure ${OPTS}" 1 0 1
 	if [ "$(profile_get_key debuglevel)" -gt "1" ]
 	then
 		# Output to stdout and debugfile
-		${TEMP}/${GCC_DIR}/configure $(profile_get_key makeopts) "$@" 2>&1 | tee -a ${DEBUGFILE}
+		${TEMP}/${GCC_DIR}/configure "$@" 2>&1 | tee -a ${DEBUGFILE}
 		RET=${PIPESTATUS[0]}
 	else
 		# Output to debugfile only
-		${TEMP}/${GCC_DIR}/configure $(profile_get_key makeopts) "$@" >> ${DEBUGFILE} 2>&1
+		${TEMP}/${GCC_DIR}/configure "$@" >> ${DEBUGFILE} 2>&1
 		RET=$?
 	fi
 	[ "${RET}" -eq '0' ] || die "Failed to configure ..."

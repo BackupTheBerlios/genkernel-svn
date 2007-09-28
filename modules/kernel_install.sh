@@ -19,8 +19,8 @@ kernel_install::()
 		then
 			die "Could not write to ${TEMP}/genkernel-output.  Set install-path to a writeable directory or run as root"
 		else
-			mkdir -p ${TEMP}/genkernel-output || die "Could not make ${TEMP}/genkernel-output.  Set install-path to a writeable directory or run as root"
-			profile_set_key install-path "${TEMP}/genkernel-output"
+			mkdir -p ${TEMP}/genkernel-output/boot || die "Could not make ${TEMP}/genkernel-output/boot/.  Set install-path to a writeable directory or run as root"
+			profile_set_key install-path "${TEMP}/genkernel-output/boot/"
 		fi
 	fi
 	KERNEL_ARGS="${KERNEL_ARGS} INSTALL_PATH=$(profile_get_key install-path)"
@@ -49,8 +49,8 @@ kernel_install::()
 		then
 			die "Could not write to ${TEMP}/genkernel-output."
 		else
-			mkdir -p ${TEMP}/genkernel-output || die "Could not make ${TEMP}/genkernel-output."
-			profile_set_key kernel-config-destination-path "${TEMP}/genkernel-output"
+			mkdir -p ${TEMP}/genkernel-output/etc/kernels || die "Could not make ${TEMP}/genkernel-output."
+			profile_set_key kernel-config-destination-path "${TEMP}/genkernel-output/etc/kernels"
 		fi
 	fi
 	

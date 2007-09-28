@@ -33,4 +33,3 @@ missing file check .. before running a bunch of the program
 the print_info command is going to need some work too
  think when it dumps stuff to the debugfile
  it should automatically strip color codes
-

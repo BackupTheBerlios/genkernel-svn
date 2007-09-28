@@ -24,14 +24,13 @@ kernel_modules_install::()
 	    fi
 	fi
 
-	KERNEL_ARGS="${KERNEL_ARGS} INSTALL_MOD_PATH=$(profile_get_key install-mod-path)"
-	
 	if kernel_config_is_not_set "MODULES"
 	then
 		print_info 1 ">> Modules not enabled in .config... skipping modules install"
 	else
 
 		setup_kernel_args
+	    KERNEL_ARGS="${KERNEL_ARGS} INSTALL_MOD_PATH=$(profile_get_key install-mod-path)"
 
 		[ "$(profile_get_key debuglevel)" -gt "1" ] && print_info 1 ">> Installing kernel modules to $(profile_get_key install-mod-path)"
 

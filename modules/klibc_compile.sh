@@ -2,13 +2,14 @@
 # for usage by other modules.
 logicTrue $(profile_get_key internal-uclibc) && require gcc
 
-if [ "$(profile_get_key arch-override)" == "um" -o "$(profile_get_key arch-override)" == "xen0" \
-     -o "$(profile_get_key arch-override)" == "xenU" ]
-then
-	require kernel_config_i386_stub
-else
-	require kernel_config
-fi
+#if [ "$(profile_get_key arch-override)" == "um" -o "$(profile_get_key arch-override)" == "xen0" \
+#     -o "$(profile_get_key arch-override)" == "xenU" ]
+#then
+#	require kernel_config_i386_stub
+#else
+#	require kernel_config
+#fi
+require kernel_config
 
 # Check that these files exist if we are compiling"
 files_register "${SRCPKG_DIR}/klibc-1.1.1.tar.gz"

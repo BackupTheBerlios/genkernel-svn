@@ -45,26 +45,6 @@ binutils_compile::()
         --disable-werror \
         --with-sysroot="${TEMP}/staging/"
 
-	# turn on/off the cross compiler
-	#if [ -n "$(profile_get_key cross-compile)" ]
-	#then
-	#	busybox_config_set ".config" "USING_CROSS_COMPILER" "y"
-	#	busybox_config_set ".config" "CROSS_COMPILER_PREFIX" "$(profile_get_key cross-compile)"
-    #elif [ -n "$(profile_get_key utils-cross-compile)" ]
-	#then
-	#	busybox_config_set ".config" "USING_CROSS_COMPILER" "y"
-	#	busybox_config_set ".config" "CROSS_COMPILER_PREFIX" "$(profile_get_key utils-cross-compile)"
-	#else
-	#	busybox_config_unset ".config" "USING_CROSS_COMPILER"
-	#	busybox_config_unset ".config" "CROSS_COMPILER_PREFIX"
-	#fi
-	#print_info 1 "${PRINT_PREFIX}>> Running uclibc menuconfig..."
-	#compile_generic runtask ${KERNEL_ARGS} menuconfig
-	#compile_generic defconfig
-
-	#uclibc_config_set_string .config KERNEL_SOURCE "/usr"
-	#yes '' 2>/dev/null | compile_generic oldconfig
-
 	print_info 1 'binutils: >> Compiling...'
 	compile_generic all
 	

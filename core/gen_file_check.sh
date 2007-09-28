@@ -12,27 +12,22 @@ files_register_read() {
 	local header_printed=0
 	
 	for (( n = 0 ; n < ${#__FILES_CHECK__REG__D[@]}; ++n )) ; do
-		if [ "${header_printed}" != "1" ]
-		then
-			echo
-			print_info 1 "Missing Files Needed:"
-			header_printed=1
-		fi
-				
         if [ ! -f "${__FILES_CHECK__REG__D[${n}]}" ]
         then
-		    print_info 1 "     ${__FILES_CHECK__REG__D[${n}]} is missing."
-            DIE=1
+            MISSING=1
         fi
-	done
-			
-	if [ "${header_printed}" == "1" ]
-	then
+    done
+    if [ "${MISSING}" == "1" ]
+    then
 		echo
-	fi
-	
-    if [ "${DIE}" == "1" ]
-	then
+		print_info 1 "Missing Files Needed:"
+	    for (( n = 0 ; n < ${#__FILES_CHECK__REG__D[@]}; ++n )) ; do
+            if [ ! -f "${__FILES_CHECK__REG__D[${n}]}" ]
+            then
+		        print_info 1 "     ${__FILES_CHECK__REG__D[${n}]} is missing."
+            fi
+	    done
+		echo
         die "Download missing files and rerun genkernel"
 	fi
 }
