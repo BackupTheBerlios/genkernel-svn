@@ -1,6 +1,3 @@
 kernel-make-directive := "bzImage"
 kernel-binary := "arch/i386/boot/bzImage"
-
-test := "moo1 moo2 moo3"
-test -= "moo1 moo3"
-test += "moo4"
+arch := "i386"
