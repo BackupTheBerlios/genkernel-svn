@@ -19,11 +19,10 @@ kernel_config::()
 	#fi
 	
 	cd $(profile_get_key kernel-tree)
-	determine_config_file
 	
 	# Make a backup of the config if we are going to clean
 	logicTrue $(profile_get_key clean) && cp $(profile_get_key kbuild-output)/.config \
-		$(profile_get_key kbuild-output)/.config.bak > /dev/null 2>&1
+		$(profile_get_key kbuild-output)/.config.genkernel_backup > /dev/null 2>&1
 
 	# CLEAN
 	# Source dir needs to be clean or kbuild complains
@@ -31,27 +30,41 @@ kernel_config::()
 	then
 			compile_generic mrproper
 			[ "$?" ] || die "The Kernel source tree is not clean. KBUILD_OUTPUT requires a clean tree."
+            if [ -f "$(profile_get_key kernel-tree)/localversion-genkernel" ]
+            then
+                rm -f "$(profile_get_key kernel-tree)/localversion-genkernel" >/dev/null 2>&1
+                if [ -f "$(profile_get_key kernel-tree)/localversion-genkernel" ]
+                then
+			        die "Could not remove localversion-genkernel from the Kernel source tree. Please remove it manually."
+                fi
+            fi
 	fi
 	
 	logicTrue $(profile_get_key mrproper) && \
 		print_info 1 '${PRINT_PREFIX}>> Running mrproper...' && \
 			compile_generic ${KERNEL_ARGS} mrproper
 	
-#	# Setup fake i386 kbuild_output for arch=um or xen0 or xenU 
-#	# Some proggies need a i386 configured kernel tree
-#	if [ 	"$(profile_get_key arch-override)" == "um" -o "$(profile_get_key arch-override)" == "xen0" \
-#		 -o "$(profile_get_key arch-override)" == "xenU" ]
-#	then
-#		print_info 1 "${PRINT_PREFIX}>> Creating $(profile_get_key arch-override)-i386 kernel environment"
-#		KRNL_TMP_DIR="${TEMP}/genkernel-kernel-$(profile_get_key arch-override)-i386"
-#		mkdir -p "${KRNL_TMP_DIR}"
-#		yes '' 2>/dev/null | compile_generic ARCH=i386 "KBUILD_OUTPUT=${KRNL_TMP_DIR}" oldconfig
-#		compile_generic ARCH=i386 "KBUILD_OUTPUT=${KRNL_TMP_DIR}" modules_prepare
-#	fi
+	# Setup fake i386 kbuild_output for arch=um or xen0 or xenU 
+	# Some proggies need a i386 configured kernel tree
+	if [ 	"$(profile_get_key arch)" == "um" ]
+	then
+		print_info 1 "${PRINT_PREFIX}>> Creating $(profile_get_key arch)-i386 kernel environment"
+		KRNL_TMP_DIR="${TEMP}/genkernel-kernel-$(profile_get_key arch)-i386"
+		mkdir -p "${KRNL_TMP_DIR}"
+		yes '' 2>/dev/null | compile_generic ARCH=i386 "KBUILD_OUTPUT=${KRNL_TMP_DIR}" oldconfig
+		compile_generic ARCH=i386 "KBUILD_OUTPUT=${KRNL_TMP_DIR}" modules_prepare
+	fi
 	
 	if logicTrue $(profile_get_key clean)
 	then
-		print_info 1 "${PRINT_PREFIX}Using config from ${KERNEL_CONFIG}"
+		print_info 1 'kernel configure: >> Running clean...' 
+		compile_generic ${KERNEL_ARGS} clean
+    fi
+
+	if logicTrue $(profile_get_key gentoo-config)
+    then
+	    determine_config_file
+		print_info 1 "${PRINT_PREFIX}Using default genkernel config from ${KERNEL_CONFIG}"
 		print_info 1 '        Previous config backed up to .config.bak'
 		cp "${KERNEL_CONFIG}" "${KBUILD_OUTPUT}/.config" ||\
 			die 'Could not copy configuration file!'
@@ -69,8 +82,9 @@ kernel_config::()
             die 'Error: /proc/config.gz is not found.  Running-kernel-config failed!'
         fi
 	fi
-	# When to run oldconfig
-	if logicTrue $(profile_get_key oldconfig) || logicTrue $(profile_get_key clean)
+	
+    # When to run oldconfig
+	if logicTrue $(profile_get_key oldconfig)
 	then
 		print_info 1 "${PRINT_PREFIX}>> Running oldconfig..."
 		yes '' 2>/dev/null | compile_generic ${KERNEL_ARGS} oldconfig
@@ -83,7 +97,6 @@ kernel_config::()
 		compile_generic ${KERNEL_ARGS} clean
 	else
 		print_info 1 "${PRINT_PREFIX}--no-clean is enabled; leaving the .config alone."	
-
 	fi
 	
 	# Manual Configure
@@ -159,19 +172,16 @@ kernel_config::()
 	# which is actually technically set ;-)
 
 	# So, if this is not empty, then a initramfs is set.
-	local val_CONFIG_INITRAMFS_SOURCE
-	val_CONFIG_INITRAMFS_SOURCE=$(kernel_config_get "INITRAMFS_SOURCE")
-
 	if logicTrue $(internal_initramfs)
 	then
-		if [ -z "$val_CONFIG_INITRAMFS_SOURCE" ]; then
+		if [ -z "$(kernel_config_get "INITRAMFS_SOURCE")" ]; then
 			kernel_config_set_string "INITRAMFS_SOURCE" "${TEMP}/initramfs-internal ${TEMP}/initramfs-internal.devices"
 			kernel_config_set_raw "INITRAMFS_ROOT_UID" 0
 			kernel_config_set_raw "INITRAMFS_ROOT_GID" 0
 			UPDATED_KERNEL=true
 		fi
 	else
-		if [ -n "$val_CONFIG_INITRAMFS_SOURCE" ]; then
+		if [ "$(kernel_config_get "INITRAMFS_SOURCE")" != "\"\"" ]; then
 			kernel_config_unset "INITRAMFS_SOURCE"
 			kernel_config_unset "INITRAMFS_ROOT_UID"
 			kernel_config_unset "INITRAMFS_ROOT_GID"
@@ -200,4 +210,6 @@ kernel_config::()
 	# Kernel configuration may have changed our output names ..
 	unset KV_FULL
 	get_KV $(profile_get_key kernel-tree)
+	cd $(profile_get_key kbuild-output)
+    genkernel_generate_package "kernel-config-${KV_FULL}" ".config"
 }

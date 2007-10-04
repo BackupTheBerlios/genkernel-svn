@@ -9,7 +9,18 @@ kernel_compile::()
 	# Compile the kernel image
 	print_info 1 '>> Compiling kernel ...'
 	compile_generic ${KERNEL_ARGS} $(profile_get_key kernel-make-directive)
-	if [ "$?" == "0" ]
+    RES=$?
+    rm -rf "${TEMP}/kernel-compile" > /dev/null
+    mkdir ${TEMP}/kernel-compile
+    install -D "$(profile_get_key kernel-binary)" "${TEMP}/kernel-compile/$(profile_get_key kernel-binary)"
+    cp "System.map" "${TEMP}/kernel-compile"
+    cp .config "${TEMP}/kernel-compile"
+    cd ${TEMP}/kernel-compile
+    genkernel_generate_package "kernel-${KV_FULL}" "."
+	cd $(profile_get_key kbuild-output)
+    rm -r ${TEMP}/kernel-compile
+
+	if [ "$RES" == "0" ]
 	then
 		print_info 1 ''
 		print_info 1 "Kernel compiled successfully!"

@@ -56,6 +56,30 @@ initramfs_create::() {
 	else
 		print_info 1 'Merging:'
 		[ -e "${TEMP}/initramfs-output.cpio.gz" ] && rm "${TEMP}/initramfs-output.cpio.gz"
+		if logicTrue $(profile_get_key single-cpio)
+		then
+			print_info 1 'Creating Single Cpio File'
+			# Build a single cpio file
+		
+			if [ -d "${TEMP}/initramfs-internal" ]
+			then
+				rm -r "${TEMP}/initramfs-internal" 
+			fi
+
+			mkdir "${TEMP}/initramfs-internal"
+		
+			for i in $(initramfs_register_cpio_read)
+			do
+				if [ ! -f "$i" ]
+				then
+					die "Invalid CPIO file in registry: ${i} -- file does not exist."
+				fi
+				genkernel_extract_cpio $i "${TEMP}/initramfs-internal"
+			done
+			cd "${TEMP}/initramfs-internal"
+			genkernel_generate_cpio_path initramfs-output .
+
+		else
 		for i in $(initramfs_register_cpio_read)
 		do
 			if [ ! -f "$i" ]
@@ -73,4 +97,5 @@ initramfs_create::() {
 			cat "$i" >> "${TEMP}/initramfs-output.cpio.gz"
 		done
 	fi
+fi
 }

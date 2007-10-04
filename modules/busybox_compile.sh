@@ -100,7 +100,8 @@ busybox_compile::()
 	cp busybox ${BUSYBOX_CONFIG} ${TEMP}/busybox-compile
 	cd ${TEMP}/busybox-compile
 	genkernel_generate_package "busybox-${BUSYBOX_VER}" "."
-
+    
 	cd "${TEMP}"
+	rm -rf "${TEMP}/busybox-compile" > /dev/null
 	rm -rf "${BUSYBOX_DIR}" > /dev/null
 }

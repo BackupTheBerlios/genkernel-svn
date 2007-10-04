@@ -442,35 +442,29 @@ genkernel_print_header() {
 }
 determine_profile() {
 	local myProfile=$(profile_get_key profile user)
-    echo $myProfile
-	if [ "${myProfile}" != '' ]
+	
+	ARCH=$(uname -m)
+	case "${ARCH}" in
+		i?86)
+			ARCH='x86'
+	        profile_set_key "arch" "i386" "system"
+		;;
+		mips64)
+			ARCH='mips'
+	        profile_set_key "arch" "mips" "system"
+		;;
+		*)
+	        profile_set_key "arch" "${ARCH}" "system"
+		;;
+    esac
+    
+    if [ "${myProfile}" != '' ]
 	then
 	    profile_set_key "profile" "${myProfile}"
-	else
-	    profile_set_key "profile" "$(profile_get_key arch)"
+    else
+        # This is the default profile to use.
+	    profile_set_key "profile" "${ARCH}"
     fi
-}
-
-genkernel_determine_arch() {
-	local myArch=$(profile_get_key arch user)
-	if [ "${myArch}" != '' ]
-	then
-		ARCH=${myArch}
-	else
-		ARCH=$(uname -m)
-		case "${ARCH}" in
-			i?86)
-				ARCH='x86'
-			;;
-			mips64)
-				ARCH='mips'
-			;;
-			*)
-			;;
-		esac
-	fi
-
-	profile_set_key "arch" "${ARCH}" "running"
 }
 
 print_list()

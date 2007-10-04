@@ -61,10 +61,9 @@ done
 # Override with the cmdline
 profile_copy cmdline "user"
 
-genkernel_determine_arch
 determine_profile
 
-# We now know the arch so update CACHE_DIR and CONFIG_DIR
+# We now know the profile so set default CACHE_DIR and CONFIG_DIR
 CACHE_DIR="${CACHE_DIR}/$(profile_get_key profile)"
 CONFIG_DIR="${CONFIG_DIR}/$(profile_get_key profile)"
 

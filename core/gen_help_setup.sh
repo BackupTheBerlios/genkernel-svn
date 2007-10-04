@@ -43,7 +43,7 @@ __register_config_option 'Kernel Configuration'	'save-config' 'false' 'true' "sa
 profile_set_key 'save-config' false 'system'
 
 __register_config_option 'Kernel Configuration'	'oldconfig'	 'false' 'true' 'Run oldconfig.'
-profile_set_key 'oldconfig' true 'system'
+profile_set_key 'oldconfig' false 'system'
 
 __register_config_option 'Kernel Configuration'	'config'	 'false' 'true' 'Run config after oldconfig.'
 __register_config_option 'Kernel Configuration'	'gconfig'	 'false' 'true' 'Run gconfig after oldconfig.'
@@ -61,6 +61,8 @@ __register_config_option 'Kernel Configuration' 'kernel-binary' 'true' 'false' '
 profile_set_key kernel-name genkernel 'system'
 
 ## Initramfs options
+__register_config_option 'Initramfs' 'single-cpio' 'false' 'true' "Single compressed cpio output."
+profile_set_key single-cpio false 'system'
 __register_config_option 'Initramfs' 'gmi' 'false' 'true' "Disable genkernel's initramfs scripts"
 profile_set_key gmi true 'system'
 
