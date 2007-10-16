@@ -166,7 +166,7 @@ setup_modules_profile() {
 	GENERIC_MODULES_LOAD="${CONFIG_GENERIC_DIR}/modules_load.gk"
 	[ -f "${GENERIC_MODULES_LOAD}" ] && config_profile_read ${GENERIC_MODULES_LOAD} "modules"
 
-	# override with the arch specific kernel modules
+	# override with the config specific kernel modules
 	MODULES_LOAD="${CONFIG_DIR}/modules_load.gk"
 	[ -f "${MODULES_LOAD}" ] && config_profile_read ${MODULES_LOAD} "modules"
 }
