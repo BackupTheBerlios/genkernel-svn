@@ -35,3 +35,5 @@ the print_info command is going to need some work too
  it should automatically strip color codes
 
 split arch into kernel-arch and tools-arch
+
+PROFILE_DUMP is broken makeopts -j3 should be := "-j3"

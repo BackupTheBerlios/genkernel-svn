@@ -385,15 +385,7 @@ compile_generic() {
 	then
         MAKEOPTS=$(profile_get_key makeopts)
 		print_info 2 "COMMAND: ${MAKE} ${OPTS}" 1 0 1
-		if [ "$(profile_get_key debuglevel)" -gt "1" ]
-        then
-		    make -s "$@" 2>&1 | tee -a ${DEBUGFILE}
-			RET=${PIPESTATUS[0]}
-		else
-			# Output to debugfile only
-			make "$@" >> ${DEBUGFILE} 2>&1
-			RET=$?
-		fi
+		make "$@" 
 	else
 		print_info 2 "COMMAND: make $(profile_get_key makeopts) ${OPTS}" 1 0 1
 		if [ "$(profile_get_key debuglevel)" -gt "1" ]
@@ -401,13 +393,14 @@ compile_generic() {
 			# Output to stdout and debugfile
 			make $(profile_get_key makeopts) "$@" 2>&1 | tee -a ${DEBUGFILE}
 			RET=${PIPESTATUS[0]}
+	        [ "${RET}" -eq '0' ] || die "Failed to compile ..."
 		else
 			# Output to debugfile only
 			make $(profile_get_key makeopts) "$@" >> ${DEBUGFILE} 2>&1
 			RET=$?
+	        [ "${RET}" -eq '0' ] || die "Failed to compile ..."
 		fi
 	fi
-	[ "${RET}" -eq '0' ] || die "Failed to compile ..."
 }
 
 configure_generic() {

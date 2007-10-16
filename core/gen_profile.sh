@@ -157,8 +157,8 @@ profile_list_keys() {
 setup_system_profile() {
 	# has to happen after the cmdline is processed.
 	# Read arch-specific config
-	ARCH_CONFIG="${CONFIG_DIR}/profile.gk"
-	[ -f "${ARCH_CONFIG}" ] && config_profile_read ${ARCH_CONFIG} "system"
+	PROFILE_CONFIG="${CONFIG_DIR}/profile.gk"
+	[ -f "${PROFILE_CONFIG}" ] && config_profile_read ${PROFILE_CONFIG} "system"
 }
 
 setup_modules_profile() {

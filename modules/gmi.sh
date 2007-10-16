@@ -93,7 +93,7 @@ gmi::()
 
 	# Generate CPIO
 	cd "${TEMP}/initramfs-base-temp/"
-	find . -name .svn -exec rm -r {} \; >/dev/null 2>&1
+	find "${TEMP}/initramfs-base-temp/" -name .svn -exec rm -fr {} \; >/dev/null 2>&1
 	genkernel_generate_cpio_path gmi-core .
 	initramfs_register_cpio gmi-core
 

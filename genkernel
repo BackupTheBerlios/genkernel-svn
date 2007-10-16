@@ -107,6 +107,10 @@ then
 	mkdir -p "${TEMP}" || die "Failed to create temporary directory!"
 fi
 
+# remove the genkernel-output folder if it exists
+rm -r ${TEMP}/genkernel-output >/dev/null 2>&1
+
+
 clear_log
 genkernel_print_header
 
@@ -128,6 +132,10 @@ then
 
 fi
 
+
+genkernel_lookup_packages
+genkernel_lookup_kernel
+
 if [ "$(profile_get_key debuglevel)" -gt "2" ]
 then
 	for i in $(profile_list)
@@ -136,7 +144,6 @@ then
 	done
 	echo
 fi
-
 [ -n "$(profile_get_key profile-dump)" ] && config_profile_dump
 
 # Check if any modules to execute were specified
@@ -148,8 +155,6 @@ then
 fi
 
 
-genkernel_lookup_packages
-genkernel_lookup_kernel
 
 # Process depends
 print_info 1 '>> Processing dependency tree...'

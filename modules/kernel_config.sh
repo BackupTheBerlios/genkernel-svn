@@ -28,8 +28,11 @@ kernel_config::()
 	# Source dir needs to be clean or kbuild complains
 	if [ ! "$(profile_get_key kbuild-output)" == "$(profile_get_key kernel-tree)" ]
 	then
+            
+		    print_info 1 '>> Cleaning kernel source tree...'
+            print_info 1 '   Run "make mrproper" as root if this fails'
 			compile_generic mrproper
-			[ "$?" ] || die "The Kernel source tree is not clean. KBUILD_OUTPUT requires a clean tree."
+
             if [ -f "$(profile_get_key kernel-tree)/localversion-genkernel" ]
             then
                 rm -f "$(profile_get_key kernel-tree)/localversion-genkernel" >/dev/null 2>&1
@@ -41,7 +44,7 @@ kernel_config::()
 	fi
 	
 	logicTrue $(profile_get_key mrproper) && \
-		print_info 1 '${PRINT_PREFIX}>> Running mrproper...' && \
+		print_info 1 '>> Running mrproper...' && \
 			compile_generic ${KERNEL_ARGS} mrproper
 	
 	# Setup fake i386 kbuild_output for arch=um or xen0 or xenU 
