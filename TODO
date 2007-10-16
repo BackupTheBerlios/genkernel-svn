@@ -1,6 +1,5 @@
 Things to fix:
 
-* We should make an attempt at autodetecting GENKERNEL_HOME if it's not set
 * CACHE_DIR should be created automatically if it does not exist
 
 * cmdline kernel config parameter changing
@@ -15,6 +14,7 @@ gmi: We need modules in the sense that you can just add an overlay and the
      initramfs scripts will pick up the .sh and run it.
 
 busybox: fix config (add --busybox-networking opt or something)
+
 general: "Failed to compile" errors need to produce backtrace & etc...
 
 kernel modules --no doesnt work
@@ -27,11 +27,6 @@ kernel modules --no doesnt work
 when you don't have a kernel driver and you ip=dhcp <-- it should say no
 such device or so.
 
-missing file check .. before running a bunch of the program
-
-
 the print_info command is going to need some work too
- think when it dumps stuff to the debugfile
+ I think when it dumps stuff to the debugfile
  it should automatically strip color codes
-
-PROFILE_DUMP is broken makeopts -j3 should be := "-j3"

@@ -14,7 +14,43 @@ die() {
   exit 1
 }
 
-source genkernel.conf || die "Failed to source genkernel.conf"
+
+# Autodetect genkernel home if its not set as an env variable
+PATH="${PATH} $(dirname $0)"
+if [ "$GENKERNEL_HOME" == "" ]
+then
+    for i in $PATH
+    do
+        if [ -f "$i/core/gen_initialize.sh" ]
+        then
+            GENKERNEL_HOME=$i
+            break
+        fi
+    done
+fi
+if [ "$GENKERNEL_HOME" == "" ]
+then
+    echo "GENKERNEL_HOME could not be set."
+    exit 1
+fi
+
+CORE_DIR="$GENKERNEL_HOME/core"
+MODULES_DIR="$GENKERNEL_HOME/modules"
+CONFIG_DIR="$GENKERNEL_HOME/configs/"
+CONFIG_GENERIC_DIR="$GENKERNEL_HOME/configs/generic"
+CACHE_DIR="$GENKERNEL_HOME/cache/"
+GMI_DIR="$GENKERNEL_HOME/gmi"
+SRCPKG_DIR="$GENKERNEL_HOME/dist"
+FIXES_FILES_DIR="$GENKERNEL_HOME/fixes/files"
+FIXES_PATCHES_DIR="$GENKERNEL_HOME/fixes/patches"
+
+if [ -f /etc/genkernel/genkernel.conf ]
+then
+    source /etc/genkernel/genkernel.conf || die "Failed to source /etc/genkernel/genkernel.conf"
+else
+    source ${GENKERNEL_HOME}/genkernel.conf || die "Failed to source ${GENKERNEL_HOME}/genkernel.conf"
+fi
+
 source ${CORE_DIR}/gen_coreFunctions.sh || die "Failed to source gen_coreFunctions.sh"
 source ${CORE_DIR}/gen_kernel_cmdline.sh || die "Failed to source gen_kernel_cmdline.sh"
 source ${CORE_DIR}/gen_dependencyEngine.sh || die "Failed to source gen_dependencyEngine.sh"
