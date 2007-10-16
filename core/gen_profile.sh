@@ -418,7 +418,7 @@ config_profile_dump() {
 				done
 				
 				for l in ${element_list}; do
-					if [ "${l:0:1}" == "-" ]
+					if [ "${l:0:3}" == "%%-" ]
 					then
 						negative_list="${negative_list} ${l#-}"
 						element_list="$(subtract_from_list "$l" "${element_list}")"
