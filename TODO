@@ -34,6 +34,4 @@ the print_info command is going to need some work too
  think when it dumps stuff to the debugfile
  it should automatically strip color codes
 
-split arch into kernel-arch and tools-arch
-
 PROFILE_DUMP is broken makeopts -j3 should be := "-j3"

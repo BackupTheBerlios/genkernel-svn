@@ -17,14 +17,10 @@ e2fsprogs_compile::() {
 	cd "${E2FSPROGS_DIR}"
 
     # turn on/off the cross compiler
-    if [ -n "$(profile_get_key cross-compile)" ]
-    then
-		TARGET=$(profile_get_key cross-compile)
-        ARGS="${ARGS} --host=$(profile_get_key cross-compile)"
-    elif [ -n "$(profile_get_key utils-cross-compile)" ]
+    if [ -n "$(profile_get_key utils-cross-compile)" ]
     then
 		TARGET=$(profile_get_key utils-cross-compile)
-        ARGS="${ARGS} --host=$(profile_get_key utils-cross-compile)"
+        ARGS="${ARGS} --host=$(${TARGET}-gcc -dumpmachine)"
 	else
 		TARGET=$(gcc -dumpmachine)
 		

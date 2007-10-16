@@ -18,14 +18,10 @@ lvm2_compile::() {
 	cp /usr/share/gnuconfig/* autoconf
 
 	# turn on/off the cross compiler
-	if [ -n "$(profile_get_key cross-compile)" ]
-	then
-		TARGET=$(profile_get_key cross-compile)
-		ARGS="${ARGS} --host=$(gcc -dumpmachine) --target=${TARGET}"
-	elif [ -n "$(profile_get_key utils-cross-compile)" ]
+	if [ -n "$(profile_get_key utils-cross-compile)" ]
 	then
 		TARGET=$(profile_get_key utils-cross-compile)
-		ARGS="${ARGS} --host=$(gcc -dumpmachine) --target=${TARGET}"
+		ARGS="${ARGS} --host=$(${TARGET}-gcc -dumpmachine) --target=${TARGET}"
 	else
 		TARGET=$(gcc -dumpmachine)
 	fi

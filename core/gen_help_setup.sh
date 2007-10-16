@@ -11,6 +11,8 @@ __register_config_option 'Debug' 'debugfile'  'true' 'false' 'Output file for de
 
 ## Internals
 __register_config_option 'Internals' 'arch' 'true' 'false' 'Force to arch instead of autodetecting.'
+__register_config_option 'Internals' 'kernel-arch' 'true' 'false' 'Force to arch instead of autodetecting. (Kernel-only)'
+__register_config_option 'Internals' 'utils-arch' 'true' 'false' 'Force to arch instead of autodetecting. (Utils only)'
 __register_config_option 'Internals' 'callback'	'true' 'false' 'Run the specified arguments after the kernel and modules have been compiled.'
 __register_config_option 'Internals' 'cachedir' 'true' 'false' 'Override the default cache location.'
 __register_config_option 'Internals' 'tempdir' 'true' 'false' "Location of Genkernel's temporary directory."

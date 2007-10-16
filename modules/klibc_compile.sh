@@ -65,22 +65,13 @@ klibc_compile::() {
 	fi
 
 	# turn on/off the cross compiler
-	if [ -n "$(profile_get_key cross-compile)" ]
+	if [ -n "$(profile_get_key utils-cross-compile)" ]
 	then
-		sed -i MCONFIG -e "s|CROSS   = |CROSS = $(profile_get_key cross-compile)|g"
+		sed -i MCONFIG -e "s|CROSS   = |CROSS = $(profile_get_key utils-cross-compile)|g"
 		# Workaround for makefile that doesnt set CROSS consistently
 		sed -i Makefile -e "s|\$(CROSS)klibc.config|klibc.config|g"
 		sed -i Makefile -e "s|\$(KCROSS)klcc|klcc|g"
 		sed -i Makefile -e "s|\$(CROSS)klcc|klcc|g"
-	else
-		if [ -n "$(profile_get_key utils-cross-compile)" ] 
-		then
-			sed -i MCONFIG -e "s|CROSS   = |CROSS = $(profile_get_key utils-cross-compile)|g" 
-			# Workaround for makefile that doesnt set CROSS consistently
-			sed -i Makefile -e "s|\$(CROSS)klibc.config|klibc.config|g"
-			sed -i Makefile -e "s|\$(KCROSS)klcc|klcc|g"
-			sed -i Makefile -e "s|\$(CROSS)klcc|klcc|g"
-		fi
 	fi
 
 	if [ "${ARCH}" = 'um' -o "${ARCH}" = 'xen0' -o "${ARCH}" = 'xenU' -o "${ARCH}" = 'x86' ]

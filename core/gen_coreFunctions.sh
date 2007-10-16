@@ -290,6 +290,42 @@ die_debugged() {
 	cleanup
   	exit 1
 }
+setup_cross_compile()
+{
+    if [ -n "$(profile_get_key cross-compile)" ]
+    then
+        if [ -z "$(profile_get_key utils-cross-compile)" ]
+        then
+            profile_set_key utils-cross-compile $(profile_get_key cross-compile)
+        fi
+        if [ -z "$(profile_get_key kernel-cross-compile)" ]
+        then
+            profile_set_key kernel-cross-compile $(profile_get_key cross-compile)
+        fi
+    fi
+    print_info 3 "cross-compile: $(profile_get_key cross-compile)"
+    print_info 3 "kernel-cross-compile: $(profile_get_key kernel-cross-compile)"
+    print_info 3 "utils-cross-compile: $(profile_get_key utils-cross-compile)"
+
+}
+
+setup_arch()
+{
+    if [ -n "$(profile_get_key arch)" ]
+    then
+        if [ -z "$(profile_get_key utils-arch)" ]
+        then
+            profile_set_key utils-arch $(profile_get_key arch)
+        fi
+        if [ -z "$(profile_get_key kernel-arch)" ]
+        then
+            profile_set_key kernel-arch $(profile_get_key arch)
+        fi
+    fi
+    print_info 3 "arch: $(profile_get_key arch)"
+    print_info 3 "kernel-arch: $(profile_get_key kernel-arch)"
+    print_info 3 "utils-arch: $(profile_get_key utils-arch)"
+}
 
 setup_cache_dir()
 {

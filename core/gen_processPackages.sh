@@ -133,7 +133,7 @@ genkernel_generate_package() {
 
 genkernel_extract_package() {
 	[ -e "${CACHE_DIR}/pkg_$1.tar.bz2" ] || die "Binary cache not present for $1!"
-	if [ "$(profile_get_key debuglevel)" -gt "1" ]
+	if [ "$(profile_get_key debuglevel)" -gt "3" ]
 	then
 		tar jvxf "${CACHE_DIR}/pkg_$1.tar.bz2" || die "Could not extract binary cache for $1!"
 	else

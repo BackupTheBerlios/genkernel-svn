@@ -19,10 +19,7 @@ db_compile::() {
 	print_info 1 'DB: >> Configuring...'
 
 	# turn on/off the cross compiler
-	if [ -n "$(profile_get_key cross-compile)" ]
-	then
-		TARGET="$(profile_get_key cross-compile)"
-	elif [ -n "$(profile_get_key utils-cross-compile)" ]
+	if [ -n "$(profile_get_key utils-cross-compile)" ]
 	then
 		TARGET="$(profile_get_key utils-cross-compile)"
 	else

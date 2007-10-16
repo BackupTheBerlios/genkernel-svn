@@ -48,16 +48,14 @@ unionfs_modules_compile::()
 		fi
 
 		# turn on/off the cross compiler
-		if [ "$(profile_get_key cross-compile)" != "" ]
+		if [ "$(profile_get_key utils-cross-compile)" != "" ]
 		then
-			echo "KERNEL_CROSS_COMPILE=$(profile_get_key cross-compile)" >> fistdev.mk
-			echo "UTILS_CROSS_COMPILE=$(profile_get_key cross-compile)-" >> fistdev.mk
-		else
-			if [ "$(profile_get_key utils-cross-compile)" != "" ]
-			then
-				echo "UTILS_CROSS_COMPILE=$(profile_get_key utils-cross-compile)-" >> fistdev.mk
-    		fi
-		fi
+			echo "UTILS_CROSS_COMPILE=$(profile_get_key utils-cross-compile)-" >> fistdev.mk
+    	fi
+		if [ "$(profile_get_key kernel-cross-compile)" != "" ]
+		then
+			echo "KERNEL_CROSS_COMPILE=$(profile_get_key kernel-cross-compile)-" >> fistdev.mk
+    	fi
 
 		print_info 1 "Compiling unionfs kernel module"
 

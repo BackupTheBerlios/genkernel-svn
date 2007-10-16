@@ -324,7 +324,7 @@ setup_kernel_args() {
 	local KNAME
     KERNEL_ARGS=""
 	# Override the default arch being built
-	[ -n "$(profile_get_key arch)" ] && KERNEL_ARGS="${KERNEL_ARGS} ARCH=$(profile_get_key arch)"
+	[ -n "$(profile_get_key arch)" ] && KERNEL_ARGS="${KERNEL_ARGS} ARCH=$(profile_get_key kernel-arch)"
 
 	#if [ "$(profile_get_key kbuild-output)" == "$(profile_get_key kernel-tree)" ]
 	#then
@@ -345,11 +345,9 @@ setup_kernel_args() {
     fi
 	
     # Kernel cross compiling support
-	if [ -n "$(profile_get_key cross-compile)" ]
+	if [ -n "$(profile_get_key kernel-cross-compile)" ]
 	then
-		KERNEL_ARGS="${KERNEL_ARGS} CROSS_COMPILE=$(profile_get_key cross-compile)"
-	else
-		[ -n "$(profile_get_key kernel-cross-compile)" ] && KERNEL_ARGS="${KERNEL_ARGS} CROSS_COMPILE=$(profile_get_key kernel-cross-compile)"
+		KERNEL_ARGS="${KERNEL_ARGS} CROSS_COMPILE=$(profile_get_key kernel-cross-compile)-"
 	fi
 
 	# Override the localversion via the cmdline... 

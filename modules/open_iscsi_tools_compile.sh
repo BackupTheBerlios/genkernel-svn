@@ -42,10 +42,7 @@ open_iscsi_tools_compile::()
 		-e 's/nios2.*/nios2/' \
 	)
    # turn on/off the cross compiler
-	if [ -n "$(profile_get_key cross-compile)" ]
-	then
-		CC="$(profile_get_key cross-compile)-gcc"
-	elif [ -n "$(profile_get_key utils-cross-compile)" ]
+	if [ -n "$(profile_get_key utils-cross-compile)" ]
 	then
 		CC="$(profile_get_key utils-cross-compile)-gcc"
 	else

@@ -80,7 +80,7 @@ profile_list_contents() {
 	[ "$1" = "" ] && __destination_profile="running" || __destination_profile="$1"
 	local identifier values arg
 	for identifier in $(profile_list_keys ${__destination_profile}); do
-		if [ "$(profile_get_key debuglevel)" -gt "3" ]
+		if [ "$(profile_get_key debuglevel)" -gt "4" ]
 		then
 			echo "${__destination_profile}[${identifier}]: $(profile_get_key "${identifier}" "${__destination_profile}" 'true' )"
 		else

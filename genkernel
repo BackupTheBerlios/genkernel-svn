@@ -136,7 +136,7 @@ fi
 genkernel_lookup_packages
 genkernel_lookup_kernel
 
-if [ "$(profile_get_key debuglevel)" -gt "2" ]
+if [ "$(profile_get_key debuglevel)" -gt "4" ]
 then
 	for i in $(profile_list)
 	do
@@ -175,6 +175,9 @@ setup_cache_dir
 
 # Die if we are missing required files
 files_register_read
+
+setup_cross_compile
+setup_arch
 
 # If we have a callback set require the callback module
 [ -n "$(profile_get_key callback)" ] && require callback
