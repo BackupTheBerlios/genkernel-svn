@@ -32,3 +32,5 @@ the print_info command is going to need some work too
  I think when it dumps stuff to the debugfile
  it should automatically strip color codes
 
+# Single cpio option must be run as root .. die if not root.
+    -> mknod fails as a regular user. :/

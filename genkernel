@@ -216,6 +216,11 @@ files_register_read
 setup_cross_compile
 setup_arch
 
+if logicTrue $(profile_get_key single-cpio) && [ ! "$UID" == 0 ]
+then
+    die "The single cpio option requires genkernel be run as root"
+fi
+
 # If we have a callback set require the callback module
 [ -n "$(profile_get_key callback)" ] && require callback
 for i in $(buildDepTreeSolution)
