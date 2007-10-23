@@ -48,7 +48,7 @@ lvm2_compile::() {
     cp tools/lvm.static ${TEMP}/LVM2/sbin
 	cd "${TEMP}/LVM2"
 	chmod u+w sbin/lvm.static # Fix crazy permissions to strip
-	strip sbin/lvm.static || die 'Could not strip lvm.static!'
+	${TARGET}-strip sbin/lvm.static || die 'Could not strip lvm.static!'
 	genkernel_generate_package "lvm2-${LVM2_VER}" sbin/lvm.static || die 'Could not create LVM2 package!'
 
 	cd "${TEMP}"
