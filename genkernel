@@ -23,7 +23,8 @@ then
     do
         if [ -f "$i/core/gen_initialize.sh" ]
         then
-            GENKERNEL_HOME=$i
+            cd $i
+            GENKERNEL_HOME=`pwd`
             break
         fi
     done

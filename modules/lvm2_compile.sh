@@ -34,7 +34,7 @@ lvm2_compile::() {
 	ac_cv_func_malloc_0_nonnull=yes \
 	configure_generic ${ARGS} --enable-static_link --prefix=${TEMP}/LVM2  --with-confdir=${TEMP}/LVM2/etc
 
-	mkdir -p "${TEMP}/LVM2"
+	mkdir -p "${TEMP}/LVM2/sbin"
 	print_info 1 'LVM2: >> Compiling...'
 	
 	CC=${TARGET}-gcc \
@@ -44,8 +44,8 @@ lvm2_compile::() {
 	CPPFLAGS="-I${DEVICE_MAPPER}/include" \
 	ac_cv_func_malloc_0_nonnull=yes \
 	compile_generic # Compile
-	compile_generic install
-
+	#compile_generic install
+    cp tools/lvm.static ${TEMP}/LVM2/sbin
 	cd "${TEMP}/LVM2"
 	chmod u+w sbin/lvm.static # Fix crazy permissions to strip
 	strip sbin/lvm.static || die 'Could not strip lvm.static!'
