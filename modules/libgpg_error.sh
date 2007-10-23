@@ -10,4 +10,3 @@ libgpg_error::()
     
     genkernel_extract_package "libgpg_error-${LIBGPG_ERROR_VER}"
 }
-

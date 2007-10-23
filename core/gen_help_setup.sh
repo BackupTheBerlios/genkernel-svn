@@ -82,6 +82,7 @@ __register_config_option 'Initramfs' 'portmap' 'false' 'true' 'Include portmap i
 __register_config_option 'Initramfs' 'unionfs' 'false' 'true' 'Unionfs is deprecated use aufs instead.'
 __register_config_option 'Initramfs' 'open-iscsi' 'false' 'true' 'Include open-iscsi inside the initramfs.'
 __register_config_option 'Initramfs' 'aoetools' 'false' 'true' 'Include aoetools inside the initramfs.'
+__register_config_option 'Initramfs' 'luks' 'false' 'true' 'Include cryptsetup-luks inside the initramfs.'
 
 __register_config_option 'Initramfs' 'kernel-modules'   'true!m' 'false' 'Add or subtract kernel modules from the initramfs. --kernel-module="GROUP:module -module"' 'cmdline_modules_register'
 __register_config_option 'Initramfs' 'kernel-modules-cpio' 'false' 'true' 'Add kernel modules to the initramfs'
