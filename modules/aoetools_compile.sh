@@ -16,11 +16,15 @@ aoetools_compile::()
 		cd "${AOETOOLS_DIR}" > /dev/null	
 		gen_patch ${FIXES_PATCHES_DIR}/aoetools/${AOETOOLS_VER} .
         
-        # turn on/off the cross compiler
+        #turn on/off the cross compiler
         if [ -n "$(profile_get_key utils-cross-compile)" ]
         then
-            ARGS="${ARGS} CC=$(profile_get_key utils-cross-compile)-gcc"
+            TARGET=$(profile_get_key utils-cross-compile)
+        else
+            TARGET=$(gcc -dumpmachine)
         fi
+        ARGS="${ARGS} CC=${TARGET}-gcc"
+
 
 		print_info 1 "Compiling aoetools utilities"
 
@@ -44,19 +48,10 @@ aoetools_compile::()
                 RET=$?
             fi
             [ "${RET}" -eq '0' ] || die "Failed to install ..."
+            ${TARGET}-strip ${TEMP}/aoetools-output/sbin/$i
         done
-		#[ -x "utils/unionctl" ] && cp utils/unionctl ${TEMP}/unionfs-output/sbin
-		#[ -x "unionctl" ] && cp unionctl ${TEMP}/unionfs-output/sbin
-		#strip ${TEMP}/unionfs-output/sbin/unionctl
-
-		#cp unionimap ${TEMP}/unionfs-output/sbin
-		#cp uniondbg ${TEMP}/unionfs-output/sbin
-		#strip ${TEMP}/unionfs-output/sbin/unionimap
-		#strip ${TEMP}/unionfs-output/sbin/uniondbg
 		
 		cd ${TEMP}/aoetools-output
 		genkernel_generate_package "aoetools-${AOETOOLS_VER}" "."
-		#genkernel_generate_cpio_path "unionfs-${UNIONFS_VER}" .
-		#initramfs_register_cpio "unionfs-${UNIONFS_VER}"
 	#fi
 }
