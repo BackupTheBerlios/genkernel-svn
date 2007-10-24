@@ -20,7 +20,10 @@ portmap_compile::()
     # turn on/off the cross compiler
 	if [ -n "$(profile_get_key utils-cross-compile)" ]
 	then
+        TARGET=$(profile_get_key utils-cross-compile)
 		ARGS="${ARGS} CC=$(profile_get_key utils-cross-compile)-gcc"
+    else
+        TARGET=$(gcc -dumpmachine)
 	fi
 
 	print_info 1 'portmap: >> Compiling...'
@@ -37,9 +40,9 @@ portmap_compile::()
     cp pmap_set ${TEMP}/portmap-compile/sbin
     cd ${TEMP}/portmap-compile
 
-	strip "${TEMP}/portmap-compile/sbin/portmap" || die 'Could not strip portmap binary!'
-	strip "${TEMP}/portmap-compile/sbin/pmap_dump" || die 'Could not strip pmap_dump binary!'
-	strip "${TEMP}/portmap-compile/sbin/pmap_set" || die 'Could not strip pmap_set binary!'
+	${TARGET}-strip "${TEMP}/portmap-compile/sbin/portmap" || die 'Could not strip portmap binary!'
+	${TARGET}-strip "${TEMP}/portmap-compile/sbin/pmap_dump" || die 'Could not strip pmap_dump binary!'
+	${TARGET}-strip "${TEMP}/portmap-compile/sbin/pmap_set" || die 'Could not strip pmap_set binary!'
     genkernel_generate_package "portmap-${PORTMAP_VER}" "."
 	
 	cd ${TEMP}

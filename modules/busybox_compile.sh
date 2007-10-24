@@ -74,9 +74,11 @@ busybox_compile::()
 	if [ "$(profile_get_key utils-cross-compile)" != "" ]
 	then
 		print_info 1 "Setting cross compiler to $(profile_get_key utils-cross-compile)"
+        TARGET=$(profile_get_key utils-cross-compile)
 		config_set ".config" "USING_CROSS_COMPILER" "y"
 		config_set_string ".config" "CROSS_COMPILER_PREFIX" "$(profile_get_key utils-cross-compile)-"
 	else
+        TARGET=$(gcc -dumpmachine)
 		config_unset ".config" "USING_CROSS_COMPILER"
 		config_unset ".config" "CROSS_COMPILER_PREFIX"
 	fi
@@ -85,9 +87,9 @@ busybox_compile::()
 	
 	print_info 1 'busybox: >> Compiling...'
 	compile_generic all
-	
+    # No need to strip output the Makefile already does it.
+
 	[ -f "busybox" ] || die 'Busybox executable does not exist!'
-	strip "busybox" || die 'Could not strip busybox binary!'
 	
 	[ -e "${TEMP}/busybox-compile" ] && rm -r ${TEMP}/busybox-compile
 	mkdir ${TEMP}/busybox-compile

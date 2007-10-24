@@ -34,3 +34,5 @@ the print_info command is going to need some work too
 
 # Single cpio option must be run as root .. die if not root.
     -> mknod fails as a regular user. :/
+    look into gen_init_cpio or cpio --append to see if we cant work around
+    the dev node issues.
