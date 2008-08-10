@@ -1,14 +1,49 @@
-Buildroot2 TODOs
+Things to fix:
 
-- fix packages/Makefile.autotools.in to use a package-imposed patchdir
-  (Ivan Kuten)
-- convert all packages that use autoconf to use the infrastructure of
-  packages/Makefile.autotools.in
-- fix setting of flags for packages
+* Use "make kernelversion" in the kernel tree to determine the kernel version safely
+  (replace the grep/sed/blah version checking with that)
 
-- stabilize for a 0.10.0 release
+* Specify kernel config options on the genkernel cmdline
 
-- think about using a common --config-cache for configure
-  Should take care of expanding TARGET_CONFIGURE_ARGS for cross compiles
-  to working presets.
+* make some functions more generic .. ( not necessary right away but would be nice to get done )
 
+* make critical variables (arch, etc) bombproof and readonly so modules can't b0rk things
+  up
+
+* --list-module-groups for gmi
+
+* gmi: We need modules in the sense that you can just add an overlay
+  and the initramfs scripts will pick up the .sh and run it.
+
+  Perhaps some "preroot" and "postroot" directories, containing
+  scripts that get executed before the mounting and, well, after
+  Dropping scripts there would ensure execution.  What about the
+  execution order?  Or some explicit running: vmlinuz
+  post-root=bla:asdf;bla2:asdf <...> on the kernel command line.
+
+busybox: fix config (add --busybox-networking opt or something)
+
+general: "Failed to compile" errors need to produce backtrace & etc...
+
+kernel modules --no doesnt work
+
+* reduce --help indentation to make things more readable
+* --help should go to stderr
+* console=ttyS0,9600 goes kaboom
+
+when you don't have a kernel driver and you ip=dhcp <-- it should say no
+such device or so.
+
+the print_info command is going to need some work too
+ I think when it dumps stuff to the debugfile
+ it should automatically strip color codes
+
+# Single cpio option must be run as root .. die if not root.
+    -> mknod fails as a regular user. :/
+    look into gen_init_cpio or cpio --append to see if we cant work around
+    the dev node issues.
+
+    maybe run the "gen_init_cpio" binary from the kernel source tree, then use
+    a "nod bla\ndir bla"-style file?
+
+* Kernel install and Kmod install might depend on initramfs compile
