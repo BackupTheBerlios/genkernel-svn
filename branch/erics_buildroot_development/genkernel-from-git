@@ -1,0 +1,63 @@
+#!/bin/bash
+# Copyright: Jean-Francois Richard <jean-francois@richard.name>
+
+script_name=$(basename $0)
+
+function usage() {
+    local e="$@"
+    if [ -n "$e" ]; then
+	echo 
+	echo Error: $@ >&2
+	echo
+    fi
+    echo "usage: " >&2
+    echo "  $script_name <kernel-tree-path> <version-tag> -- [genkernel options]" >&2
+    echo "  <version-tag> can be set to"
+    echo "     latest       to use the bleeding edge commit from 'origin'" >&2
+    echo "     latest-tag   to use the most recent tag" >&2
+    echo "     current      to use your git kernel tree as is" >&2
+    echo "     <tag>        to use the given tag, e.g. 'v2.6.23'" >&2
+    echo "example:"
+    echo "  $script_name /home/abc/linux.git latest -- --menuconfig all::" >&2
+    exit 1
+}
+
+which git-checkout &>/dev/null || usage "Could not find Git tools in your path"
+which genkernel &>/dev/null || usage "Could not find 'genkernel' in your path"
+[ "$#" -lt "3" ] && usage
+[ "$3" != "--" ] && usage
+ktree="$1"
+ktag="$2"
+[ ! -d "$ktree/.git" ] && usage "The path specified for the kernel tree is not a Git directory."
+cd "$ktree"
+
+if [ "$ktag" = "current" ]; then
+    echo "Using the current kernel tree configuration"
+else
+    if [ "$ktag" = "latest" ]; then
+	ktag=master
+	echo "Checking out tag '$ktag' in the kernel tree"    
+
+    elif [ "$ktag" = "latest-tag" ]; then
+	echo -n "Finding the latest tag... "
+	ktag=$( for i in `git-rev-parse --tags`; do git-log --pretty=format:"%ct %H" -1 $i; echo ; done | sort | cut -f2 -d' ' | tail -n1 )
+	ktag=$( git-describe "$ktag" )
+	echo $ktag
+
+    else
+	git-tag -l ^$ktag\$ || usage "The specified tag '$ktag' does not exist in the kernel tree"
+	echo "Checking out tag '$ktag' in the kernel tree"    
+    fi
+    git-checkout $ktag || exit 1
+fi
+
+
+shift
+shift
+shift
+# phew. alright now!
+
+echo "Running genkernel $@ --kernel-tree='$ktree'"
+echo
+echo
+genkernel $@ --kernel-tree="$ktree"

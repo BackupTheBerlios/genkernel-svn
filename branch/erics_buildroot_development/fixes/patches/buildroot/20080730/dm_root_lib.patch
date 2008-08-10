@@ -1,0 +1,11 @@
+diff -urN buildroot.orig/package/dm/dm.mk buildroot/package/dm/dm.mk
+--- buildroot.orig/package/dm/dm.mk	2008-07-30 02:15:23.000000000 -0500
++++ buildroot/package/dm/dm.mk	2008-08-10 06:54:15.000000000 -0500
+@@ -95,6 +95,7 @@
+ 
+ # Install libdevmapper.so.1.00 from staging to target
+ $(DM_TARGET_LIBRARY).$(DM_BASEVER): $(DM_STAGING_LIBRARY)
++	mkdir -p $(TARGET_DIR)/usr/lib
+ 	$(INSTALL) -m 0644 $? $@
+ 	-$(STRIPCMD) $@
+ 	touch -c $@

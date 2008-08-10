@@ -1,0 +1,20 @@
+Source: genkernel
+Section: devel
+Priority: extra
+Maintainer: Jean-François Richard <trucker@genkernel.org>
+Build-Depends: debhelper (>= 5), asciidoc (>= 8), xsltproc (>= 1), docbook-xml (>= 4), docbook-xsl (>= 1.6)
+Standards-Version: 3.7.2
+
+Package: genkernel
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, build-essential
+Description: Flexible platform for generating kernel, initramfs images
+ Genkernel is a platform designed to help users build kernel and
+ initramfs images.  It provides several configuration options to
+ support particular hardware setups and sports a flexible initramfs
+ script library to allow booting from many types of devices.
+ .
+ Genkernel's initramfs supports a variety of systems such as LVM2,
+ EVMS, aufs, UnionFS, LUKS, as well as various netbooting options.  It
+ can also provide LiveCD-style autoconfiguration of devices using
+ kernel modules with special parameters.
