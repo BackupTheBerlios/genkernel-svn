@@ -10,18 +10,19 @@ kernel_modules_cpio::()
 		
 		print_info 2 "initramfs: >> Searching for modules..."
 
-		if [ -d "${TEMP}/initramfs-modules-${KV_FULL}-temp" ]
+		if [ -d "${CACHE_DIR}/initramfs-modules-${KV_FULL}-temp" ]
 		then
-			rm -r "${TEMP}/initramfs-modules-${KV_FULL}-temp/"
+			rm -r "${CACHE_DIR}/initramfs-modules-${KV_FULL}-temp/"
 		fi
-		mkdir -p "${TEMP}/initramfs-modules-${KV_FULL}-temp/lib/modules/${KV_FULL}"
+		mkdir -p "${CACHE_DIR}/initramfs-modules-${KV_FULL}-temp/lib/modules/${KV_FULL}"
 	
 		# setup the modules profile
 		setup_modules_profile
-		cd ${INSTALL_MOD_PATH}
+		cd ${CACHE_DIR}/kernel-modules-compile-output/
 		for i in `gen_dep_list`
 		do
 			mymod=`find ./lib/modules/${KV_FULL} -name "${i}${MOD_EXT}" 2>/dev/null| head -n 1 `
+
 			if [ -z "${mymod}" ]
 			then
 				print_warning 2 "Warning :: ${i}${MOD_EXT} not found; skipping..."
@@ -29,21 +30,21 @@ kernel_modules_cpio::()
 			fi
 			
 			print_info 2 "initramfs: >> Copying ${i}${MOD_EXT}..."
-			cp -ax --parents "${mymod}" "${TEMP}/initramfs-modules-${KV_FULL}-temp"
+			cp -ax --parents "${mymod}" "${CACHE_DIR}/initramfs-modules-${KV_FULL}-temp"
 		done
 
 		if [ -f "$(profile_get_key install-to-prefix)"/lib/modules/${KV_FULL}/modules.dep ]
 		then
 			print_info 2 "Copying modules.dep into the initramfs"
-			cp -ax --parents "./lib/modules/${KV_FULL}/modules.dep" "${TEMP}/initramfs-modules-${KV_FULL}-temp/"
+			cp -ax --parents "./lib/modules/${KV_FULL}/modules.dep" "${CACHE_DIR}/initramfs-modules-${KV_FULL}-temp/"
 		fi
 		
 		# include all modules. thank you.
 #		cd ${INSTALL_MOD_PATH}
-#		mkdir -p "${TEMP}/initramfs-modules-${KV_FULL}-temp"
-#		cp -av --no-dereference * "${TEMP}/initramfs-modules-${KV_FULL}-temp"
+#		mkdir -p "${CACHE_DIR}/initramfs-modules-${KV_FULL}-temp"
+#		cp -av --no-dereference * "${CACHE_DIR}/initramfs-modules-${KV_FULL}-temp"
 		
-		mkdir -p "${TEMP}/initramfs-modules-${KV_FULL}-temp/etc/modules/"
+		mkdir -p "${CACHE_DIR}/initramfs-modules-${KV_FULL}-temp/etc/modules/"
 
 		
 		for i in $(profile_list); do
@@ -58,14 +59,14 @@ kernel_modules_cpio::()
 		for i in $(profile_list_keys "modules")
 		do	
 			[ "$(profile_get_key debuglevel)" -gt "4" ] && print_info 1 "${i#module-}: $(profile_get_key $i "modules")"
-			[ -f "${TEMP}/initramfs-modules-${KV_FULL}-temp/etc/modules/${i#module-}" ] \
-					&& rm "${TEMP}/initramfs-modules-${KV_FULL}-temp/etc/modules/${i#module-}"
+			[ -f "${CACHE_DIR}/initramfs-modules-${KV_FULL}-temp/etc/modules/${i#module-}" ] \
+					&& rm "${CACHE_DIR}/initramfs-modules-${KV_FULL}-temp/etc/modules/${i#module-}"
 			echo $(profile_get_key $i "modules") \
-				> "${TEMP}/initramfs-modules-${KV_FULL}-temp/etc/modules/${i#module-}"
+				> "${CACHE_DIR}/initramfs-modules-${KV_FULL}-temp/etc/modules/${i#module-}"
 		done
 	
 		# Generate CPIO
-		cd "${TEMP}/initramfs-modules-${KV_FULL}-temp/"
+		cd "${CACHE_DIR}/initramfs-modules-${KV_FULL}-temp/"
 		
 		genkernel_generate_cpio_path kernel-modules-${KV_FULL} .
 		initramfs_register_cpio kernel-modules-${KV_FULL}

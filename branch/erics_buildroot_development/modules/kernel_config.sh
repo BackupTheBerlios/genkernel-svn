@@ -92,9 +92,9 @@ kernel_config::()
         print_info 1 "${PRINT_PREFIX}--no-clean is enabled; leaving the .config alone."
     fi
 
-    kernel_config_set_string "LOCALVERSION" "-genkernel-$(profile_get_key arch)"
-    cat $(profile_get_key kbuild-output)/.config|grep LOCAL
-    sleep 10
+    #kernel_config_set_string "LOCALVERSION" "-genkernel-$(profile_get_key arch)"
+    #cat $(profile_get_key kbuild-output)/.config|grep LOCAL
+    #sleep 10
     # Manual Configure
     if logicTrue $(profile_get_key defconfig)
     then

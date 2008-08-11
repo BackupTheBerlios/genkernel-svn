@@ -13,8 +13,7 @@ kernel_compile::()
         CACHED_KCONFIG_MD5SUM=1
         KCONFIG_MD5SUM=0
     fi
-    echo ${CACHED_KCONFIG_MD5SUM}
-    echo ${KCONFIG_MD5SUM}
+    
     if [ "${CACHED_KCONFIG_MD5SUM}" != "${KCONFIG_MD5SUM}" ]
     then
         # Compile the kernel image

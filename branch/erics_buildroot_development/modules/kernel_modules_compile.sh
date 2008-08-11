@@ -16,6 +16,8 @@ kernel_modules_compile::()
         then
             print_info 1 ">> Modules not enabled in .config... skipping modules compile"
         else
+	    rm -rf ${CACHE_DIR}/kernel-modules-compile-output/
+	    mkdir -p ${CACHE_DIR}/kernel-modules-compile-output/
             setup_kernel_args
 
             # make the modules

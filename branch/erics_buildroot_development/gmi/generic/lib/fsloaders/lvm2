@@ -41,19 +41,19 @@ do_mount() {
 
 	is_set ${mount_opts} && _mount_opts="-o ${mount_opts}"
 
-	if [ -e /sbin/lvm.static ]
+	if [ -e /sbin/lvm ]
 	then
 		dbg_msg "Scanning for Volume Groups"
-		/sbin/lvm.static vgscan --ignorelockingfailure --mknodes 2>/dev/null
+		/sbin/lvm vgscan --ignorelockingfailure --mknodes 2>/dev/null
 		dbg_msg "Activating Volume Groups"
-		/sbin/lvm.static vgchange -ay --ignorelockingfailure 2>/dev/null
+		/sbin/lvm vgchange -ay --ignorelockingfailure 2>/dev/null
 
 		dbg_msg "mount ${_mount_opts} ${lvmdevice} ${mountpoint}"
 		mount ${_mount_opts} ${lvmdevice} ${mountpoint}
 		assert "$?" "Could not mount the LVM device '${lvmdevice}'" || return 1
 
 	else
-		bad_msg "/sbin/lvm.static not found: skipping LVM2 volume group activation!"
+		bad_msg "/sbin/lvm not found: skipping LVM2 volume group activation!"
 		return 1
 	fi
 }

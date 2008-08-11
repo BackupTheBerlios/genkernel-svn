@@ -1,4 +1,13 @@
 require @pkg_buildroot-${BUILDROOT_VER}-$(profile_get_key utils-arch)-toolchain:null:buildroot_compile 
+
+
+if logicTrue $(profile_get_key lvm2)
+then
+	cfg_register "BLK_DEV_DM" "REQUIRED for a fully functional lvm"
+	cfg_register "DM_SNAPSHOT" "Recommended for a fully functional lvm"
+	cfg_register "DM_MIRROR" "Recommended for a fully functional lvm"
+fi
+
 buildroot::() {
     local BUILDROOT_DIR="buildroot"
     cd ${CACHE_DIR}
@@ -48,9 +57,12 @@ buildroot::() {
     #config_set .config BR2_PACKAGE_MICROPERL y
     #
 
-    logicTrue $(profile_get_key busybox) \
-        && print_info 1 'BUILDROOT (Packages): > Enabling busybox...' \
-        && config_set .config BR2_PACKAGE_BUSYBOX y
+    if logicTrue $(profile_get_key busybox) 
+    then
+    	print_info 1 'BUILDROOT (Packages): > Enabling busybox...'
+        config_set .config BR2_PACKAGE_BUSYBOX y
+	config_set package/busybox/busybox-1.11.x.config CONFIG_RAIDAUTORUN y
+    fi
     logicTrue $(profile_get_key lvm2) \
         && print_info 1 'BUILDROOT (Packages): > Enabling lvm2...' \
         && config_set .config BR2_PACKAGE_LVM2 y
@@ -87,9 +99,11 @@ buildroot::() {
     # Clean out destination target so we only get the packages we want
     rm -rf "project_build_$(profile_get_key utils-arch)/uclibc/root"
 
-    # Buildroot gets mad if this directory doesnt exist... 
+    # Buildroot gets mad if these directory doesnt exist... 
     mkdir -p "project_build_$(profile_get_key utils-arch)/uclibc/root/usr/lib"
+    mkdir -p "project_build_$(profile_get_key utils-arch)/uclibc/root/etc/init.d"
 
+	
     print_info 1 'BUILDROOT (Packages): > Compiling...'
     compile_generic
     cd "project_build_$(profile_get_key utils-arch)/uclibc/root"
