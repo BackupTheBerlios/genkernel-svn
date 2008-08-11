@@ -7,7 +7,7 @@ kernel_compile::()
     cd $(profile_get_key kbuild-output)
     if [ -d "${CACHE_DIR}/kernel-compile-output" ]
     then
-        CACHED_KCONFIG_MD5SUM=$(cat ${CACHE_DIR}/kernel-compile-output/kernel.md5sum)
+        CACHED_KCONFIG_MD5SUM=$(cat ${CACHE_DIR}/kernel-compile-output/kernel-config-${KV_FULL}.md5sum)
         KCONFIG_MD5SUM=$(cat .config|grep ^CONFIG|sort|md5sum |awk '{print $1}')
     else
         CACHED_KCONFIG_MD5SUM=1
@@ -23,7 +23,7 @@ kernel_compile::()
         rm -rf "${CACHE_DIR}/kernel-compile-output" > /dev/null
         mkdir -p ${CACHE_DIR}/kernel-compile-output
         install -D "$(profile_get_key kernel-binary)" "${CACHE_DIR}/kernel-compile-output/$(profile_get_key kernel-binary)"
-        cat .config|grep ^CONFIG|sort|md5sum |awk '{print $1}' > ${CACHE_DIR}/kernel-compile-output/kernel.md5sum
+        cat .config|grep ^CONFIG|sort|md5sum |awk '{print $1}' > ${CACHE_DIR}/kernel-compile-output/kernel-config-${KV_FULL}.md5sum
         cp "System.map" "${CACHE_DIR}/kernel-compile-output"
         cp .config "${CACHE_DIR}/kernel-compile-output"
         if [ "$RES" == "0" ]

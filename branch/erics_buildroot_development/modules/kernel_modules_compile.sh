@@ -4,7 +4,7 @@ kernel_modules_compile::()
     cd $(profile_get_key kbuild-output)
     if [ -d "${CACHE_DIR}/kernel-modules-compile-output" ]
     then
-        CACHED_KCONFIG_MD5SUM=$(cat ${CACHE_DIR}/kernel-modules-compile-output/config.md5sum)
+        CACHED_KCONFIG_MD5SUM=$(cat ${CACHE_DIR}/kernel-modules-compile-output/kernel-config-${KV_FULL}.md5sum)
         KCONFIG_MD5SUM=$(cat .config|grep ^CONFIG|sort|md5sum |awk '{print $1}')
     else
         CACHED_KCONFIG_MD5SUM=1
@@ -28,7 +28,7 @@ kernel_modules_compile::()
             compile_generic ${KERNEL_ARGS} modules
 
             compile_generic ${KERNEL_ARGS} INSTALL_MOD_PATH=${CACHE_DIR}/kernel-modules-compile-output modules_install
-            cat .config|grep ^CONFIG|sort|md5sum |awk '{print $1}' > ${CACHE_DIR}/kernel-modules-compile-output/config.md5sum
+            cat .config|grep ^CONFIG|sort|md5sum |awk '{print $1}' > ${CACHE_DIR}/kernel-modules-compile-output/kernel-config-${KV_FULL}.md5sum
         fi
     else
         print_info 1 '>> Kernel .config unchanged using cached kernel modules'
