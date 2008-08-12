@@ -41,7 +41,6 @@ cfg_register_read() {
 
 cfg_register_enable() {
 	for (( n = 0 ; n < ${#__CONFIG__REG__D[@]}; ++n )) ; do
-        echo "${__CONFIG__REG__D[${n}]}"
 		if kernel_config_is_not_set ${__CONFIG__REG__D[${n}]}
 		then
 			UPDATED_KERNEL=true

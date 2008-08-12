@@ -265,11 +265,11 @@ determine_config_file() {
     rm "${TEMP}/from-running-system.config" 2>/dev/null
 
     if [ -f "/proc/config.gz" ]; then
-	zcat /proc/config.gz > "${TEMP}/from-running-system.config" 2> /dev/null
-	logicTrue $(profile_get_key running-kernel-config) && \
-	    profile_set_key kernel-config "${TEMP}/from-running-system.config"
+	    zcat /proc/config.gz > "${TEMP}/from-running-system.config" 2> /dev/null
+	    logicTrue $(profile_get_key running-kernel-config) && \
+	        profile_set_key kernel-config "${TEMP}/from-running-system.config"
     else
-	logicTrue $(profile_get_key running-kernel-config) && \
+	    logicTrue $(profile_get_key running-kernel-config) && \
             die 'Error: /proc/config.gz is not found.  Running-kernel-config failed!'
     fi
 

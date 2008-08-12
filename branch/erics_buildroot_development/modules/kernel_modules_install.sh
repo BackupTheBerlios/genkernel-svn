@@ -11,7 +11,7 @@ kernel_modules_install::()
             && die "Could not write to $(profile_get_key install-to-prefix).  Set install-to-prefix to a writeable directory or run as root."
         genkernel_extract_package "kernel-modules-${KV_FULL}"
         print_info 1 "Kernel modules installed in ${BOLD}$(profile_get_key install-to-prefix)${NORMAL}"
-        print_info 1 "$( du -h lib/modules/kernel-${KV_FULL} )"
+        print_info 1 "$( du -sh lib/modules/${KV_FULL} )"
         print_info 1 "Updating module dependencies"
 
         if [ "$(profile_get_key debuglevel)" -gt "4" ]

@@ -59,9 +59,9 @@ buildroot::() {
 
     if logicTrue $(profile_get_key busybox) 
     then
-    	print_info 1 'BUILDROOT (Packages): > Enabling busybox...'
+        print_info 1 'BUILDROOT (Packages): > Enabling busybox...'
         config_set .config BR2_PACKAGE_BUSYBOX y
-	config_set package/busybox/busybox-1.11.x.config CONFIG_RAIDAUTORUN y
+        config_set package/busybox/busybox-1.11.x.config CONFIG_RAIDAUTORUN y
     fi
     logicTrue $(profile_get_key lvm2) \
         && print_info 1 'BUILDROOT (Packages): > Enabling lvm2...' \
@@ -92,14 +92,29 @@ buildroot::() {
     logicTrue $(profile_get_key dmraid) \
         && print_info 1 'BUILDROOT (Packages): > Enabling dmraid...' \
         && config_set .config BR2_PACKAGE_DMRAID y
-    #logicTrue $(profile_get_key open-iscsi) && require open_iscsi
     #logicTrue $(profile_get_key aoetools) && require aoetools
-    #logicTrue $(profile_get_key luks) && require luks
+    if logicTrue $(profile_get_key luks)
+    then
+        print_info 1 'BUILDROOT (Packages): > Enabling luks cryptsetup...'
+        config_set .config BR2_PACKAGE_CRYPTSETUP y
+    fi
+
+    if logicTrue $(profile_get_key open-iscsi)
+    then
+        print_info 1 'BUILDROOT (Packages): > Enabling openiscsi iscsistart...'
+        config_set .config BR2_PACKAGE_OPENISCSI_ISCSISTART y
+    fi
+    if logicTrue $(profile_get_key aoetools)
+    then
+        print_info 1 'BUILDROOT (Packages): > Enabling aoetools...'
+        config_set .config BR2_PACKAGE_AOETOOLS y
+    fi
 
     # Clean out destination target so we only get the packages we want
     rm -rf "project_build_$(profile_get_key utils-arch)/uclibc/root"
 
     # Buildroot gets mad if these directory doesnt exist... 
+    mkdir -p "project_build_$(profile_get_key utils-arch)/uclibc/root/usr/sbin"
     mkdir -p "project_build_$(profile_get_key utils-arch)/uclibc/root/usr/lib"
     mkdir -p "project_build_$(profile_get_key utils-arch)/uclibc/root/etc/init.d"
 

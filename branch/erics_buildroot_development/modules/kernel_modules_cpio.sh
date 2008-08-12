@@ -55,10 +55,10 @@ kernel_modules_cpio::()
 		done
 		profile_copy "modules-cmdline" "modules"
 	
-		[ "$(profile_get_key debuglevel)" -gt "4" ] && print_info 1 "modules to be tested at bootup"
+		print_info 4 "Modules to be tested at bootup"
 		for i in $(profile_list_keys "modules")
 		do	
-			[ "$(profile_get_key debuglevel)" -gt "4" ] && print_info 1 "${i#module-}: $(profile_get_key $i "modules")"
+			print_info 4 "${i#module-}: $(profile_get_key $i "modules")"
 			[ -f "${CACHE_DIR}/initramfs-modules-${KV_FULL}-temp/etc/modules/${i#module-}" ] \
 					&& rm "${CACHE_DIR}/initramfs-modules-${KV_FULL}-temp/etc/modules/${i#module-}"
 			echo $(profile_get_key $i "modules") \

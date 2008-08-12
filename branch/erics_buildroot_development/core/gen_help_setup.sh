@@ -34,7 +34,7 @@ __register_config_option 'Cross compile' 'internal-uclibc' 'false' 'true' 'Build
 
 ## Kernel Config
 __register_config_option 'Kernel Configuration' 'kernel-config' 'true' 'false' 'Kernel configuration file to use for compilation.'
-__register_config_option 'Kernel Configuration' 'running-kernel-config' 'true' 'false' 'Use /proc/config.gz if found for the kernel config.'
+__register_config_option 'Kernel Configuration' 'running-kernel-config' 'true' 'true' 'Use /proc/config.gz if found for the kernel config.'
 __register_config_option 'Kernel Configuration' 'force-config' 'false' 'true' 'Turn on any config options genkernel deems mandatory.'
 profile_set_key force-config false 'system'
 __register_config_option 'Kernel Configuration'	'menuconfig'	 'false' 'true'	 'Run menuconfig after oldconfig.'

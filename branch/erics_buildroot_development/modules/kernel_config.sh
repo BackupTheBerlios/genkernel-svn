@@ -77,17 +77,17 @@ kernel_config::()
         compile_generic ${KERNEL_ARGS} clean
     fi
 
-    # Determine which config we are going to use to configure the kernel
-    determine_config_file
-
-    print_info 1 "${PRINT_PREFIX}Using kernel config from ${KERNEL_CONFIG}"
-    cp "${KERNEL_CONFIG}" "$(profile_get_key kbuild-output)/.config" ||\
-        die 'Could not copy configuration file!'
-
     if logicTrue $(profile_get_key clean)
     then
         print_info 1 'kernel configure: >> Running clean...' 
         compile_generic ${KERNEL_ARGS} clean
+
+        # Determine which config we are going to use to configure the kernel
+        determine_config_file
+
+        print_info 1 "${PRINT_PREFIX}Using kernel config from ${KERNEL_CONFIG}"
+        cp "${KERNEL_CONFIG}" "$(profile_get_key kbuild-output)/.config" ||\
+            die 'Could not copy configuration file!'
     else
         print_info 1 "${PRINT_PREFIX}--no-clean is enabled; leaving the .config alone."
     fi
@@ -192,7 +192,8 @@ kernel_config::()
     fi
 
     compile_generic ${KERNEL_ARGS} prepare
-    if [ "$(kernel_config_get "MODULES")" = 'yes' ]; then
+    if kernel_config_is_set "MODULES"; then
+        print_info 2 "${PRINT_PREFIX}>> Running kernel modules_prepare..."
         compile_generic ${KERNEL_ARGS} modules_prepare
     fi
 

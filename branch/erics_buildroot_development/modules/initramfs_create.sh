@@ -7,7 +7,7 @@ logicTrue $(profile_get_key evms2) && require evms_host_compiled
 logicTrue $(profile_get_key gensplash) && require gensplash
 #logicTrue $(profile_get_key portmap) && require portmap
 #logicTrue $(profile_get_key dmraid) && require dmraid
-#logicTrue $(profile_get_key open-iscsi) && require open_iscsi
+logicTrue $(profile_get_key open-iscsi) && require open_iscsi
 #logicTrue $(profile_get_key aoetools) && require aoetools
 #logicTrue $(profile_get_key luks) && require luks
 require buildroot
