@@ -1,0 +1,137 @@
+diff -urN buildroot.orig/package/Config.in buildroot/package/Config.in
+--- buildroot.orig/package/Config.in	2008-07-30 02:15:30.000000000 -0500
++++ buildroot/package/Config.in	2008-08-11 18:57:50.000000000 -0500
+@@ -22,6 +22,7 @@
+ source "package/grep/Config.in"
+ endif
+ source "package/make/Config.in"
++source "package/aoetools/Config.in"
+ if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
+ source "package/patch/Config.in"
+ source "package/sed/Config.in"
+diff -urN buildroot.orig/package/aoetools/Config.in buildroot/package/aoetools/Config.in
+--- buildroot.orig/package/aoetools/Config.in	1969-12-31 18:00:00.000000000 -0600
++++ buildroot/package/aoetools/Config.in	2008-08-10 22:51:25.000000000 -0500
+@@ -0,0 +1,6 @@
++config BR2_PACKAGE_AOETOOLS
++    bool "aoetools"
++    help
++      Create the aoe tools
++
++      http://support.coraid.com/support/linux
+diff -urN buildroot.orig/package/aoetools/aoetools.mk buildroot/package/aoetools/aoetools.mk
+--- buildroot.orig/package/aoetools/aoetools.mk	1969-12-31 18:00:00.000000000 -0600
++++ buildroot/package/aoetools/aoetools.mk	2008-08-11 15:56:02.000000000 -0500
+@@ -0,0 +1,112 @@
++#############################################################
++#
++# aoetools
++#
++#############################################################
++AOETOOLS_VERSION:=27
++AOETOOLS_SOURCE:=aoetools-$(AOETOOLS_VERSION).tar.gz
++AOETOOLS_SITE:=http://$(BR2_SOURCEFORGE_MIRROR).dl.sourceforge.net/sourceforge/aoetools
++AOETOOLS_DIR:=$(BUILD_DIR)/aoetools-$(AOETOOLS_VERSION)
++
++AOETOOLS_TARGET_BINARIES:=$(TARGET_DIR)/usr/sbin/aoe-mkdevs
++AOETOOLS_TARGET_BINARIES+=$(TARGET_DIR)/usr/sbin/aoe-version
++AOETOOLS_TARGET_BINARIES+=$(TARGET_DIR)/usr/sbin/coraid-update
++AOETOOLS_TARGET_BINARIES+=$(TARGET_DIR)/usr/sbin/aoeping
++AOETOOLS_TARGET_BINARIES+=$(TARGET_DIR)/usr/sbin/aoecfg
++AOETOOLS_TARGET_BINARIES+=$(TARGET_DIR)/usr/sbin/aoe-discover
++AOETOOLS_TARGET_BINARIES+=$(TARGET_DIR)/usr/sbin/aoe-interfaces
++AOETOOLS_TARGET_BINARIES+=$(TARGET_DIR)/usr/sbin/aoe-mkshelf
++AOETOOLS_TARGET_BINARIES+=$(TARGET_DIR)/usr/sbin/aoe-revalidate
++AOETOOLS_TARGET_BINARIES+=$(TARGET_DIR)/usr/sbin/aoe-flush
++AOETOOLS_TARGET_BINARIES+=$(TARGET_DIR)/usr/sbin/aoe-stat
++
++AOETOOLS_COPY:=cp -df --preserve=mode,ownership
++$(DL_DIR)/$(AOETOOLS_SOURCE):
++	$(WGET) -P $(DL_DIR) $(AOETOOLS_SITE)/$(AOETOOLS_SOURCE)
++
++aoetools-source: $(DL_DIR)/$(AOETOOLS_SOURCE)
++
++$(AOETOOLS_DIR)/.unpacked: $(DL_DIR)/$(AOETOOLS_SOURCE)
++	$(WGET_CAT) $(DL_DIR)/$(AOETOOLS_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
++	$(CONFIG_UPDATE) $(AOETOOLS_DIR)
++	touch $@
++
++$(AOETOOLS_DIR)/$(AOETOOLS_TARGET_BINARY): $(AOETOOLS_DIR)/.unpacked
++	$(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(AOETOOLD_DIR)
++	touch $@
++
++$(AOETOOLS_DIR)/.compiled: $(AOETOOLS_DIR)/.unpacked
++	-CC="$(TARGET_CC)" $(MAKE) -C $(AOETOOLS_DIR)
++	touch $@
++
++$(TARGET_DIR)/usr/sbin/aoe-mkdevs: $(AOETOOLS_DIR)/.unpacked
++	$(AOETOOLS_COPY) $(AOETOOLS_DIR)/aoe-mkdevs $(TARGET_DIR)/usr/sbin/aoe-mkdevs
++	touch $@
++
++$(TARGET_DIR)/usr/sbin/aoe-version: $(AOETOOLS_DIR)/.unpacked
++	$(AOETOOLS_COPY) $(AOETOOLS_DIR)/aoe-version $(TARGET_DIR)/usr/sbin/aoe-version
++	touch $@
++
++$(TARGET_DIR)/usr/sbin/coraid-update: $(AOETOOLS_DIR)/.unpacked
++	$(AOETOOLS_COPY) $(AOETOOLS_DIR)/coraid-update $(TARGET_DIR)/usr/sbin/coraid-update
++	touch $@
++
++$(TARGET_DIR)/usr/sbin/aoeping: $(AOETOOLS_DIR)/.compiled
++	$(AOETOOLS_COPY) $(AOETOOLS_DIR)/aoeping $(TARGET_DIR)/usr/sbin/aoeping
++	touch $@
++
++$(TARGET_DIR)/usr/sbin/aoecfg: $(AOETOOLS_DIR)/.compiled
++	$(AOETOOLS_COPY) $(AOETOOLS_DIR)/aoecfg $(TARGET_DIR)/usr/sbin/aoecfg
++	touch $@
++
++$(TARGET_DIR)/usr/sbin/aoe-discover: $(AOETOOLS_DIR)/.unpacked
++	$(AOETOOLS_COPY) $(AOETOOLS_DIR)/aoe-discover $(TARGET_DIR)/usr/sbin/aoe-discover
++	touch $@
++
++$(TARGET_DIR)/usr/sbin/aoe-interfaces: $(AOETOOLS_DIR)/.unpacked
++	$(AOETOOLS_COPY) $(AOETOOLS_DIR)/aoe-interfaces $(TARGET_DIR)/usr/sbin/aoe-interfaces
++	touch $@
++
++$(TARGET_DIR)/usr/sbin/aoe-mkshelf: $(AOETOOLS_DIR)/.unpacked
++	$(AOETOOLS_COPY) $(AOETOOLS_DIR)/aoe-mkshelf $(TARGET_DIR)/usr/sbin/aoe-mkshelf
++	touch $@
++
++$(TARGET_DIR)/usr/sbin/aoe-revalidate: $(AOETOOLS_DIR)/.unpacked
++	$(AOETOOLS_COPY) $(AOETOOLS_DIR)/aoe-revalidate $(TARGET_DIR)/usr/sbin/aoe-revalidate
++	touch $@
++
++$(TARGET_DIR)/usr/sbin/aoe-flush: $(AOETOOLS_DIR)/.unpacked
++	$(AOETOOLS_COPY) $(AOETOOLS_DIR)/aoe-flush $(TARGET_DIR)/usr/sbin/aoe-flush
++	touch $@
++
++$(TARGET_DIR)/usr/sbin/aoe-stat: $(AOETOOLS_DIR)/.unpacked
++	$(AOETOOLS_COPY) $(AOETOOLS_DIR)/aoe-stat $(TARGET_DIR)/usr/sbin/aoe-stat
++	touch $@
++
++aoetools: uclibc $(AOETOOLS_TARGET_BINARIES)
++
++aoetools-clean:
++	rm -f $(TARGET_DIR)/usr/sbin/aoe-mkdevs
++	rm -f $(TARGET_DIR)/usr/sbin/aoe-version
++	rm -f $(TARGET_DIR)/usr/sbin/coraid-update
++	rm -f $(TARGET_DIR)/usr/sbin/aoeping
++	rm -f $(TARGET_DIR)/usr/sbin/aoecfg
++	rm -f $(TARGET_DIR)/usr/sbin/aoe-discover
++	rm -f $(TARGET_DIR)/usr/sbin/aoe-interfaces
++	rm -f $(TARGET_DIR)/usr/sbin/aoe-mkshelf
++	rm -f $(TARGET_DIR)/usr/sbin/aoe-revalidate
++	rm -f $(TARGET_DIR)/usr/sbin/aoe-flush
++	rm -f $(TARGET_DIR)/usr/sbin/aoe-stat
++	rm -f $(AOETOOLS_DIR)/.compiled
++	-$(MAKE) -C $(AOETOOLS_DIR) clean
++
++aoetools-dirclean:
++	rm -rf $(AOETOOLS_DIR)
++#############################################################
++#
++# Toplevel Makefile options
++#
++#############################################################
++ifeq ($(strip $(BR2_PACKAGE_AOETOOLS)),y)
++TARGETS+=aoetools
++endif
