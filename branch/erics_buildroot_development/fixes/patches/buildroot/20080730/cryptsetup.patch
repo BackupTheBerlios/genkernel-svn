@@ -1,6 +1,6 @@
-diff -urN /home/eje001/code/genkernel/branch/erics_buildroot_development/dist/buildroot/package/cryptsetup/Config.in package/cryptsetup/Config.in
+diff -urN /home/eje001/code/genkernel/branch/erics_buildroot_development/dist/buildroot/package/cryptsetup/Config.in buildroot/package/cryptsetup/Config.in
 --- /home/eje001/code/genkernel/branch/erics_buildroot_development/dist/buildroot/package/cryptsetup/Config.in	1969-12-31 18:00:00.000000000 -0600
-+++ package/cryptsetup/Config.in	2008-08-11 20:09:49.000000000 -0500
++++ buildroot/package/cryptsetup/Config.in	2008-08-11 20:09:49.000000000 -0500
 @@ -0,0 +1,6 @@
 +config BR2_PACKAGE_CRYPTSETUP
 +    bool "cryptsetup
@@ -8,9 +8,9 @@ diff -urN /home/eje001/code/genkernel/branch/erics_buildroot_development/dist/bu
 +      Create the crypt setup
 +
 +      http://luks.endorphin.org/dm-crypt
-diff -urN /home/eje001/code/genkernel/branch/erics_buildroot_development/dist/buildroot/package/cryptsetup/cryptsetup.mk package/cryptsetup/cryptsetup.mk
+diff -urN /home/eje001/code/genkernel/branch/erics_buildroot_development/dist/buildroot/package/cryptsetup/cryptsetup.mk buildroot/package/cryptsetup/cryptsetup.mk
 --- /home/eje001/code/genkernel/branch/erics_buildroot_development/dist/buildroot/package/cryptsetup/cryptsetup.mk	1969-12-31 18:00:00.000000000 -0600
-+++ package/cryptsetup/cryptsetup.mk	2008-08-11 22:42:21.000000000 -0500
++++ buildroot/package/cryptsetup/cryptsetup.mk	2008-08-11 22:42:21.000000000 -0500
 @@ -0,0 +1,70 @@
 +#############################################################
 +#
@@ -82,9 +82,9 @@ diff -urN /home/eje001/code/genkernel/branch/erics_buildroot_development/dist/bu
 +ifeq ($(strip $(BR2_PACKAGE_CRYPTSETUP)),y)
 +TARGETS+=cryptsetup
 +endif
-diff -urN /home/eje001/code/genkernel/branch/erics_buildroot_development/dist/buildroot/package/e2fsprogs/e2fsprogs.mk package/e2fsprogs/e2fsprogs.mk
+diff -urN /home/eje001/code/genkernel/branch/erics_buildroot_development/dist/buildroot/package/e2fsprogs/e2fsprogs.mk buildroot/package/e2fsprogs/e2fsprogs.mk
 --- /home/eje001/code/genkernel/branch/erics_buildroot_development/dist/buildroot/package/e2fsprogs/e2fsprogs.mk	2008-07-30 02:15:13.000000000 -0500
-+++ package/e2fsprogs/e2fsprogs.mk	2008-08-11 22:46:20.000000000 -0500
++++ buildroot/package/e2fsprogs/e2fsprogs.mk	2008-08-11 22:46:20.000000000 -0500
 @@ -83,6 +83,8 @@
  E2FSPROGS_RM$(strip $(BR2_PACKAGE_E2FSPROGS_UUIDGEN)) += ${TARGET_DIR}/bin/uuidgen
  

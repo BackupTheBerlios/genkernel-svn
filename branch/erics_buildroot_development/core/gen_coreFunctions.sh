@@ -593,10 +593,10 @@ gen_patch() {
 		print_info 1 "patch-o-matic: ${i}"
 		    if [ "$(profile_get_key debuglevel)" -gt "1" ]
 		    then
-    		    ${uncomp} ${i} | patch -p1 -E -d ${targetdir} 2>&1 | tee -a ${DEBUGFILE}
+    		    ${uncomp} ${i} | patch -p1 -E -F 5 -d ${targetdir} 2>&1 | tee -a ${DEBUGFILE}
                 RET=${PIPESTATUS[1]}
             else
-    		    ${uncomp} ${i} | patch -p1 -s -E -d ${targetdir} 2>&1 | tee -a ${DEBUGFILE}
+    		    ${uncomp} ${i} | patch -p1 -s -E -F 5 -d ${targetdir} 2>&1 | tee -a ${DEBUGFILE}
                 RET=${PIPESTATUS[1]}
             fi
     		if [ $RET != 0 ] ; then

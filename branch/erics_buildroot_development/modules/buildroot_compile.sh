@@ -10,10 +10,11 @@ buildroot_compile::()
 
 	cd "${CACHE_DIR}"
 	rm -rf ${BUILDROOT_DIR} >  /dev/null
+	rm -rf ${BUILDROOT_DIR}-$(profile_get_key utils-arch) >  /dev/null
 	unpack ${BUILDROOT_SRCTAR} || die 'Could not extract buildroot source tarball!'
 	[ -d "${BUILDROOT_DIR}" ] || die 'Buildroot directory ${BUILDROOT_DIR} is invalid!'
 	mv "${BUILDROOT_DIR}" "${BUILDROOT_DIR}-$(profile_get_key utils-arch)"
-    cd "${BUILDROOT_DIR}-$(profile_get_key utils-arch)"
+    	cd "${BUILDROOT_DIR}-$(profile_get_key utils-arch)"
 	gen_patch ${FIXES_PATCHES_DIR}/buildroot/${BUILDROOT_VER} .
 	print_info 1 'BUILDROOT: > Configuring...'
 	compile_generic defconfig
