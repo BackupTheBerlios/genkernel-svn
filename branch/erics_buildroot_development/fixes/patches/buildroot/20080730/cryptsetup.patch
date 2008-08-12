@@ -1,0 +1,96 @@
+diff -urN /home/eje001/code/genkernel/branch/erics_buildroot_development/dist/buildroot/package/cryptsetup/Config.in package/cryptsetup/Config.in
+--- /home/eje001/code/genkernel/branch/erics_buildroot_development/dist/buildroot/package/cryptsetup/Config.in	1969-12-31 18:00:00.000000000 -0600
++++ package/cryptsetup/Config.in	2008-08-11 20:09:49.000000000 -0500
+@@ -0,0 +1,6 @@
++config BR2_PACKAGE_CRYPTSETUP
++    bool "cryptsetup
++    help
++      Create the crypt setup
++
++      http://luks.endorphin.org/dm-crypt
+diff -urN /home/eje001/code/genkernel/branch/erics_buildroot_development/dist/buildroot/package/cryptsetup/cryptsetup.mk package/cryptsetup/cryptsetup.mk
+--- /home/eje001/code/genkernel/branch/erics_buildroot_development/dist/buildroot/package/cryptsetup/cryptsetup.mk	1969-12-31 18:00:00.000000000 -0600
++++ package/cryptsetup/cryptsetup.mk	2008-08-11 22:42:21.000000000 -0500
+@@ -0,0 +1,70 @@
++#############################################################
++#
++# cryptsetup
++#
++#############################################################
++http://luks.endorphin.org/source/cryptsetup-1.0.5.tar.bz2
++CRYPTSETUP_VERSION:=1.0.5
++CRYPTSETUP_SOURCE:=cryptsetup-$(CRYPTSETUP_VERSION).tar.bz2
++CRYPTSETUP_SITE:=http://luks.endorphin.org/source/
++CRYPTSETUP_DIR:=$(BUILD_DIR)/cryptsetup-$(CRYPTSETUP_VERSION)
++CRYPTSETUP_TARGET:=$(TARGET_DIR)/usr/sbin/cryptsetup
++
++CRYPTSETUP_COPY:=cp -df --preserve=mode,ownership
++
++$(DL_DIR)/$(CRYPTSETUP_SOURCE):
++	$(WGET) -P $(DL_DIR) $(CRYPTSETUP_SITE)/$(CRYPTSETUP_SOURCE)
++
++cryptsetup-source: $(DL_DIR)/$(CRYPTSETUP_SOURCE)
++
++$(CRYPTSETUP_DIR)/.unpacked: $(DL_DIR)/$(CRYPTSETUP_SOURCE)
++	$(BZCAT) $(DL_DIR)/$(CRYPTSETUP_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
++	$(CONFIG_UPDATE) $(CRYPTSETUP_DIR)
++	touch $@
++
++$(CRYPTSETUP_DIR)/.configured: $(CRYPTSETUP_DIR)/.unpacked
++		(cd $(CRYPTSETUP_DIR); \
++			$(TARGET_CONFIGURE_OPTS) \
++			CFLAGS="$(TARGET_CFLAGS) -I$(STAGING_DIR)/usr/include -L$(STAGING_DIR)/usr/lib -L$(STAGING_DIR)/lib" \
++			./configure \
++			--target=$(GNU_TARGET_NAME) \
++			--host=$(GNU_TARGET_NAME) \
++			--build=$(GNU_HOST_NAME) \
++			--prefix=/usr \
++			--sysconfdir=/etc \
++			$(DISABLE_NLS) \
++			--enable-libdevmapper \
++			--enable-libgcrypt \
++		);
++		touch $(CRYPTSETUP_DIR)/.configured
++
++$(CRYPTSETUP_DIR)/.compiled: $(CRYPTSETUP_DIR)/.configured
++	$(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(CRYPTSETUP_DIR)
++	touch $@
++
++$(STAGING_DIR)/usr/sbin/cryptsetup: $(CRYPTSETUP_DIR)/.compiled
++	$(MAKE) DESTDIR=$(STAGING_DIR) $(TARGET_CONFIGURE_OPTS) -C $(CRYPTSETUP_DIR) install
++	touch $@
++
++$(CRYPTSETUP_TARGET): $(STAGING_DIR)/usr/sbin/cryptsetup
++	cp -dpf $(STAGING_DIR)/usr/sbin/cryptsetup $(CRYPTSETUP_TARGET)
++	cp -dpf $(STAGING_DIR)/usr/lib/libcryptsetup* $(TARGET_DIR)/usr/lib/
++	touch -c $@
++
++cryptsetup: uclibc e2fsprogs popt dm libgcrypt $(CRYPTSETUP_TARGET)
++
++cryptsetup-clean:
++	rm -f $(TARGET_DIR)/usr/sbin/cryptsetup
++	rm -f $(CRYPTSETUP_DIR)/.compiled
++	-$(MAKE) -C $(CRYPTSETUP_DIR) clean
++
++cryptsetup-dirclean:
++	rm -rf $(CRYPTSETUP_DIR)
++#############################################################
++#
++# Toplevel Makefile options
++#
++#############################################################
++ifeq ($(strip $(BR2_PACKAGE_CRYPTSETUP)),y)
++TARGETS+=cryptsetup
++endif
+diff -urN /home/eje001/code/genkernel/branch/erics_buildroot_development/dist/buildroot/package/e2fsprogs/e2fsprogs.mk package/e2fsprogs/e2fsprogs.mk
+--- /home/eje001/code/genkernel/branch/erics_buildroot_development/dist/buildroot/package/e2fsprogs/e2fsprogs.mk	2008-07-30 02:15:13.000000000 -0500
++++ package/e2fsprogs/e2fsprogs.mk	2008-08-11 22:46:20.000000000 -0500
+@@ -83,6 +83,8 @@
+ E2FSPROGS_RM$(strip $(BR2_PACKAGE_E2FSPROGS_UUIDGEN)) += ${TARGET_DIR}/bin/uuidgen
+ 
+ $(TARGET_DIR)/$(E2FSPROGS_TARGET_BINARY): $(E2FSPROGS_DIR)/$(E2FSPROGS_BINARY)
++	$(MAKE1) DESTDIR=$(STAGING_DIR) -C $(E2FSPROGS_DIR) LDCONFIG=true install
++	$(MAKE1) DESTDIR=$(STAGING_DIR) -C $(E2FSPROGS_DIR) LDCONFIG=true install-libs
+ 	$(MAKE1) PATH=$(TARGET_PATH) DESTDIR=$(TARGET_DIR) LDCONFIG=true \
+ 		-C $(E2FSPROGS_DIR) install
+ 	rm -rf ${TARGET_DIR}/sbin/mkfs.ext[23] \
