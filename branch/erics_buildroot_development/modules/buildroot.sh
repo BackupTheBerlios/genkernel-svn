@@ -56,12 +56,25 @@ buildroot::() {
     #config_set .config BR2_PACKAGE_LZO y
     #config_set .config BR2_PACKAGE_MICROPERL y
     #
+    config_set .config BR2_PACKAGE_DROPBEAR y
 
     if logicTrue $(profile_get_key busybox) 
     then
         print_info 1 'BUILDROOT (Packages): > Enabling busybox...'
         config_set .config BR2_PACKAGE_BUSYBOX y
+	config_set package/busybox/busybox-1.11.x.config CONFIG_DEPMOD y
         config_set package/busybox/busybox-1.11.x.config CONFIG_RAIDAUTORUN y
+        config_set package/busybox/busybox-1.11.x.config CONFIG_FEATURE_MOUNT_NFS y
+        config_set package/busybox/busybox-1.11.x.config CONFIG_FDISK y
+        config_set package/busybox/busybox-1.11.x.config CONFIG_FEATURE_FDISK_WRITABLE y
+        config_set package/busybox/busybox-1.11.x.config CONFIG_FEATURE_FDISK_ADVANCED y
+        config_set package/busybox/busybox-1.11.x.config CONFIG_FEATURE_HAVE_RPC y
+        config_set package/busybox/busybox-1.11.x.config CONFIG_FEATURE_MDEV_CONF y
+        config_set package/busybox/busybox-1.11.x.config CONFIG_FEATURE_MDEV_RENAME y
+        config_set package/busybox/busybox-1.11.x.config CONFIG_FEATURE_MDEV_RENAME_REGEXP y
+        config_set package/busybox/busybox-1.11.x.config CONFIG_FEATURE_MDEV_EXEC y
+        config_set package/busybox/busybox-1.11.x.config CONFIG_FEATURE_MDEV_LOAD_FIRMWARE y
+        config_set package/busybox/busybox-1.11.x.config CONFIG_OPENVT y
     fi
     logicTrue $(profile_get_key lvm2) \
         && print_info 1 'BUILDROOT (Packages): > Enabling lvm2...' \
@@ -117,6 +130,23 @@ buildroot::() {
     mkdir -p "project_build_$(profile_get_key utils-arch)/uclibc/root/usr/sbin"
     mkdir -p "project_build_$(profile_get_key utils-arch)/uclibc/root/usr/lib"
     mkdir -p "project_build_$(profile_get_key utils-arch)/uclibc/root/etc/init.d"
+
+    for i in 0 1 2 3 4 5
+    do
+    	echo "etherd!e$i.0 0:0 777 >etherd/e$i.0" >> "project_build_$(profile_get_key utils-arch)/uclibc/root/etc/mdev.conf"
+    	for j in 1 2 3 4 5 6 7 8 
+	do
+    	echo "etherd!e$i.0p$j 0:0 777 >etherd/e$i.0p$j" >> "project_build_$(profile_get_key utils-arch)/uclibc/root/etc/mdev.conf"
+	done
+    done
+    echo "discover 0:0 777 >etherd/" >> "project_build_$(profile_get_key utils-arch)/uclibc/root/etc/mdev.conf"
+    echo "revalidate 0:0 777 >etherd/" >> "project_build_$(profile_get_key utils-arch)/uclibc/root/etc/mdev.conf"
+    echo "flush 0:0 777 >etherd/" >> "project_build_$(profile_get_key utils-arch)/uclibc/root/etc/mdev.conf"
+    echo "err 0:0 777 >etherd/" >> "project_build_$(profile_get_key utils-arch)/uclibc/root/etc/mdev.conf"
+    echo "interfaces 0:0 777 >etherd/" >> "project_build_$(profile_get_key utils-arch)/uclibc/root/etc/mdev.conf"
+
+    # Make this directory for aoe support
+    mkdir -p "project_build_$(profile_get_key utils-arch)/uclibc/root/dev/etherd"
 
 	
     print_info 1 'BUILDROOT (Packages): > Compiling...'

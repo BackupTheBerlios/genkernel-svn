@@ -26,7 +26,7 @@ fi
 # mv /sbin/insmod to /bin/insmod or modprobe breaks 
 # Busybox 1.1.0
 [ -e /sbin/insmod ] && mv /sbin/insmod /bin/insmod
-
+/sbin/depmod -a
 # suppress kernel messages
 quiet_kmsg 
 
