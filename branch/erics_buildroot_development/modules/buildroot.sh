@@ -75,6 +75,7 @@ buildroot::() {
         config_set package/busybox/busybox-1.11.x.config CONFIG_FEATURE_MDEV_EXEC y
         config_set package/busybox/busybox-1.11.x.config CONFIG_FEATURE_MDEV_LOAD_FIRMWARE y
         config_set package/busybox/busybox-1.11.x.config CONFIG_OPENVT y
+        config_set package/busybox/busybox-1.11.x.config CONFIG_CTTYHACK y
     fi
     logicTrue $(profile_get_key lvm2) \
         && print_info 1 'BUILDROOT (Packages): > Enabling lvm2...' \

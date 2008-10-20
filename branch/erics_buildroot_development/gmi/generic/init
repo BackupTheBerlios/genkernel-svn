@@ -1,4 +1,4 @@
-#!/bin/busybox sh
+#!/bin/ash
 # Copyright 2006 Eric Edgar <rocket@gentoo.org>, 
 #                Tim Yamin <plasmaroo@gentoo.org> and 
 #                Jean-Francois Richard <jean-francois@richard.name> 
